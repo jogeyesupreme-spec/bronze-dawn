@@ -1,0 +1,1987 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bronze Dawn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Eczar:wght@500;600;700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Noto+Sans+Cuneiform&display=swap">
+<style>
+:root {
+  /* Layout: a lapis-and-shell plaque after the Standard of Ur. Inlay frieze on top,
+     map tablet on the left, ledger of tabs on the right, timeline bar fixed below. */
+  color-scheme: dark;
+  --lapis: #16224f;
+  --lapis-deep: #0c1535;
+  --panel: #111a41;
+  --panel-2: #1a2759;
+  --line: #2d3d7c;
+  --shell: #f2e9d6;
+  --muted: #a9b0d2;
+  --gold: #ecbf5a;
+  --bronze: #c48a43;
+  --carnelian: #e2694b;
+  --verdigris: #6cc4a6;
+  --bitumen: #070b1f;
+  --water: #8fc9d8;
+  --t-R: #3b6a59; --t-P: #75703f; --t-F: #2c5236; --t-H: #6d5236;
+  --t-M: #5b5770; --t-D: #978257; --t-S: #13245a;
+  --o-player: #ecbf5a; --o-kesh: #f2e9d6; --o-hattu: #e2694b;
+  --o-amurru: #b693e8; --o-dilmun: #56d4c9;
+  --font-display: "Eczar", Georgia, "Times New Roman", serif;
+  --font-body: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --font-cu: "Noto Sans Cuneiform", "Segoe UI Historic", sans-serif;
+  --radius: 8px;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  color: var(--shell);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.45;
+  background-color: var(--lapis);
+  /* pyrite flecks in lapis lazuli */
+  background-image:
+    radial-gradient(rgba(236, 191, 90, .32) .7px, transparent 1.3px),
+    radial-gradient(rgba(236, 191, 90, .16) .6px, transparent 1.1px),
+    radial-gradient(120% 80% at 50% 0%, rgba(255, 255, 255, .05), transparent 60%);
+  background-size: 41px 37px, 23px 29px, 100% 100%;
+  background-position: 0 0, 13px 19px, 0 0;
+}
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--shell); outline-offset: 2px; }
+.cu { font-family: var(--font-cu); line-height: 1; font-weight: 400; }
+.muted { color: var(--muted); }
+.small { font-size: .86rem; }
+.pos { color: var(--verdigris); }
+.neg { color: var(--carnelian); }
+.h {
+  margin: 0;
+  font: 700 .74rem/1.2 var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  color: var(--muted);
+}
+
+/* ---------- frieze and header ---------- */
+.frieze {
+  height: 12px;
+  background-color: var(--shell);
+  background-image:
+    linear-gradient(to bottom right, transparent 50%, var(--carnelian) 50%),
+    linear-gradient(to bottom left, transparent 50%, var(--carnelian) 50%);
+  background-size: 14px 12px;
+  border-bottom: 3px solid var(--bitumen);
+}
+.app {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 0 130px;
+  display: grid;
+  gap: 14px;
+}
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 28px;
+  padding-block: 16px 2px;
+}
+.brand { display: grid; gap: 4px; min-width: 0; }
+.brand h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  line-height: 1;
+  color: var(--gold);
+  text-wrap: balance;
+}
+.realm { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: flex-end; }
+.stat { display: grid; gap: 2px; }
+.stat .v { font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; line-height: 1.1; }
+.hdr-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- resources ---------- */
+.res { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.chip {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 9px;
+  align-items: center;
+  padding: 8px 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.chip .cu { grid-row: span 2; font-size: 1.15rem; letter-spacing: -.12em; color: var(--gold); min-width: 1.4rem; text-align: center; }
+.chip .lab { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+.chip .val { font-size: 1.12rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chip .d { font-size: .8rem; font-weight: 500; }
+.chip.warn { border-color: var(--carnelian); }
+
+/* ---------- main layout ---------- */
+.main { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 960px) {
+  .main { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: start; }
+}
+
+/* ---------- map ---------- */
+.board {
+  background: var(--lapis-deep);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: inset 0 0 0 4px var(--panel), 0 10px 30px rgba(0, 0, 0, .35);
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; padding: 4px 6px 0; font-size: .85rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 2px; background: var(--oc); display: inline-block; }
+#map { display: block; width: 100%; height: auto; }
+.hex { stroke: var(--bitumen); stroke-width: 1.5; }
+.t-R { fill: var(--t-R); } .t-P { fill: var(--t-P); } .t-F { fill: var(--t-F); } .t-H { fill: var(--t-H); }
+.t-M { fill: var(--t-M); } .t-D { fill: var(--t-D); } .t-S { fill: var(--t-S); }
+.deco { fill: none; stroke: rgba(242, 233, 214, .35); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.deco-R { stroke: var(--water); stroke-opacity: .8; }
+.deco-F { fill: rgba(8, 26, 14, .55); stroke: none; }
+.deco-M { fill: rgba(220, 215, 240, .16); stroke: rgba(242, 233, 214, .4); }
+.deco-S { stroke: rgba(143, 201, 216, .35); }
+.deco-D { stroke: rgba(60, 40, 20, .55); stroke-width: 2.6; }
+.own { fill: var(--oc); fill-opacity: .14; stroke: var(--oc); stroke-width: 3; pointer-events: none; }
+.claim { fill: none; stroke: var(--gold); stroke-width: 1.5; stroke-dasharray: 3 4; opacity: .75; pointer-events: none; }
+.sel { fill: none; stroke: var(--shell); stroke-width: 3; pointer-events: none; }
+.cap { fill: var(--oc); stroke: var(--bitumen); stroke-width: 1.2; pointer-events: none; }
+.imp { fill: var(--bronze); stroke: var(--bitumen); stroke-width: 1; pointer-events: none; }
+.tile { cursor: pointer; outline: none; }
+.tile:hover .hex { filter: brightness(1.2); }
+.tile:focus-visible .hex { stroke: var(--shell); stroke-width: 3; }
+
+.tileinfo { display: grid; gap: 8px; padding: 6px 6px 4px; }
+.ti-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; }
+.ti-head h3 { margin: 0; font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; }
+.ti-stats { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .9rem; color: var(--muted); }
+.ti-stats b { color: var(--shell); font-variant-numeric: tabular-nums; }
+.tileinfo p { margin: 0; }
+
+/* ---------- side panel ---------- */
+.side {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  min-width: 0;
+}
+.advice { display: grid; gap: 6px; padding: 12px 14px; border-bottom: 1px solid var(--line); background: var(--panel-2); }
+.tip { margin: 0; display: grid; grid-template-columns: 1.3rem minmax(0, 1fr); gap: 6px; font-size: .95rem; }
+.tip .cu { color: var(--bronze); font-size: 1rem; padding-top: .2em; }
+.tip.bad .cu, .tip.bad { color: var(--carnelian); }
+.tip.good .cu { color: var(--verdigris); }
+.buffs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 0 2px; background: var(--lapis-deep); border-bottom: 1px solid var(--line); }
+.tab {
+  flex: 0 0 auto;
+  position: relative;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: .95rem;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+.tab[aria-selected="true"] { color: var(--gold); border-bottom-color: var(--gold); }
+.tab .dot { position: absolute; top: 8px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--carnelian); }
+.pane { display: grid; gap: 12px; padding: 14px; }
+.pane p { margin: 0; }
+
+/* ---------- controls ---------- */
+.btn {
+  font-weight: 700;
+  font-size: .92rem;
+  color: var(--bitumen);
+  background: linear-gradient(var(--gold), var(--bronze));
+  border: 1px solid var(--bitumen);
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn:hover:not(:disabled) { filter: brightness(1.08); }
+.btn:disabled { background: var(--panel-2); color: var(--muted); border-color: var(--line); cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--shell); border-color: var(--line); }
+.btn.ghost:hover:not(:disabled) { border-color: var(--gold); }
+.btn.danger { background: linear-gradient(#ef8a6d, var(--carnelian)); }
+.btn.sq { width: 34px; height: 34px; padding: 0; font-size: 1.2rem; line-height: 1; }
+.chipbtn {
+  font-weight: 700;
+  font-size: .85rem;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 11px;
+  cursor: pointer;
+}
+.chipbtn[aria-pressed="true"] { background: var(--gold); color: var(--bitumen); border-color: var(--gold); }
+.steps { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+.pill.war { background: var(--carnelian); border-color: var(--carnelian); color: var(--bitumen); }
+.pill.peace { border-color: var(--verdigris); color: var(--verdigris); }
+.pill.own { border-color: var(--oc); color: var(--oc); }
+
+/* ---------- people ---------- */
+.jobs { display: grid; }
+.job {
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+}
+.job > .cu { font-size: 1.5rem; color: var(--gold); text-align: center; }
+.job-txt { display: grid; gap: 1px; min-width: 0; }
+.job-txt b { font-size: 1.02rem; }
+.out { font-size: .9rem; font-variant-numeric: tabular-nums; }
+.stepper { display: flex; align-items: center; gap: 6px; }
+.stepper .n { min-width: 3.2ch; text-align: center; font-size: 1.1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ledger { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 14px; font-size: .95rem; font-variant-numeric: tabular-nums; }
+.ledger span:nth-child(even) { text-align: right; }
+.ledger .tot { border-top: 1px solid var(--line); padding-top: 4px; font-weight: 700; }
+
+/* ---------- lists ---------- */
+.item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.item h4 { margin: 0; font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; }
+.item .meta { color: var(--muted); font-size: .9rem; }
+.item .note { color: var(--muted); font-size: .85rem; font-style: italic; }
+.item .why { color: var(--carnelian); font-size: .84rem; }
+.item.locked h4 { color: var(--muted); }
+.count { font-family: var(--font-body); font-size: .85rem; color: var(--muted); font-weight: 500; }
+.bar { height: 8px; background: var(--lapis-deep); border-radius: 4px; overflow: hidden; }
+.bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--bronze), var(--gold)); }
+.current { display: grid; gap: 6px; padding: 12px; background: var(--panel-2); border-radius: var(--radius); }
+.current h4 { margin: 0; font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; }
+
+/* ---------- neighbors ---------- */
+.nb { display: grid; gap: 8px; padding: 12px; background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius); }
+.nb.gone { opacity: .6; }
+.nb-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.nb-head h4 { margin: 0; font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; }
+.sw { width: 12px; height: 12px; border-radius: 3px; background: var(--oc); }
+.nb-stats { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .9rem; color: var(--muted); }
+.nb-stats b { color: var(--shell); }
+.meter { position: relative; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--carnelian), var(--lapis-deep) 50%, var(--verdigris)); }
+.meter i { position: absolute; top: -4px; width: 4px; height: 14px; margin-left: -2px; background: var(--shell); border-radius: 2px; }
+.nb-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ---------- trade ---------- */
+.scroll { overflow-x: auto; }
+.trade { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.trade th { text-align: left; font-size: .7rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); padding: 6px; }
+.trade td { padding: 8px 6px; border-top: 1px solid var(--line); vertical-align: middle; }
+.trade td .cu { color: var(--gold); margin-right: 4px; }
+.trade .acts { display: flex; justify-content: flex-end; gap: 6px; }
+
+/* ---------- chronicle ---------- */
+.chron { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.chron li { display: grid; grid-template-columns: 5.4rem minmax(0, 1fr); gap: 8px; font-size: .95rem; }
+.chron .yr { color: var(--muted); font-variant-numeric: tabular-nums; }
+.chron li.bad { color: var(--carnelian); }
+.chron li.good { color: var(--verdigris); }
+.chron li.big { color: var(--gold); }
+.gloss { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px 14px; }
+.gloss div { display: flex; align-items: center; gap: 10px; font-size: .9rem; }
+.gloss .cu { font-size: 1.35rem; color: var(--gold); min-width: 2.6rem; }
+
+/* ---------- turn bar ---------- */
+.turnbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  background: var(--bitumen);
+  border-top: 1px solid var(--line);
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+}
+.turnbar .inner { max-width: 1320px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+.timeline { flex: 1; min-width: 0; display: grid; gap: 6px; }
+.tl-labels { display: flex; justify-content: space-between; gap: 10px; font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tl-labels b { color: var(--shell); }
+.tl-labels .col { color: var(--carnelian); }
+.tl-track { position: relative; height: 6px; background: var(--panel-2); border-radius: 3px; overflow: hidden; }
+.tl-track i { display: block; height: 100%; background: linear-gradient(90deg, var(--bronze), var(--gold)); transition: width .6s ease; }
+.endturn { font-family: var(--font-display); font-size: 1.1rem; padding: 9px 20px; display: grid; line-height: 1.1; text-align: center; }
+.endturn small { font-family: var(--font-body); font-size: .75rem; font-weight: 500; }
+@media (max-width: 560px) {
+  .tl-labels .edge { display: none; }
+  .tl-labels { justify-content: flex-start; }
+}
+
+/* ---------- modal and toast ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(7, 11, 31, .8);
+}
+.card {
+  width: min(560px, 100%);
+  max-height: calc(100% - 16px);
+  overflow: auto;
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  background: var(--panel-2);
+  border: 1px solid var(--bronze);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+  animation: rise .2s ease-out;
+}
+.card p { margin: 0; }
+.card .bigcu { font-size: 2.6rem; color: var(--gold); }
+.card h2 { margin: 0; font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; line-height: 1.1; text-wrap: balance; }
+.card ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 5px; }
+.card label { font-weight: 700; }
+.card input {
+  width: 100%;
+  font: inherit;
+  color: var(--shell);
+  background: var(--lapis-deep);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+.choices { display: grid; gap: 8px; }
+.choice { display: grid; gap: 2px; text-align: left; padding: 10px 14px; white-space: normal; }
+.choice .hint { font-weight: 500; font-size: .85rem; opacity: .85; }
+.tests { display: grid; gap: 6px; }
+.tests div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 8px 10px; background: var(--lapis-deep); border-radius: 6px; }
+.rank { font-family: var(--font-display); font-size: 1.3rem; color: var(--gold); }
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 40;
+  max-width: calc(100% - 32px);
+  padding: 8px 16px;
+  background: var(--shell);
+  color: var(--bitumen);
+  border-radius: 6px;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .4);
+  animation: rise .2s ease-out;
+}
+@keyframes rise { from { transform: translateY(8px); opacity: 0; } }
+.toast { animation-name: toastIn; }
+@keyframes toastIn { from { transform: translate(-50%, 8px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .card, .toast { animation: none; }
+  .tl-track i { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="frieze" aria-hidden="true"></div>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <p class="h">Bronze Dawn · <span id="era"></span></p>
+      <h1 id="realmName">The Uruma</h1>
+    </div>
+    <div class="realm" id="realm"></div>
+    <div class="hdr-btns">
+      <button class="btn ghost" data-act="help">How to play</button>
+      <button class="btn ghost" data-act="menu">New game</button>
+    </div>
+  </header>
+
+  <section class="res" id="res" aria-label="Resources"></section>
+
+  <div class="main">
+    <section class="board" aria-label="Map">
+      <div class="legend" id="legend"></div>
+      <svg id="map" role="group" aria-label="Map of the land"></svg>
+      <div class="tileinfo" id="tileinfo" aria-live="polite"></div>
+    </section>
+    <section class="side">
+      <div class="advice" id="advice" aria-label="Advisors"></div>
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <div class="pane" id="pane" role="tabpanel"></div>
+    </section>
+  </div>
+</div>
+
+<div class="turnbar">
+  <div class="inner">
+    <div class="timeline" id="timeline"></div>
+    <button class="btn endturn" id="endBtn" data-act="end">End turn</button>
+  </div>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="card" id="mCard" role="dialog" aria-modal="true" aria-labelledby="mTitle"></div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   Bronze Dawn: a turn-based civilization game, 3000 BC to 1200 BC.
+   One file: data, rules, neighbor AI, events and UI.
+   Sections: 1 data · 2 state · 3 map geometry · 4 economy · 5 player
+   actions · 6 end of turn · 7 neighbors · 8 events · 9 end of game ·
+   10 rendering · 11 modals · 12 boot
+   ===================================================================== */
+
+/* ---------- 1. Data ---------- */
+const COLS = 9, ROWS = 7, HEX = 34, PAD = 6, SQ3 = Math.sqrt(3);
+const START_YEAR = 3000, END_YEAR = 1200, YEARS_PER_TURN = 20;
+const LAST_TURN = (START_YEAR - END_YEAR) / YEARS_PER_TURN; // 90 turns
+const SAVE_KEY = 'bronze-dawn-save-v1';
+
+// Sumerian cuneiform signs, used as icons
+const SIGN = {
+  people: '\u{12326}',                    // UN
+  food: '\u{122BA}',                      // ŠE, barley
+  materials: '\u{12111}',                 // GIŠ, wood
+  copper: '\u{12350}',                    // URUDU
+  tin: '\u{1202D}\u{1223E}',              // AN.NA
+  bronze: '\u{12313}\u{12157}\u{12047}',  // ZABAR, written UD.KA.BAR
+  silver: '\u{121AC}\u{12313}',           // KUG.BABBAR
+  stability: '\u{12072}',                 // SILIM, written DI
+  army: '\u{1209F}',                      // ERIN₂, troops
+  knowledge: '\u{1207E}',                 // DUB, clay tablet
+  house: '\u{1208D}',                     // É, house
+  land: '\u{121A0}',                      // KI, place
+  foreign: '\u{121B3}',                   // KUR, mountain, foreign land
+  king: '\u{12217}',                      // LUGAL
+  star: '\u{1202F}',                      // MUL
+  wedge: '\u{12038}',                     // AŠ, a single wedge
+};
+const GLOSSARY = [
+  ['people', 'UN', 'people'], ['food', 'ŠE', 'barley'], ['materials', 'GIŠ', 'wood'],
+  ['copper', 'URUDU', 'copper'], ['tin', 'AN.NA', 'tin'], ['bronze', 'ZABAR', 'bronze'],
+  ['silver', 'KUG.BABBAR', 'silver'], ['stability', 'SILIM', 'peace, well-being'],
+  ['army', 'ERIN₂', 'troops'], ['knowledge', 'DUB', 'clay tablet'], ['house', 'É', 'house'],
+  ['land', 'KI', 'place, earth'], ['foreign', 'KUR', 'mountain, foreign land'],
+  ['king', 'LUGAL', 'king ("big man")'], ['star', 'MUL', 'star'],
+];
+
+// A Mesopotamia-like map: hills and mountains north and east, two rivers, desert west, gulf south-east
+const MAP_TEMPLATE = [
+  'FHHFHMMMM',
+  'PHRPHRHMM',
+  'DPRPPRPHM',
+  'DPPRPRPFH',
+  'DDPRPPRPH',
+  'DDPPRRPSS',
+  'DDDPPRSSS',
+];
+const PLAYER_START = [3, 3];
+
+const TERRAIN = {
+  R: { name: 'River floodplain', farm: 40, house: 30, mat: 2, def: 1.0, note: 'Rich silt. The best farmland there is.' },
+  P: { name: 'Plains', farm: 22, house: 30, mat: 2, def: 1.0, note: 'Open land for barley and herds.' },
+  F: { name: 'Forest', farm: 6, house: 20, mat: 6, def: 1.25, note: 'Timber for building.' },
+  H: { name: 'Hills', farm: 8, house: 20, mat: 3, def: 1.35, note: 'Copper ore lies in the hills.' },
+  M: { name: 'Mountains', farm: 2, house: 10, mat: 3, def: 1.6, note: 'The only place to mine tin.' },
+  D: { name: 'Desert steppe', farm: 3, house: 15, mat: 1, def: 1.1, note: 'Thin grazing for goats.' },
+  S: { name: 'Sea', farm: 0, house: 0, mat: 0, def: 1, note: 'Land on the coast can hold a harbor.' },
+};
+
+// One improvement per tile
+const IMPROVEMENTS = {
+  lumber:     { name: 'Lumber camp', on: 'F', cost: 20, tech: null, desc: '+8 materials', fx: { mat: 8 } },
+  pasture:    { name: 'Pasture', on: 'PHD', cost: 25, tech: 'husbandry', desc: '+12 food', fx: { food: 12 } },
+  canal:      { name: 'Irrigation canal', on: 'RP', cost: 40, tech: 'irrigation', desc: '+25 farmland', fx: { farm: 25 } },
+  copperMine: { name: 'Copper mine', on: 'H', cost: 40, tech: 'copperWorking', desc: '+6 copper', fx: { copper: 6 } },
+  quarry:     { name: 'Quarry', on: 'HM', cost: 30, tech: 'masonry', desc: '+6 materials', fx: { mat: 6 } },
+  tinMine:    { name: 'Tin mine', on: 'M', cost: 60, tech: 'bronzeWorking', desc: '+3 tin', fx: { tin: 3 } },
+  harbor:     { name: 'Harbor', on: 'coast', cost: 50, tech: 'sailing', desc: '+15 food, +1 caravan', fx: { food: 15, caravan: 1 } },
+};
+
+const BUILDINGS = {
+  house:    { name: 'Houses', one: 'a row of houses', cost: 15, max: 99, tech: null, desc: () => `+${houseSize()} housing` },
+  granary:  { name: 'Granary', one: 'a granary', cost: 40, max: 4, tech: 'pottery', desc: () => '+300 grain storage' },
+  temple:   { name: 'Temple', one: 'a temple', cost: 60, max: 3, tech: 'rituals', desc: () => '+8 stability' },
+  barracks: { name: 'Barracks', one: 'the barracks', cost: 50, max: 2, tech: 'copperWorking', desc: () => 'Army +20%' },
+  walls:    { name: 'Walls', one: 'a stretch of wall', cost: 90, max: 3, tech: 'masonry', desc: () => 'Defence +30%' },
+  forge:    { name: 'Forge', one: 'a forge', cost: 60, max: 4, tech: 'bronzeWorking', desc: () => 'Casts up to 4 bronze a turn, each from 2 copper and 1 tin' },
+  scribe:   { name: 'Scribe house', one: 'a scribe house', cost: 70, max: 3, tech: 'writing', desc: () => 'Knowledge +25%' },
+  market:   { name: 'Market', one: 'the market', cost: 100, max: 1, tech: 'currency', desc: () => 'Better prices, +2 caravans, +3 stability' },
+  ziggurat: { name: 'Ziggurat', one: 'the ziggurat', cost: 500, bronze: 50, max: 1, tech: 'monumental', desc: () => '+15 stability and lasting fame' },
+};
+
+// One-time bronze-age upgrades
+const PROJECTS = {
+  sickles:  { name: 'Bronze sickles', bronze: 25, materials: 20, tech: 'bronzeWorking', desc: 'Farmers +20% food' },
+  tools:    { name: 'Bronze tools', bronze: 25, materials: 0, tech: 'bronzeWorking', desc: 'Materials +30%' },
+  weapons:  { name: 'Bronze weapons', bronze: 35, materials: 0, tech: 'bronzeWorking', desc: 'Each soldier fights 60% harder' },
+  chariots: { name: 'War chariots', bronze: 50, materials: 60, tech: 'chariotry', desc: 'Each soldier fights another 60% harder' },
+  iron:     { name: 'Iron weapons', bronze: 0, materials: 120, tech: 'ironWorking', desc: 'Each soldier fights another 80% harder' },
+};
+
+const TECHS = {
+  agriculture:   { name: 'Agriculture', cost: 0, req: [], desc: 'Barley and emmer wheat in the river silt.', note: '' },
+  rituals:       { name: 'Rituals', cost: 30, req: [], desc: 'Unlocks the Temple.', note: 'Shrines to the gods of sky, earth and water.' },
+  pottery:       { name: 'Pottery', cost: 40, req: [], desc: 'Unlocks the Granary.', note: 'Sealed jars keep grain through the dry months.' },
+  husbandry:     { name: 'Animal husbandry', cost: 50, req: [], desc: 'Farmers +15% food. Unlocks Pastures.', note: 'Sheep, goats and cattle give wool, milk and plough oxen.' },
+  copperWorking: { name: 'Copper working', cost: 70, req: [], desc: 'Materials +10%. Unlocks Copper mines and Barracks.', note: 'Copper was smelted here long before anyone alloyed it with tin.' },
+  masonry:       { name: 'Mud-brick masonry', cost: 70, req: ['pottery'], desc: 'Houses hold 40 instead of 25. Unlocks Walls and Quarries.', note: 'Sun-dried mud brick built the cities of Sumer.' },
+  irrigation:    { name: 'Irrigation', cost: 90, req: ['pottery'], desc: 'Unlocks Irrigation canals on river and plains land.', note: 'Canals carried the Tigris and Euphrates to distant fields.' },
+  wheel:         { name: 'The wheel', cost: 100, req: ['husbandry'], desc: 'Settling costs 25% less. +1 caravan a turn.', note: 'Solid wooden wheels appear around 3500 BC.' },
+  sailing:       { name: 'Sailing', cost: 110, req: ['pottery'], desc: 'Unlocks Harbors on the coast.', note: 'Reed and plank boats linked Sumer to Dilmun and Magan.' },
+  bronzeWorking: { name: 'Bronze working', cost: 150, req: ['copperWorking'], desc: 'Unlocks Tin mines, Forges and bronze projects.', note: 'Roughly nine parts copper to one part tin.' },
+  writing:       { name: 'Writing', cost: 160, req: ['pottery', 'rituals'], desc: 'Stability +3. Unlocks the Scribe house.', note: 'Cuneiform began as tallies of grain pressed into clay.' },
+  currency:      { name: 'Silver currency', cost: 220, req: ['writing', 'wheel'], desc: 'Unlocks the Market.', note: 'Silver weighed out in shekels served as money.' },
+  mathematics:   { name: 'Mathematics', cost: 220, req: ['writing'], desc: 'Knowledge +20%. Buildings cost 10% less.', note: 'Counting in base 60 still shapes our hours and degrees.' },
+  lawCode:       { name: 'Law code', cost: 240, req: ['writing'], desc: 'Stability +10. The realm can hold 4 more lands before unrest.', note: 'The code of Ur-Nammu, about 2100 BC, is the oldest known.' },
+  chariotry:     { name: 'Chariotry', cost: 260, req: ['wheel', 'bronzeWorking'], desc: 'Unlocks War chariots.', note: 'Light spoked-wheel chariots spread across the region after 2000 BC.' },
+  astronomy:     { name: 'Astronomy', cost: 280, req: ['mathematics'], desc: 'Farmers +15% food. Droughts and floods hurt less.', note: 'Priests tracked the moon and stars to set the calendar.' },
+  monumental:    { name: 'Monumental building', cost: 340, req: ['masonry', 'mathematics'], desc: 'Unlocks the Ziggurat.', note: 'The great ziggurat of Ur rose around 2100 BC.' },
+  ironWorking:   { name: 'Iron working', cost: 480, req: ['bronzeWorking', 'mathematics'], desc: 'Unlocks Iron weapons.', note: 'Iron stayed rare and costly until late in the Bronze Age.' },
+};
+
+const AI_DEFS = [
+  { id: 'kesh', name: 'Kesh', epithet: 'river city upstream', start: [5, 1], mil: 1.0, expand: 0.13, base: 0 },
+  { id: 'hattu', name: 'Hattu', epithet: 'highland clans', start: [1, 0], mil: 1.35, expand: 0.1, base: -15 },
+  { id: 'amurru', name: 'Amurru', epithet: 'desert herders', start: [1, 4], mil: 1.2, expand: 0.11, base: -32 },
+  { id: 'dilmun', name: 'Dilmun', epithet: 'seafaring traders', start: [6, 5], mil: 0.75, expand: 0.08, base: 25 },
+];
+const AI_DEF = Object.fromEntries(AI_DEFS.map(d => [d.id, d]));
+
+const JOBS = [
+  { key: 'farmers', name: 'Farmers', sign: 'food', desc: 'Grow barley. One farmer on good land feeds more than two people.' },
+  { key: 'workers', name: 'Laborers', sign: 'materials', desc: 'Cut timber, mould bricks, haul stone.' },
+  { key: 'soldiers', name: 'Soldiers', sign: 'army', desc: 'Guard the borders and take new land.' },
+  { key: 'scholars', name: 'Scholars', sign: 'knowledge', desc: 'Study, keep records and lead the rites.' },
+];
+
+// Market goods, priced in shekels of silver per lot
+const GOODS = {
+  food: { name: 'Food', lot: 20, value: 0.5 },
+  materials: { name: 'Materials', lot: 10, value: 0.9 },
+  copper: { name: 'Copper', lot: 5, value: 2 },
+  tin: { name: 'Tin', lot: 5, value: 4 },
+  bronze: { name: 'Bronze', lot: 5, value: 6 },
+};
+const GIFTS = { food: [50, 8], silver: [10, 12], bronze: [5, 14] }; // amount, goodwill
+
+const TITLES = ['Tribe', 'Chiefdom', 'Town', 'City-state', 'Kingdom', 'Empire'];
+
+/* ---------- 2. State ---------- */
+let S = null;                                  // the whole saved game
+const ui = { tab: 'people', sel: null, step: 5 };
+let modalQueue = [], modalOpen = false, currentModal = null, toastTimer = 0;
+
+const has = id => S.techs.includes(id);
+const done = id => S.proj.includes(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const R = Math.round;
+const rand = (a, b) => a + Math.random() * (b - a);
+const yearOf = turn => START_YEAR - turn * YEARS_PER_TURN;
+const fmtYear = turn => `${yearOf(turn)} BC`;
+const tileIdx = (c, r) => r * COLS + c;
+const aiById = id => S.ais.find(a => a.id === id);
+const signed = n => (n >= 0 ? `+${n}` : `−${Math.abs(n)}`);
+const fmt1 = n => (Math.round(n * 10) / 10).toString();
+const R10 = x => (x < 20 ? Math.max(0, R(x)) : R(x / 10) * 10);
+const pct = a => `${a >= 0 ? '+' : '−'}${Math.abs(R(a * 100))}%`;
+const article = w => (/^[aeiou]/i.test(w) ? 'an' : 'a');
+const escapeHTML = s => String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+const houseSize = () => (S && has('masonry') ? 40 : 25);
+const totalBuildings = () => Object.values(S.b).reduce((a, b) => a + b, 0);
+const tilesOwnedBy = id => S.tiles.map((t, i) => i).filter(i => S.tiles[i].owner === id);
+const cu = key => `<span class="cu" aria-hidden="true">${SIGN[key]}</span>`;
+
+function newGame(name) {
+  const starts = [PLAYER_START, ...AI_DEFS.map(d => d.start)].map(([c, r]) => tileIdx(c, r));
+  const tiles = [];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) tiles.push({ t: MAP_TEMPLATE[r][c], owner: null, imp: null, capital: false });
+  }
+  // a little variety each game: some plains turn to forest or hills
+  tiles.forEach((tile, i) => {
+    if (tile.t !== 'P' || starts.includes(i)) return;
+    const x = Math.random();
+    if (x < 0.1) tile.t = 'F';
+    else if (x < 0.18) tile.t = 'H';
+  });
+  S = {
+    v: 1, name, turn: 0, pop: 60,
+    jobs: { farmers: 30, workers: 10, soldiers: 5, scholars: 3 },
+    res: { food: 100, materials: 30, copper: 0, tin: 0, bronze: 0, silver: 15 },
+    stability: 60, techs: ['agriculture'], research: null, progress: 0,
+    b: Object.fromEntries(Object.keys(BUILDINGS).map(k => [k, 0])), proj: [],
+    tiles,
+    ais: AI_DEFS.map(d => ({ id: d.id, name: d.name, att: d.base, army: 10 * d.mil, war: false, warTurns: 0, alive: true, cool: 0 })),
+    buffs: [], log: [], cool: {}, attacked: false, tradeUsed: 0, conquered: 0, over: false, era: '', title: '',
+  };
+  const p = tileIdx(...PLAYER_START);
+  tiles[p].owner = 'player';
+  tiles[p].capital = true;
+  AI_DEFS.forEach(d => {
+    const i = tileIdx(...d.start);
+    tiles[i].owner = d.id;
+    tiles[i].capital = true;
+    const opts = neighbors(i).filter(j => !tiles[j].owner && tiles[j].t !== 'S' && !starts.includes(j) && !neighbors(j).includes(p));
+    if (opts.length) tiles[opts[Math.floor(Math.random() * opts.length)]].owner = d.id;
+  });
+  S.era = eraOf();
+  S.title = titleOf();
+  log(`The ${name} settle beside the river.`, 'big');
+  ui.sel = p;
+  ui.tab = 'people';
+}
+
+function log(text, kind = '') {
+  S.log.unshift({ y: S.turn, text, kind });
+  if (S.log.length > 150) S.log.length = 150;
+}
+
+function save() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* storage blocked: play on */ }
+}
+function loadSave() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    return s && s.v === 1 ? s : null;
+  } catch (e) { return null; }
+}
+
+// Population changes keep the current split between jobs
+function groups() {
+  const j = S.jobs;
+  return { farmers: j.farmers, workers: j.workers, soldiers: j.soldiers, scholars: j.scholars, foragers: S.pop - j.farmers - j.workers - j.soldiers - j.scholars };
+}
+function rescalePop(target) {
+  target = Math.max(0, R(target));
+  const g = groups(), keys = Object.keys(g), old = S.pop;
+  if (old <= 0) { S.pop = target; return; }
+  const exact = keys.map(k => g[k] * target / old);
+  const base = exact.map(Math.floor);
+  let rem = target - base.reduce((a, b) => a + b, 0);
+  const order = exact.map((v, i) => [v - base[i], i]).sort((a, b) => b[0] - a[0]);
+  for (let k = 0; rem > 0; k = (k + 1) % order.length, rem--) base[order[k][1]]++;
+  keys.forEach((k, i) => { if (k !== 'foragers') S.jobs[k] = base[i]; });
+  S.pop = target;
+}
+function killSoldiers(n) {
+  n = Math.min(Math.max(0, R(n)), S.jobs.soldiers);
+  S.jobs.soldiers -= n;
+  S.pop -= n;
+  return n;
+}
+
+/* ---------- 3. Map geometry (pointy-top hexes, odd rows shifted right) ---------- */
+function hexCenter(c, r) {
+  return [PAD + HEX * SQ3 / 2 + c * HEX * SQ3 + (r & 1) * HEX * SQ3 / 2, PAD + HEX + r * HEX * 1.5];
+}
+function hexPoints(x, y, size) {
+  const pts = [];
+  for (let i = 0; i < 6; i++) {
+    const a = Math.PI / 180 * (60 * i - 30);
+    pts.push(`${(x + size * Math.cos(a)).toFixed(1)},${(y + size * Math.sin(a)).toFixed(1)}`);
+  }
+  return pts.join(' ');
+}
+function neighbors(i) {
+  const c = i % COLS, r = Math.floor(i / COLS);
+  const dirs = r & 1
+    ? [[1, 0], [-1, 0], [0, -1], [1, -1], [0, 1], [1, 1]]
+    : [[1, 0], [-1, 0], [-1, -1], [0, -1], [-1, 1], [0, 1]];
+  return dirs.map(([dc, dr]) => [c + dc, r + dr])
+    .filter(([cc, rr]) => cc >= 0 && cc < COLS && rr >= 0 && rr < ROWS)
+    .map(([cc, rr]) => tileIdx(cc, rr));
+}
+const isCoast = i => S.tiles[i].t !== 'S' && neighbors(i).some(j => S.tiles[j].t === 'S');
+const isFrontier = i => neighbors(i).some(j => S.tiles[j].owner === 'player');
+function frontier(owner) {
+  const out = new Set();
+  S.tiles.forEach((t, i) => {
+    if (t.owner === owner) neighbors(i).forEach(j => { if (S.tiles[j].owner !== owner) out.add(j); });
+  });
+  return [...out];
+}
+const bordersPlayer = id => S.tiles.some((t, i) => t.owner === id && neighbors(i).some(j => S.tiles[j].owner === 'player'));
+const ownsTerrain = t => S.tiles.some(x => x.owner === 'player' && x.t === t);
+const ownsImp = k => S.tiles.some(x => x.owner === 'player' && x.imp === k);
+const ownerName = o => (o === 'player' ? `The ${S.name}` : o ? AI_DEF[o].name : 'Unclaimed');
+
+/* ---------- 4. Economy: everything the next turn will produce ---------- */
+function calc() {
+  const c = {}, j = S.jobs;
+  let farmSlots = 0, housing = 0, tileMat = 0, extraFood = 0, copperIn = 0, tinIn = 0, harbors = 0, tiles = 0;
+  S.tiles.forEach(t => {
+    if (t.owner !== 'player') return;
+    const T = TERRAIN[t.t];
+    tiles++;
+    farmSlots += T.farm;
+    housing += T.house;
+    tileMat += T.mat;
+    if (t.capital) housing += 40;
+    if (t.imp) {
+      const fx = IMPROVEMENTS[t.imp].fx;
+      farmSlots += fx.farm || 0;
+      extraFood += fx.food || 0;
+      tileMat += fx.mat || 0;
+      copperIn += fx.copper || 0;
+      tinIn += fx.tin || 0;
+      harbors += fx.caravan || 0;
+    }
+  });
+  housing += S.b.house * houseSize();
+  const buff = k => S.buffs.reduce((a, b) => a + (b[k] || 0), 0);
+  const low = S.stability < 30 ? 0.85 : 1;
+  const foragers = S.pop - j.farmers - j.workers - j.soldiers - j.scholars;
+
+  // food
+  const foodMult = Math.max(0.2, 1 + (has('husbandry') ? 0.15 : 0) + (has('astronomy') ? 0.15 : 0) + (done('sickles') ? 0.2 : 0) + buff('food'));
+  const good = Math.min(j.farmers, farmSlots);
+  c.farmSlots = farmSlots;
+  c.goodFarmers = good;
+  c.farmFood = R((good * 2.4 + (j.farmers - good) * 0.6) * foodMult * low);
+  c.gatherFood = R(foragers * 0.6);
+  c.extraFood = extraFood;
+  c.foodIn = c.farmFood + c.gatherFood + extraFood;
+  c.foodOut = R(S.pop + j.soldiers * 0.2);
+  c.foodNet = c.foodIn - c.foodOut;
+  c.foodAfter = S.res.food + c.foodNet;
+  c.storage = 200 + 300 * S.b.granary;
+
+  // materials, knowledge, metals
+  c.matIn = R((j.workers + tileMat) * (1 + (has('copperWorking') ? 0.1 : 0) + (done('tools') ? 0.3 : 0)) * low);
+  c.know = Math.round((j.scholars + S.pop / 30) * (1 + 0.25 * S.b.scribe + (has('mathematics') ? 0.2 : 0)) * low * 10) / 10;
+  c.copperIn = copperIn;
+  c.tinIn = tinIn;
+  c.forgeCap = 4 * S.b.forge;
+  c.bronzeIn = Math.min(c.forgeCap, Math.floor((S.res.copper + copperIn) / 2), S.res.tin + tinIn);
+
+  // military
+  c.weapon = 1 + (done('weapons') ? 0.6 : 0) + (done('chariots') ? 0.6 : 0) + (done('iron') ? 0.8 : 0);
+  c.strength = R(j.soldiers * c.weapon * (1 + 0.2 * S.b.barracks));
+  c.defense = R(c.strength * (1 + 0.3 * S.b.walls) + S.pop * 0.04 + S.b.walls * 10);
+
+  c.housing = housing;
+  c.tiles = tiles;
+  c.foragers = foragers;
+  c.harbors = harbors;
+
+  // population next turn
+  const room = housing - S.pop;
+  const rate = 0.1 * (0.6 + S.stability / 125);
+  c.births = (c.foodAfter > 0 && room > 0)
+    ? Math.min(Math.max(1, R(S.pop * rate)), room, Math.max(0, Math.floor(c.foodNet * 0.8 + S.res.food * 0.05)))
+    : 0;
+  c.crowd = S.pop > housing ? Math.ceil((S.pop - housing) * 0.15) : 0;
+  c.starve = c.foodAfter < 0 ? Math.ceil(-c.foodAfter * 0.5) : 0;
+
+  // stability target
+  const parts = [['Base', 50]];
+  if (S.b.temple) parts.push(['Temples', 8 * S.b.temple]);
+  if (has('writing')) parts.push(['Written records', 3]);
+  if (has('lawCode')) parts.push(['Law code', 10]);
+  if (S.b.market) parts.push(['Market', 3]);
+  if (S.b.ziggurat) parts.push(['Ziggurat', 15]);
+  const priests = S.pop ? Math.min(8, R(j.scholars / S.pop * 40)) : 0;
+  if (priests) parts.push(['Scholars and priests', priests]);
+  if (S.pop > housing) parts.push(['Overcrowding', -Math.min(20, R((S.pop - housing) / Math.max(1, housing) * 60))]);
+  if (S.pop >= 400) parts.push(['Big-city quarrels', -Math.min(20, Math.floor((S.pop - 300) / 100))]);
+  const lim = has('lawCode') ? 9 : 5;
+  if (tiles > lim) parts.push(['Too many lands to govern', -(tiles - lim) * 3]);
+  const wars = S.ais.filter(a => a.alive && a.war).length;
+  if (wars) parts.push(['War', -5 * wars]);
+  if (c.foodAfter < 0) parts.push(['Hunger', -10]);
+  S.buffs.forEach(b => { if (b.stab) parts.push([b.name, b.stab]); });
+  c.stabParts = parts;
+  c.stabTarget = clamp(parts.reduce((a, p) => a + p[1], 0), 0, 100);
+
+  // trade
+  c.partners = S.ais.filter(a => a.alive && !a.war && a.att >= -20);
+  const base = c.partners.length ? 1 + c.partners.length : 0;
+  c.caravans = (base + harbors === 0) ? 0 : base + harbors + 2 * S.b.market + (has('wheel') ? 1 : 0);
+  c.buyMult = S.b.market ? 1.12 : 1.3;
+  c.sellMult = S.b.market ? 0.88 : 0.7;
+  const dil = aiById('dilmun');
+  c.tinDeal = dil.alive && !dil.war && dil.att >= 0;
+
+  // cost to settle one more tile
+  const k = has('wheel') ? 0.75 : 1;
+  c.settle = { pop: 15, food: R(40 * k), materials: R((20 + 5 * (tiles - 1)) * k) };
+  return c;
+}
+
+const eraOf = () => {
+  if (has('bronzeWorking') && S.techs.length >= 14) return 'Late Bronze Age';
+  if (has('bronzeWorking') && has('writing')) return 'Middle Bronze Age';
+  if (has('bronzeWorking')) return 'Early Bronze Age';
+  if (has('copperWorking')) return 'Copper Age';
+  return 'Late Neolithic';
+};
+const titleOf = () => {
+  const n = tilesOwnedBy('player').length, p = S.pop;
+  if (p >= 2500 && n >= 10) return 'Empire';
+  if (p >= 1200 && n >= 6) return 'Kingdom';
+  if (p >= 600 && has('writing')) return 'City-state';
+  if (p >= 250 && n >= 2) return 'Town';
+  if (p >= 120) return 'Chiefdom';
+  return 'Tribe';
+};
+
+/* ---------- 5. Player actions ---------- */
+function canAfford(cost) { return !cost || Object.entries(cost).every(([k, v]) => S.res[k] >= v); }
+function pay(cost) { Object.entries(cost || {}).forEach(([k, v]) => { S.res[k] -= v; }); }
+function costText(cost) { return Object.entries(cost).filter(([, v]) => v).map(([k, v]) => `${v} ${k}`).join(', '); }
+function addBuff(name, turns, fx) { S.buffs.push({ name, turns, ...fx }); }
+
+function applyFx(fx) {
+  for (const [k, v] of Object.entries(fx)) {
+    if (!v) continue;
+    if (k === 'pop') rescalePop(S.pop + v);
+    else if (k === 'stability') S.stability = clamp(S.stability + v, 0, 100);
+    else if (k === 'knowledge') S.progress += v;
+    else S.res[k] = Math.max(0, S.res[k] + v);
+  }
+  if (fx.knowledge) checkResearch().forEach(n => toast(`Mastered ${n}`));
+}
+
+function checkResearch() {
+  const learned = [];
+  while (S.research && S.progress >= TECHS[S.research].cost) {
+    const t = TECHS[S.research];
+    S.progress -= t.cost;
+    S.techs.push(S.research);
+    S.research = null;
+    learned.push(t.name);
+    log(`Our scholars mastered ${t.name}. ${t.desc}`, 'good');
+  }
+  return learned;
+}
+
+function changeJob(key, dir) {
+  const c = calc();
+  if (dir === '+') {
+    const n = Math.min(ui.step, c.foragers);
+    if (!n) return toast('Everyone already has a job. Take people from another job first.');
+    S.jobs[key] += n;
+  } else {
+    S.jobs[key] -= Math.min(ui.step, S.jobs[key]);
+  }
+}
+
+const buildCost = id => {
+  const b = BUILDINGS[id];
+  const base = id === 'house' ? b.cost + 2 * S.b.house : b.cost; // each new row of houses costs a little more
+  return { materials: R(base * (has('mathematics') ? 0.9 : 1)), ...(b.bronze ? { bronze: b.bronze } : {}) };
+};
+function buildCheck(id) {
+  const b = BUILDINGS[id];
+  if (b.tech && !has(b.tech)) return `Needs ${TECHS[b.tech].name}`;
+  if (S.b[id] >= b.max) return 'Maximum built';
+  for (const [k, v] of Object.entries(buildCost(id))) if (S.res[k] < v) return `Needs ${v} ${k}`;
+  return '';
+}
+function build(id) {
+  if (buildCheck(id)) return;
+  pay(buildCost(id));
+  S.b[id]++;
+  log(`Built ${BUILDINGS[id].one}.`);
+  toast(`Built ${BUILDINGS[id].one}`);
+}
+
+function projectCheck(id) {
+  const p = PROJECTS[id];
+  if (done(id)) return 'Done';
+  if (!has(p.tech)) return `Needs ${TECHS[p.tech].name}`;
+  if (S.res.bronze < p.bronze) return `Needs ${p.bronze} bronze`;
+  if (S.res.materials < p.materials) return `Needs ${p.materials} materials`;
+  return '';
+}
+function project(id) {
+  if (projectCheck(id)) return;
+  const p = PROJECTS[id];
+  pay({ bronze: p.bronze, materials: p.materials });
+  S.proj.push(id);
+  log(`Completed: ${p.name}.`, 'good');
+  toast(`${p.name} ready`);
+}
+
+const impCost = k => R(IMPROVEMENTS[k].cost * (has('mathematics') ? 0.9 : 1));
+const fitsTile = (k, i) => (IMPROVEMENTS[k].on === 'coast' ? isCoast(i) : IMPROVEMENTS[k].on.includes(S.tiles[i].t));
+function improveCheck(k, i) {
+  const m = IMPROVEMENTS[k], t = S.tiles[i];
+  if (t.owner !== 'player') return 'Not our land';
+  if (t.imp) return 'This land already has an improvement';
+  if (m.tech && !has(m.tech)) return `Needs ${TECHS[m.tech].name}`;
+  if (S.res.materials < impCost(k)) return `Needs ${impCost(k)} materials`;
+  return '';
+}
+function improve(k) {
+  const i = ui.sel;
+  if (i == null || !fitsTile(k, i) || improveCheck(k, i)) return;
+  S.res.materials -= impCost(k);
+  S.tiles[i].imp = k;
+  log(`Built a ${IMPROVEMENTS[k].name.toLowerCase()}.`);
+  toast(`Built a ${IMPROVEMENTS[k].name.toLowerCase()}`);
+}
+
+function settleCheck(i, c) {
+  const t = S.tiles[i];
+  if (t.owner || t.t === 'S') return 'Not available';
+  if (!isFrontier(i)) return 'Too far away. Settle land that touches your borders.';
+  const s = c.settle;
+  if (S.pop - s.pop < 20) return 'Not enough people to spare';
+  if (S.res.food < s.food) return `Needs ${s.food} food`;
+  if (S.res.materials < s.materials) return `Needs ${s.materials} materials`;
+  return '';
+}
+function settle() {
+  const i = ui.sel, c = calc();
+  if (i == null || settleCheck(i, c)) return;
+  rescalePop(S.pop - c.settle.pop);
+  S.res.food -= c.settle.food;
+  S.res.materials -= c.settle.materials;
+  S.tiles[i].owner = 'player';
+  log(`Families settled new ${TERRAIN[S.tiles[i].t].name.toLowerCase()}.`, 'good');
+  toast('New land settled');
+}
+
+function defenders(i) {
+  const t = S.tiles[i], ai = aiById(t.owner);
+  const n = Math.max(1, tilesOwnedBy(ai.id).length);
+  return R(ai.army / n * TERRAIN[t.t].def * (t.capital ? 1.4 : 1) + 4);
+}
+function outlook(ratio) {
+  if (ratio > 1.4) return 'Likely victory';
+  if (ratio > 1.05) return 'In our favour';
+  if (ratio > 0.85) return 'An even fight';
+  if (ratio > 0.6) return 'Risky';
+  return 'Hopeless';
+}
+function attack() {
+  const i = ui.sel, t = i == null ? null : S.tiles[i];
+  const ai = t && t.owner && t.owner !== 'player' ? aiById(t.owner) : null;
+  if (!ai || S.attacked || !isFrontier(i) || !S.jobs.soldiers) return;
+  if (!ai.war) {
+    pushModal({
+      sign: 'army', title: `March on ${ai.name}?`,
+      body: `Attacking means war with ${ai.name}. They will raid our borders until one side asks for peace.`,
+      choices: [
+        { label: 'Declare war and attack', danger: true, run: () => { startWar(ai); battle(i); } },
+        { label: 'Hold back', ghost: true },
+      ],
+    });
+    return;
+  }
+  battle(i);
+}
+function startWar(ai) {
+  ai.war = true;
+  ai.warTurns = 0;
+  ai.att = Math.min(ai.att, -50);
+  log(`We declared war on ${ai.name}.`, 'bad');
+}
+function battle(i) {
+  const c = calc(), t = S.tiles[i], ai = aiById(t.owner), T = TERRAIN[t.t];
+  const def = defenders(i);
+  const a = c.strength * rand(0.85, 1.15), d = def * rand(0.85, 1.15);
+  S.attacked = true;
+  let title, body;
+  if (a > d) {
+    const lost = killSoldiers(S.jobs.soldiers * 0.18 * d / a);
+    ai.army = Math.max(0, ai.army - def * 0.7);
+    const wasCap = t.capital;
+    t.owner = 'player';
+    t.capital = false;
+    S.res.silver += 8;
+    S.conquered++;
+    S.stability = clamp(S.stability + 4, 0, 100);
+    title = `Victory in the ${T.name.toLowerCase()}`;
+    body = `Our army took the land from ${ai.name} and lost ${lost} soldiers. We carried off 8 shekels of silver.`;
+    const rest = tilesOwnedBy(ai.id);
+    if (!rest.length) {
+      ai.alive = false;
+      ai.war = false;
+      const joined = R(25 + S.turn);
+      rescalePop(S.pop + joined);
+      body += ` ${ai.name} is no more. ${joined} of their people join us.`;
+      log(`${ai.name} fell to the ${S.name}.`, 'big');
+    } else if (wasCap) {
+      S.tiles[rest[0]].capital = true;
+      body += ' We captured their capital, and their leaders fled to another town.';
+    }
+    log(`We took land from ${ai.name}.`, 'good');
+  } else {
+    const lost = killSoldiers(S.jobs.soldiers * 0.35);
+    ai.army = Math.max(0, ai.army - a * 0.35);
+    S.stability = clamp(S.stability - 5, 0, 100);
+    title = 'Our army is driven back';
+    body = `${ai.name} held the ${T.name.toLowerCase()}. We lost ${lost} soldiers.`;
+    log(`Our attack on ${ai.name} failed.`, 'bad');
+  }
+  pushModal({ sign: 'army', title, body, choices: [{ label: 'Continue' }] });
+}
+
+function setResearch(id) {
+  const t = TECHS[id];
+  if (!t || has(id) || !t.req.every(has)) return;
+  S.research = id;
+  checkResearch().forEach(n => toast(`Mastered ${n}`));
+}
+
+function gift(arg) {
+  const [id, kind] = arg.split(':');
+  const ai = aiById(id), [amt, good] = GIFTS[kind];
+  if (!ai || !ai.alive || S.res[kind] < amt) return;
+  S.res[kind] -= amt;
+  ai.att = clamp(ai.att + (ai.war ? good / 2 : good), -100, 100);
+  toast(`${ai.name} accepts the gift`);
+}
+function askPeace(id) {
+  const ai = aiById(id), c = calc();
+  if (!ai || !ai.war) return;
+  if (ai.att > -35 || ai.army < c.strength * 0.7) {
+    makePeace(ai);
+    pushModal({ sign: 'foreign', title: `Peace with ${ai.name}`, body: `${ai.name} agrees to end the war. Their envoys swear an oath before the gods of both peoples.`, choices: [{ label: 'Good' }] });
+  } else {
+    ai.att -= 3;
+    toast(`${ai.name} refuses. Send gifts or grow stronger first.`);
+  }
+}
+function makePeace(ai) {
+  ai.war = false;
+  ai.warTurns = 0;
+  ai.att = Math.max(ai.att, -25) + 10;
+  log(`Peace with ${ai.name}.`, 'good');
+}
+const canTribute = (ai, c) => ai.alive && !ai.war && !ai.cool && c.strength > ai.army * 1.5;
+function demandTribute(id) {
+  const ai = aiById(id), c = calc();
+  if (!ai || !canTribute(ai, c)) return;
+  const silver = 10 + R(S.turn / 3);
+  S.res.silver += silver;
+  S.res.food += 40;
+  ai.att -= 25;
+  ai.cool = 5;
+  log(`${ai.name} paid us tribute.`, 'good');
+  toast(`${ai.name} pays ${silver} silver and 40 food`);
+  if (ai.att < -50 && Math.random() < 0.5) declareWarOn(ai, `Humiliated, ${ai.name} takes up arms.`);
+}
+
+function price(g, side, c) {
+  const G = GOODS[g], v = G.lot * G.value;
+  if (side === 'buy') return Math.ceil(v * c.buyMult * (g === 'tin' && c.tinDeal ? 0.8 : 1));
+  return Math.max(1, Math.floor(v * c.sellMult));
+}
+function trade(g, side) {
+  const c = calc();
+  if (S.tradeUsed >= c.caravans) return;
+  const G = GOODS[g], p = price(g, side, c);
+  if (side === 'buy') {
+    if (S.res.silver < p) return;
+    S.res.silver -= p;
+    S.res[g] += G.lot;
+  } else {
+    if (S.res[g] < G.lot) return;
+    S.res[g] -= G.lot;
+    S.res.silver += p;
+  }
+  S.tradeUsed++;
+}
+
+/* ---------- 6. End of turn ---------- */
+function endTurn() {
+  if (!S || S.over || modalOpen) return;
+  const c = calc(), rep = [];
+  const before = { pop: S.pop, food: S.res.food };
+
+  // grain
+  let food = S.res.food + c.foodNet;
+  if (food < 0) {
+    const dead = Math.min(S.pop, Math.ceil(-food * 0.5));
+    rescalePop(S.pop - dead);
+    food = 0;
+    S.stability -= 8;
+    rep.push(['bad', `Famine: ${dead} people starved.`]);
+  } else if (food > c.storage) {
+    const lost = R(food - c.storage);
+    food = c.storage;
+    if (lost >= 10) rep.push(['', `${lost} grain spoiled. Storage holds ${c.storage}; granaries hold more.`]);
+  }
+  S.res.food = R(food);
+
+  // materials, metal, bronze
+  S.res.materials += c.matIn;
+  S.res.copper += c.copperIn;
+  S.res.tin += c.tinIn;
+  const cast = Math.min(c.forgeCap, Math.floor(S.res.copper / 2), S.res.tin);
+  if (cast > 0) {
+    S.res.copper -= cast * 2;
+    S.res.tin -= cast;
+    S.res.bronze += cast;
+  }
+
+  // knowledge
+  S.progress += c.know;
+  const learned = checkResearch();
+
+  // people
+  if (c.births > 0 && S.res.food > 0) rescalePop(S.pop + c.births);
+  if (c.crowd > 0) {
+    rescalePop(S.pop - c.crowd);
+    rep.push(['bad', `Crowding and disease killed ${c.crowd}. Build houses or settle more land.`]);
+  }
+
+  // stability drifts toward its target
+  const diff = c.stabTarget - S.stability;
+  if (diff) S.stability += Math.sign(diff) * Math.max(1, R(Math.abs(diff) * 0.3));
+  S.stability = clamp(S.stability, 0, 100);
+  if (S.stability < 15 && Math.random() < 0.35) revolt(rep);
+
+  S.buffs.forEach(b => { b.turns--; });
+  S.buffs = S.buffs.filter(b => b.turns > 0);
+
+  aiTurn(c, rep);
+
+  S.turn++;
+  S.attacked = false;
+  S.tradeUsed = 0;
+  checkTitles(rep);
+
+  const dPop = S.pop - before.pop, dFood = S.res.food - before.food;
+  log(`People ${signed(dPop)}, food ${signed(dFood)}.`);
+  rep.forEach(([kind, text]) => log(text, kind));
+
+  if (S.pop <= 5) return gameOver('Your people scatter', `Too few remain to keep the hearths burning. The last families drift to other villages, and the name of the ${S.name} is forgotten.`);
+  if (S.stability <= 0) return gameOver('Civil war', `Rival elders raise their own followers. The ${S.name} tear themselves apart.`);
+  if (S.turn >= LAST_TURN) {
+    save();
+    renderAll();
+    collapse();
+    return;
+  }
+
+  const serious = rep.filter(([kind]) => kind === 'bad' || kind === 'big');
+  if (serious.length) {
+    pushModal({
+      sign: 'land', title: `The years to ${fmtYear(S.turn)}`,
+      html: `<ul>${rep.map(([, text]) => `<li>${text}</li>`).join('')}</ul>`,
+      choices: [{ label: 'Continue' }],
+    });
+  } else {
+    toast(`${fmtYear(S.turn)}: people ${signed(dPop)}, food ${signed(dFood)}${learned.length ? ` · mastered ${learned.join(', ')}` : ''}`);
+  }
+  if (learned.length && serious.length) toast(`Mastered ${learned.join(', ')}`);
+  maybeEvent();
+  save();
+  renderAll();
+}
+
+function revolt(rep) {
+  const lost = R(S.pop * 0.08);
+  rescalePop(S.pop - lost);
+  const b = loseBuilding();
+  S.stability = clamp(S.stability + 10, 0, 100);
+  rep.push(['bad', `Revolt! Rioters killed ${lost} people${b ? ` and burned ${b}` : ''}. The anger has cooled a little.`]);
+}
+function loseBuilding() {
+  const ids = Object.keys(S.b).filter(k => S.b[k] > 0 && k !== 'ziggurat');
+  if (!ids.length) return null;
+  const k = ids[Math.floor(Math.random() * ids.length)];
+  S.b[k]--;
+  return BUILDINGS[k].one;
+}
+function checkTitles(rep) {
+  const e = eraOf(), t = titleOf();
+  if (e !== S.era) {
+    S.era = e;
+    rep.push(['big', `A new age begins: the ${e}.`]);
+  }
+  if (t !== S.title) {
+    const up = TITLES.indexOf(t) > TITLES.indexOf(S.title);
+    S.title = t;
+    rep.push([up ? 'good' : 'bad', up ? `Our people have become ${article(t)} ${t.toLowerCase()}.` : `We have fallen back to ${article(t)} ${t.toLowerCase()}.`]);
+  }
+}
+
+/* ---------- 7. Neighbors ---------- */
+function aiTurn(c, rep) {
+  for (const ai of S.ais) {
+    if (!ai.alive) continue;
+    const d = AI_DEF[ai.id];
+    const n = tilesOwnedBy(ai.id).length;
+    const target = n * (6 + S.turn * 0.6) * d.mil;
+    ai.army += (target - ai.army) * 0.2;
+    ai.att += (d.base - ai.att) * 0.06;
+    const borders = bordersPlayer(ai.id);
+    if (borders) ai.att -= 0.6;
+    ai.att = clamp(ai.att, -100, 100);
+    if (ai.cool > 0) ai.cool--;
+
+    // grow into empty land, preferring good farmland
+    if (Math.random() < d.expand) {
+      const opts = frontier(ai.id).filter(i => !S.tiles[i].owner && S.tiles[i].t !== 'S')
+        .map(i => [TERRAIN[S.tiles[i].t].farm + Math.random() * 20, i])
+        .sort((a, b) => b[0] - a[0]);
+      if (opts.length) {
+        const pick = opts[0][1];
+        S.tiles[pick].owner = ai.id;
+        if (isFrontier(pick)) rep.push(['', `${ai.name} settled land on our border.`]);
+      }
+    }
+
+    if (!ai.war) {
+      if (borders && ai.att < -40 && ai.army > c.defense * 0.8 && Math.random() < 0.25) {
+        declareWarOn(ai, `${ai.name} has had enough of us.`);
+        rep.push(['bad', `${ai.name} declared war.`]);
+      }
+    } else {
+      ai.warTurns++;
+      if ((ai.army < c.strength * 0.5 && Math.random() < 0.4) || (ai.warTurns > 5 && Math.random() < 0.12)) {
+        peaceOffer(ai);
+      } else if (borders && Math.random() < 0.4) {
+        const r = raid(ai, ai.army * rand(0.5, 0.9), c);
+        rep.push([r.ok ? 'good' : 'bad', r.line]);
+      }
+    }
+  }
+}
+
+function raid(ai, power, c) {
+  const def = c.defense * rand(0.85, 1.15);
+  if (power > def) {
+    const food = R(S.res.food * 0.2), mat = R(S.res.materials * 0.15), dead = Math.max(1, R(S.pop * 0.04));
+    S.res.food -= food;
+    S.res.materials -= mat;
+    rescalePop(S.pop - dead);
+    S.stability = clamp(S.stability - 6, 0, 100);
+    let line = `${ai.name} raiders broke through and carried off ${food} food and ${mat} materials. ${dead} of our people died.`;
+    if (ai.war && power > def * 1.6) {
+      const cand = tilesOwnedBy('player').filter(i => !S.tiles[i].capital && neighbors(i).some(j => S.tiles[j].owner === ai.id));
+      if (cand.length) {
+        const i = cand[Math.floor(Math.random() * cand.length)];
+        S.tiles[i].owner = ai.id;
+        line += ` They seized our ${TERRAIN[S.tiles[i].t].name.toLowerCase()}.`;
+      }
+    }
+    return { ok: false, line };
+  }
+  ai.army *= 0.85;
+  const lost = killSoldiers(S.jobs.soldiers * 0.05);
+  S.stability = clamp(S.stability + 2, 0, 100);
+  return { ok: true, line: `Our defenders drove off ${ai.name} raiders${lost ? ` (${lost} soldiers fell)` : ''}.` };
+}
+
+function declareWarOn(ai, why) {
+  ai.war = true;
+  ai.warTurns = 0;
+  ai.att = Math.min(ai.att, -45);
+  log(`${ai.name} declared war on us.`, 'bad');
+  pushModal({
+    sign: 'army', title: `${ai.name} declares war`,
+    body: `${why} Their army is about ${R10(ai.army)} strong; our defence is ${calc().defense}. Train soldiers, raise walls, or send gifts and ask for peace.`,
+    choices: [{ label: 'To arms' }],
+  });
+}
+function peaceOffer(ai) {
+  pushModal({
+    sign: 'foreign', title: `${ai.name} asks for peace`,
+    body: `Messengers from ${ai.name} arrive with gifts of dates and ask to end the war.`,
+    choices: [
+      { label: 'Make peace', hint: 'War weariness ends', run: () => makePeace(ai) },
+      { label: 'Fight on', ghost: true, hint: `${ai.name} grows angrier`, run: () => { ai.att -= 5; } },
+    ],
+  });
+}
+
+/* ---------- 8. Random events ---------- */
+const pickAI = pred => {
+  const list = S.ais.filter(a => a.alive && pred(a));
+  return list.length ? list[Math.floor(Math.random() * list.length)] : null;
+};
+const tributeTarget = c => a => !a.war && a.army > c.defense * 1.3 && a.att < 20 && bordersPlayer(a.id);
+
+const EVENTS = [
+  { id: 'harvest', weight: 3, make: () => {
+    const n = R(25 + S.pop * 0.25);
+    return { sign: 'food', title: 'The barley stands tall', body: `The fields yield far more than anyone hoped: ${n} grain beyond the usual harvest.`,
+      choices: [{ label: 'Store the surplus', fx: { food: n } }, { label: 'Hold a harvest festival', fx: { food: R(n / 2), stability: 6 } }] };
+  } },
+  { id: 'drought', weight: 3, make: () => {
+    const soft = has('astronomy'), a = soft ? -0.15 : -0.25, b = soft ? -0.08 : -0.12;
+    return { sign: 'food', title: 'The rains fail', body: `The river runs low and the canals stand dry.${soft ? ' Our astronomers saw it coming, so the harm is smaller.' : ''}`,
+      choices: [
+        { label: 'Ration the grain', hint: `Food ${pct(a)} for 2 turns, −4 stability`, run: () => { addBuff('Drought', 2, { food: a }); applyFx({ stability: -4 }); } },
+        { label: 'Dig wells and channels', cost: { materials: 30 }, hint: `−30 materials, food ${pct(b)} for 2 turns`, run: () => addBuff('Drought', 2, { food: b }) },
+      ] };
+  } },
+  { id: 'flood', weight: 2, cond: () => ownsTerrain('R'), make: () => {
+    const loss = R(S.res.food * (has('astronomy') ? 0.08 : 0.15));
+    return { sign: 'land', title: 'The river floods its banks', body: 'Brown water covers the low fields and pours into the storehouses. When it drains, it leaves fresh silt behind.',
+      choices: [
+        { label: 'Replant in the new silt', hint: `−${loss} food now, then food +20% for 3 turns`, run: () => { applyFx({ food: -loss }); addBuff('Rich silt', 3, { food: 0.2 }); } },
+        { label: 'Raise dikes', cost: { materials: 25 }, hint: '−25 materials, nothing lost', ghost: true },
+      ] };
+  } },
+  { id: 'plague', weight: 1.5, cond: () => S.pop > 90, make: () => {
+    const a = R(S.pop * 0.06), b = R(S.pop * (S.b.temple ? 0.08 : 0.12));
+    return { sign: 'people', title: 'Fever in the crowded lanes', body: 'A sickness moves from house to house. The healers burn herbs and the priests chant.',
+      choices: [{ label: 'Isolate the sick', fx: { pop: -a, stability: -6 } }, { label: 'Trust the healers', fx: { pop: -b } }] };
+  } },
+  { id: 'caravan', weight: 2.5, make: () => ({
+    sign: 'tin', title: 'A caravan from the far mountains', body: 'Donkeys laden with metal ingots stop at the edge of our fields. Their leader will trade for grain.',
+    choices: [
+      { label: 'Buy tin', cost: { food: 60 }, fx: { tin: 8 } },
+      { label: 'Buy copper', cost: { food: 45 }, fx: { copper: 12 } },
+      { label: 'Send them on', ghost: true },
+    ] }) },
+  { id: 'refugees', weight: 2, make: c => {
+    const n = R(10 + S.pop * 0.08), crowded = S.pop + n > c.housing;
+    return { sign: 'people', title: 'Families at the gate', body: `${n} people fleeing war in the north ask to live among us.${crowded ? ' We do not have houses for all of them.' : ''}`,
+      choices: [{ label: 'Welcome them', fx: { pop: n, stability: crowded ? -3 : 0 } }, { label: 'Turn them away', fx: { stability: -1 }, ghost: true }] };
+  } },
+  { id: 'comet', weight: 1, make: () => ({
+    sign: 'star', title: 'A star with a burning tail', body: 'For forty nights a bright star crosses the sky. Everyone asks the priests what it means.',
+    choices: [{ label: 'Declare it an omen of glory', fx: { stability: 8 } }, { label: 'Have the scholars chart its path', fx: { knowledge: R(15 + S.turn) } }] }) },
+  { id: 'tribute', weight: 2.5, cond: c => !!pickAI(tributeTarget(c)), make: c => {
+    const ai = pickAI(tributeTarget(c)), amt = R(30 + S.pop * 0.15);
+    return { sign: 'foreign', title: `${ai.name} demands tribute`, body: `Envoys from ${ai.name} stand in the square. Their army is larger than ours, and they want ${amt} grain to keep the peace.`,
+      choices: [
+        { label: 'Pay the tribute', cost: { food: amt }, hint: `−${amt} food, ${ai.name} grows friendlier`, run: () => { ai.att += 15; } },
+        { label: 'Refuse', ghost: true, hint: 'They will be angry, and may attack', run: () => { ai.att -= 25; if (Math.random() < 0.4) declareWarOn(ai, 'They answer the insult with war.'); } },
+      ] };
+  } },
+  { id: 'marriage', weight: 1.2, cond: () => !!pickAI(a => !a.war && a.att > 5), make: () => {
+    const ai = pickAI(a => !a.war && a.att > 5);
+    return { sign: 'king', title: `A marriage offer from ${ai.name}`, body: `The ruler of ${ai.name} proposes to wed a child of their house to one of ours. The feast alone will cost a storeroom of grain.`,
+      choices: [
+        { label: 'Agree to the match', cost: { food: 40 }, hint: `−40 food, +3 stability, ${ai.name} becomes much friendlier`, run: () => { ai.att += 30; applyFx({ stability: 3 }); } },
+        { label: 'Politely decline', ghost: true, hint: `${ai.name} is offended`, run: () => { ai.att -= 10; } },
+      ] };
+  } },
+  { id: 'ore', weight: 1, cond: () => has('copperWorking'), make: () => ({
+    sign: 'copper', title: 'Green-stained stones', body: 'Shepherds bring back rocks streaked with green. The smiths know copper ore when they see it.',
+    choices: [{ label: 'Gather all we can', fx: { copper: 15 } }] }) },
+  { id: 'locusts', weight: 1.5, cond: () => S.turn > 5, make: () => ({
+    sign: 'food', title: 'Locusts darken the sky', body: 'A cloud of locusts settles on the green barley.',
+    choices: [
+      { label: 'Burn the field edges', cost: { materials: 15 }, hint: '−15 materials, food −20% next turn', run: () => addBuff('Locusts', 1, { food: -0.2 }) },
+      { label: 'Wait for them to pass', hint: 'Food −40% next turn', run: () => addBuff('Locusts', 1, { food: -0.4 }) },
+    ] }) },
+  { id: 'sage', weight: 1.5, make: () => {
+    const n = R(20 + S.turn * 1.5);
+    return { sign: 'knowledge', title: 'A wandering sage', body: 'An old traveller who has seen the cities of the south offers to teach our young.',
+      choices: [{ label: 'Give the sage a seat among the elders', cost: { food: 15 }, fx: { knowledge: n } }, { label: 'Send the sage on', ghost: true }] };
+  } },
+  { id: 'fire', weight: 1, cond: () => S.b.granary > 0 && S.res.food > 100, make: () => {
+    const n = R(S.res.food * 0.3);
+    return { sign: 'food', title: 'Fire in the storehouse', body: 'A lamp tips over in the granary at night.', choices: [{ label: 'Save what we can', fx: { food: -n } }] };
+  } },
+  { id: 'unrest', weight: 3, cond: () => S.stability < 40, make: () => {
+    const feast = R(S.pop * 0.4), enough = S.jobs.soldiers >= S.pop * 0.06;
+    return { sign: 'stability', title: 'Grumbling in the streets', body: 'Crowds gather at the shrine to complain about hunger, crowding and the elders.',
+      choices: [
+        { label: 'Hold a feast', cost: { food: feast }, fx: { stability: 10 } },
+        { label: 'Arrest the agitators', fx: { stability: enough ? 5 : -4 }, hint: enough ? '+5 stability' : 'Too few soldiers: −4 stability' },
+        { label: 'Ignore it', fx: { stability: -5 }, ghost: true },
+      ] };
+  } },
+  { id: 'quake', weight: 0.6, cond: () => S.turn > 10 && totalBuildings() > 2, make: () => {
+    const dead = R(S.pop * 0.03);
+    return { sign: 'land', title: 'The earth shakes', body: 'Walls crack and a building collapses.',
+      choices: [{ label: 'Bury the dead and rebuild', hint: `Lose one building and ${dead} people`, run: () => { const lost = loseBuilding(); applyFx({ pop: -dead }); if (lost) log(`An earthquake destroyed ${lost}.`, 'bad'); } }] };
+  } },
+  { id: 'bandits', weight: 1.5, make: c => {
+    const need = R(20 + S.turn * 1.5);
+    return { sign: 'army', title: 'Bandits on the trade path', body: 'Robbers in the hills steal goats and waylay anyone carrying goods.',
+      choices: [
+        { label: 'Send the soldiers', hint: c.strength >= need ? 'Our army can handle this: loot and +2 stability' : `Risky: our army (${c.strength}) is weaker than the bandits (about ${need})`,
+          run: () => {
+            if (c.strength * rand(0.8, 1.2) >= need) { applyFx({ materials: 15, stability: 2 }); toast('The bandits are scattered'); }
+            else { killSoldiers(S.jobs.soldiers * 0.2); applyFx({ stability: -3 }); toast('The soldiers were beaten back'); }
+          } },
+        { label: 'Pay them to leave', cost: { food: 30 } },
+      ] };
+  } },
+  { id: 'inventor', weight: 1.2, cond: () => !!S.research, make: () => {
+    const t = TECHS[S.research], n = R(t.cost * 0.4);
+    return { sign: 'knowledge', title: 'A clever idea', body: `A potter's apprentice shows the elders a trick that speeds our study of ${t.name.toLowerCase()}.`,
+      choices: [{ label: 'Reward the apprentice', fx: { knowledge: n } }] };
+  } },
+  { id: 'envoy', weight: 0.8, cond: () => S.turn > 40, make: () => ({
+    sign: 'foreign', title: 'Envoys from a distant empire', body: 'Ambassadors arrive from a great kingdom beyond the mountains, carrying lapis lazuli and letters on clay.',
+    choices: [{ label: 'Exchange rich gifts', cost: { bronze: 10 }, fx: { knowledge: 60, stability: 4, silver: 15 } }, { label: 'Show them our granaries', fx: { stability: 3 } }] }) },
+  { id: 'herds', weight: 1.5, cond: () => has('husbandry'), make: () => ({
+    sign: 'food', title: 'Wild herds in the valley', body: 'Herds of wild asses and gazelle wander close to our pastures.',
+    choices: [{ label: 'Hunt them', fx: { food: 45 } }, { label: 'Pen and breed them', hint: 'Food +10% for 4 turns', run: () => addBuff('Fresh herds', 4, { food: 0.1 }) }] }) },
+  { id: 'nomads', weight: 1.5, cond: () => { const a = aiById('amurru'); return a.alive && !a.war && a.att < -10; }, make: c => {
+    const a = aiById('amurru'), power = R(a.army * rand(0.4, 0.7)), bribe = R(20 + S.pop * 0.1);
+    return { sign: 'army', title: 'Riders from the desert', body: `Amurru herders sweep in to raid our outlying fields. They look about ${R10(power)} strong; our defence is ${c.defense}.`,
+      choices: [
+        { label: 'Stand and fight', hint: power < c.defense ? 'We should hold' : 'They may break through', run: () => { const r = raid(a, power, calc()); log(r.line, r.ok ? 'good' : 'bad'); toast(r.ok ? 'The raiders were driven off' : 'The raiders broke through'); } },
+        { label: 'Buy them off', cost: { food: bribe } },
+      ] };
+  } },
+  { id: 'twins', weight: 0.8, make: () => ({
+    sign: 'king', title: 'Twins born to the chief', body: 'The priests call it a sign of the gods’ favour.', choices: [{ label: 'Celebrate', fx: { stability: 4 } }] }) },
+  { id: 'smith', weight: 1, cond: () => S.b.forge > 0, make: () => ({
+    sign: 'bronze', title: 'A master smith', body: 'A smith from the north shows ours how to make better casting moulds.', choices: [{ label: 'Put the smith to work', fx: { bronze: 12 } }] }) },
+  { id: 'storm', weight: 1, cond: () => ownsImp('harbor'), make: () => ({
+    sign: 'land', title: 'Storm at sea', body: 'A storm wrecks boats in the harbor.', choices: [{ label: 'Repair the boats', fx: { food: -20, materials: -15 } }] }) },
+  { id: 'pilgrims', weight: 1, cond: () => S.b.temple > 0, make: () => ({
+    sign: 'stability', title: 'Pilgrims at the temple', body: 'Worshippers from other towns come to see our temple and leave offerings.', choices: [{ label: 'Welcome them', fx: { silver: 8, stability: 3 } }] }) },
+  { id: 'accounts', weight: 0.8, cond: () => has('writing'), make: () => {
+    const n = R(S.res.food * 0.15) * (Math.random() < 0.5 ? 1 : -1);
+    return { sign: 'knowledge', title: 'The scribes recount the grain', body: n >= 0 ? 'The scribes find that the granary records undercounted our stores.' : 'The scribes find that the granary records were wrong, and some grain was never there.',
+      choices: [{ label: 'Correct the tablets', fx: { food: n } }] };
+  } },
+];
+
+function maybeEvent() {
+  if (S.turn < 2 || Math.random() > 0.45) return;
+  const c = calc();
+  const pool = EVENTS.filter(e => (S.cool[e.id] ?? -99) + 6 <= S.turn && (!e.cond || e.cond(c)));
+  const total = pool.reduce((a, e) => a + e.weight, 0);
+  let x = Math.random() * total;
+  for (const e of pool) {
+    x -= e.weight;
+    if (x <= 0) {
+      S.cool[e.id] = S.turn;
+      pushModal(e.make(c));
+      return;
+    }
+  }
+}
+
+/* ---------- 9. End of the game ---------- */
+function collapse() {
+  pushModal({
+    sign: 'foreign', title: 'The year 1200 BC',
+    body: 'Drought grips the whole region. The great trade routes fail one after another, and raiders the scribes call the Sea Peoples come burning along the coasts. Every kingdom will be tested: its walls, its granaries and the loyalty of its people.',
+    html: '<p>Where do you put your last effort?</p>',
+    choices: [
+      { label: 'Man the walls', hint: 'Defence +20% for the test', run: () => resolveCollapse('walls') },
+      { label: 'Guard the granaries', hint: 'Stored food counts 30% more', run: () => resolveCollapse('food') },
+      { label: 'Gather the people at the temples', hint: 'Stability +12 for the test', run: () => resolveCollapse('unity') },
+    ],
+  });
+}
+function resolveCollapse(focus) {
+  const c = calc();
+  const invasion = R(250 + S.pop * 0.6 + c.tiles * 20);
+  const def = c.defense * (focus === 'walls' ? 1.2 : 1);
+  const food = S.res.food * (focus === 'food' ? 1.3 : 1), foodNeed = R(S.pop * 0.6);
+  const stab = S.stability + (focus === 'unity' ? 12 : 0);
+  const tests = [
+    ['The Sea Peoples', `Defence ${R(def)} against ${invasion}`, def >= invasion, 0.25],
+    ['The great drought', `${R(food)} food stored, ${foodNeed} needed`, food >= foodNeed, 0.2],
+    ['Unity', `Stability ${R(stab)}, 55 needed`, stab >= 55, 0.15],
+  ];
+  const lossPct = tests.reduce((a, t) => a + (t[2] ? 0 : t[3]), 0);
+  const passes = tests.filter(t => t[2]).length;
+  rescalePop(S.pop - R(S.pop * lossPct));
+  const [title, text] = [
+    ['Swept away', `The ${S.name} vanish from the record. Later travellers find only a mound of melted brick.`],
+    ['Diminished', `The ${S.name} survive, but only as a shadow of what they were.`],
+    ['Shaken but standing', `The ${S.name} lose much, but the city endures into the Iron Age.`],
+    ['Unbroken', `While palaces burn across the world, the ${S.name} hold firm and carry the knowledge of the Bronze Age into the next.`],
+  ][passes];
+  S.over = true;
+  log(`The Collapse: ${title.toLowerCase()}.`, 'big');
+  const testHTML = `<div class="tests">${tests.map(t => `<div><span><b>${t[0]}</b><br><span class="muted small">${t[1]}</span></span><b class="${t[2] ? 'pos' : 'neg'}">${t[2] ? 'Passed' : 'Failed'}</b></div>`).join('')}</div>`;
+  pushModal({ sign: 'king', title, body: text, html: testHTML + scoreHTML(computeScore(passes)), choices: endChoices() });
+  save();
+}
+function gameOver(title, text) {
+  S.over = true;
+  log(title, 'bad');
+  save();
+  renderAll();
+  pushModal({ sign: 'land', title, body: text, html: scoreHTML(computeScore(0)), choices: endChoices() });
+}
+const endChoices = () => [{ label: 'Play again', run: startNew }, { label: 'Look at the map', ghost: true }];
+function computeScore(passes) {
+  const c = calc();
+  const parts = [
+    ['People', R(S.pop * 0.6)],
+    ['Lands', c.tiles * 80],
+    ['Ideas mastered', (S.techs.length - 1) * 50],
+    ['Buildings', totalBuildings() * 12],
+    ['Bronze projects', S.proj.length * 40],
+    ['Ziggurat', S.b.ziggurat ? 300 : 0],
+    ['Stability', S.stability * 2],
+    ['Lands conquered', S.conquered * 40],
+    ['Collapse tests passed', passes * 300],
+  ];
+  return { parts, total: parts.reduce((a, p) => a + p[1], 0) };
+}
+function rankOf(total) {
+  if (total < 900) return 'A name lost to the sands';
+  if (total < 1800) return 'Remembered on a few tablets';
+  if (total < 2800) return 'A city of songs';
+  if (total < 4000) return 'A kingdom of legend';
+  return 'Light of the Bronze Age';
+}
+function scoreHTML(sc) {
+  return `<div class="ledger">${sc.parts.filter(p => p[1]).map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join('')}<span class="tot">Score</span><span class="tot">${sc.total}</span></div><p class="rank">${rankOf(sc.total)}</p>`;
+}
+function startNew() {
+  newGame('Uruma');
+  showIntro();
+}
+
+/* ---------- 10. Rendering ---------- */
+const DECO = {
+  R: 'M-20 -3 q5 -5 10 0 t10 0 t10 0 t10 0 M-14 7 q4 -4 8 0 t8 0 t8 0 t8 0',
+  P: 'M-12 4 l2 -7 l2 7 M3 -2 l2 -7 l2 7 M-4 12 l2 -6 l2 6 M10 10 l2 -6 l2 6',
+  F: 'M-15 9 l6 -15 l6 15 z M-4 3 l6 -15 l6 15 z M6 11 l6 -15 l6 15 z',
+  H: 'M-18 8 q8 -14 16 0 M-2 8 q8 -14 16 0 M-10 -4 q6 -10 12 0',
+  M: 'M-19 10 L-7 -12 L5 10 Z M-3 10 L8 -6 L19 10 Z',
+  D: 'M-11 -7 h.1 M3 -10 h.1 M12 -2 h.1 M-3 2 h.1 M-14 8 h.1 M7 9 h.1 M-6 14 h.1',
+  S: 'M-16 -5 q4 -4 8 0 t8 0 t8 0 M-10 7 q4 -4 8 0 t8 0 t8 0',
+};
+const ZIGGURAT = 'M-10 5 h20 v-3.5 h-3 v-3.5 h-3 v-3.5 h-8 v3.5 h-3 v3.5 h-3 z';
+const $ = sel => document.querySelector(sel);
+
+function renderAll() {
+  if (!S) return;
+  const c = calc();
+  renderHeader(c);
+  renderRes(c);
+  renderMap();
+  renderTile(c);
+  renderAdvice(c);
+  renderTabs(c);
+  renderPane(c);
+  renderBar();
+}
+
+function renderHeader(c) {
+  $('#era').textContent = S.era;
+  $('#realmName').textContent = `The ${S.name}`;
+  $('#realm').innerHTML = [
+    ['Rank', S.title], ['Year', fmtYear(S.turn)], ['Lands', c.tiles],
+  ].map(([k, v]) => `<div class="stat"><span class="h">${k}</span><span class="v">${v}</span></div>`).join('');
+}
+
+function chip(sign, label, value, delta, warn) {
+  const d = delta == null ? '' : ` <span class="d ${delta < 0 ? 'neg' : 'pos'}">${signed(delta)}</span>`;
+  return `<div class="chip${warn ? ' warn' : ''}"><span class="cu" aria-hidden="true">${SIGN[sign]}</span><span class="lab">${label}</span><span class="val">${value}${d}</span></div>`;
+}
+function renderRes(c) {
+  const r = S.res;
+  $('#res').innerHTML = [
+    chip('people', 'People', `${S.pop}<span class="muted small">/${c.housing}</span>`, c.births - c.crowd - c.starve, S.pop > c.housing),
+    chip('food', 'Food', `${r.food}<span class="muted small">/${c.storage}</span>`, c.foodNet, c.foodNet < 0),
+    chip('materials', 'Materials', r.materials, c.matIn),
+    chip('copper', 'Copper', r.copper, c.copperIn - c.bronzeIn * 2 || null),
+    chip('tin', 'Tin', r.tin, c.tinIn - c.bronzeIn || null),
+    chip('bronze', 'Bronze', r.bronze, c.bronzeIn || null),
+    chip('silver', 'Silver', r.silver, null),
+    chip('knowledge', 'Knowledge', `+${fmt1(c.know)}`, null),
+    chip('stability', 'Stability', `${S.stability}<span class="muted small"> → ${c.stabTarget}</span>`, null, S.stability < 30),
+    chip('army', 'Army', `${c.strength}<span class="muted small"> def ${c.defense}</span>`, null),
+  ].join('');
+}
+
+function renderMap() {
+  const svg = $('#map');
+  const w = PAD * 2 + HEX * SQ3 * (COLS + 0.5), h = PAD * 2 + HEX * 2 + HEX * 1.5 * (ROWS - 1);
+  svg.setAttribute('viewBox', `0 0 ${w.toFixed(0)} ${h.toFixed(0)}`);
+  const claimable = new Set(S.over ? [] : frontier('player').filter(i => !S.tiles[i].owner && S.tiles[i].t !== 'S'));
+  let out = '';
+  S.tiles.forEach((t, i) => {
+    const [x, y] = hexCenter(i % COLS, Math.floor(i / COLS));
+    const oc = t.owner ? `--oc: var(--o-${t.owner})` : '';
+    const label = `${TERRAIN[t.t].name}, ${t.owner ? ownerName(t.owner) : t.t === 'S' ? 'open water' : 'unclaimed'}${t.capital ? ', capital' : ''}`;
+    out += `<g class="tile" data-act="select" data-arg="${i}" tabindex="0" role="button" aria-label="${escapeHTML(label)}">`;
+    out += `<polygon class="hex t-${t.t}" points="${hexPoints(x, y, HEX)}"/>`;
+    out += `<path class="deco deco-${t.t}" transform="translate(${x.toFixed(1)} ${(y + (t.capital ? 6 : 0)).toFixed(1)})" d="${DECO[t.t]}"/>`;
+    if (t.owner) out += `<polygon class="own" style="${oc}" points="${hexPoints(x, y, HEX - 4)}"/>`;
+    if (claimable.has(i)) out += `<polygon class="claim" points="${hexPoints(x, y, HEX - 5)}"/>`;
+    if (t.capital) out += `<path class="cap" style="${oc}" transform="translate(${x.toFixed(1)} ${(y - 13).toFixed(1)})" d="${ZIGGURAT}"/>`;
+    if (t.imp) out += `<rect class="imp" x="${(x - 4).toFixed(1)}" y="${(y + 15).toFixed(1)}" width="8" height="8" transform="rotate(45 ${x.toFixed(1)} ${(y + 19).toFixed(1)})"/>`;
+    if (ui.sel === i) out += `<polygon class="sel" points="${hexPoints(x, y, HEX - 1.5)}"/>`;
+    out += '</g>';
+  });
+  svg.innerHTML = out;
+  $('#legend').innerHTML = [['player', `The ${escapeHTML(S.name)}`], ...S.ais.filter(a => a.alive).map(a => [a.id, a.name])]
+    .map(([id, n]) => `<span style="--oc: var(--o-${id})"><i></i>${n}</span>`).join('') + '<span><svg width="14" height="10" aria-hidden="true"><rect x="1" y="1" width="12" height="8" fill="none" stroke="var(--gold)" stroke-dasharray="3 2"/></svg>Can settle</span>';
+}
+
+function renderTile(c) {
+  const el = $('#tileinfo'), i = ui.sel;
+  if (i == null) { el.innerHTML = '<p class="muted">Select a tile on the map.</p>'; return; }
+  const t = S.tiles[i], T = TERRAIN[t.t];
+  const pill = t.owner ? `<span class="pill own" style="--oc: var(--o-${t.owner})">${escapeHTML(ownerName(t.owner))}</span>` : `<span class="pill">${t.t === 'S' ? 'Open water' : 'Unclaimed'}</span>`;
+  let h = `<div class="ti-head"><h3>${T.name}${t.capital ? ' · capital' : ''}</h3>${pill}</div>`;
+  if (t.t !== 'S') h += `<div class="ti-stats"><span>Farmland <b>${T.farm}</b></span><span>Housing <b>${T.house}</b></span><span>Materials <b>+${T.mat}</b></span><span>Defence <b>×${T.def}</b></span>${isCoast(i) ? '<span>Coast</span>' : ''}</div>`;
+  h += `<p class="muted small">${T.note}</p>`;
+
+  if (S.over) { el.innerHTML = h; return; }
+  if (t.owner === 'player') {
+    if (t.imp) {
+      const m = IMPROVEMENTS[t.imp];
+      h += `<div class="item"><div><h4>${m.name}</h4><p class="meta">${m.desc}</p></div><button class="btn ghost" data-act="dismantle">Dismantle</button></div>`;
+    } else {
+      const opts = Object.keys(IMPROVEMENTS).filter(k => fitsTile(k, i));
+      if (!opts.length) h += '<p class="muted small">Nothing can be built on this land.</p>';
+      opts.forEach(k => {
+        const m = IMPROVEMENTS[k], why = improveCheck(k, i);
+        h += `<div class="item${m.tech && !has(m.tech) ? ' locked' : ''}"><div><h4>${m.name}</h4><p class="meta">${m.desc} · ${impCost(k)} materials</p>${why ? `<p class="why">${why}</p>` : ''}</div><button class="btn" data-act="improve" data-arg="${k}" ${why ? 'disabled' : ''}>Build</button></div>`;
+      });
+    }
+  } else if (!t.owner && t.t !== 'S') {
+    const why = settleCheck(i, c), s = c.settle;
+    h += `<div class="item"><div><h4>Settle this land</h4><p class="meta">${s.pop} people, ${s.food} food, ${s.materials} materials</p>${why ? `<p class="why">${why}</p>` : ''}</div><button class="btn" data-act="settle" ${why ? 'disabled' : ''}>Settle</button></div>`;
+  } else if (t.owner && t.owner !== 'player') {
+    const ai = aiById(t.owner), def = defenders(i);
+    let why = '';
+    if (!isFrontier(i)) why = 'Too far away. We can only attack land on our border.';
+    else if (S.attacked) why = 'Our army has already marched this turn.';
+    else if (!S.jobs.soldiers) why = 'We have no soldiers.';
+    h += `<div class="item"><div><h4>Attack ${ai.name}</h4><p class="meta">Defenders about ${R10(def)} · our army ${c.strength} · ${outlook(c.strength / Math.max(1, def))}</p>${why ? `<p class="why">${why}</p>` : ai.war ? '' : `<p class="why">This starts a war with ${ai.name}.</p>`}</div><button class="btn danger" data-act="attack" ${why ? 'disabled' : ''}>Attack</button></div>`;
+  }
+  el.innerHTML = h;
+}
+
+function tips(c) {
+  const t = [];
+  if (c.foodAfter < 0) t.push(['bad', 'Famine next turn: the grain will run out. Move people into farming.']);
+  else if (c.foodNet < 0) t.push(['bad', `We eat ${-c.foodNet} more grain than we grow each turn. The stores last about ${Math.floor(S.res.food / -c.foodNet)} turns.`]);
+  if (S.pop > c.housing) t.push(['bad', `Overcrowded: ${S.pop} people, room for ${c.housing}. Build houses or settle land.`]);
+  else if (S.pop >= c.housing - 2) t.push(['', `No room to grow (${S.pop}/${c.housing}). Build houses or settle new land.`]);
+  if (S.stability < 35) t.push(['bad', `The people are restless (stability ${S.stability}). Temples, food and peace help.`]);
+  S.ais.forEach(a => {
+    if (a.alive && a.war) t.push(['bad', `At war with ${a.name}. Their army is about ${R10(a.army)}; our defence is ${c.defense}.`]);
+    else if (a.alive && a.att < -32 && bordersPlayer(a.id)) t.push(['bad', `${a.name} is close to war with us. Gifts would calm them; walls and soldiers would deter them.`]);
+  });
+  if (!S.research && Object.keys(TECHS).some(id => !has(id) && TECHS[id].req.every(has))) t.push(['', 'The scholars have nothing to study. Pick a subject in Research.']);
+  if (S.jobs.farmers > c.farmSlots) t.push(['', `${S.jobs.farmers - c.farmSlots} farmers work poor land. Settle river or plains land, or dig canals.`]);
+  if (c.foragers > S.pop * 0.3) t.push(['', `${c.foragers} people have no job and only forage. Give them work.`]);
+  if (has('bronzeWorking') && !S.b.forge) t.push(['', 'Build a forge to cast bronze from copper and tin.']);
+  else if (S.b.forge && !c.bronzeIn) t.push(['', 'The forges are cold. Each bronze needs 2 copper and 1 tin.']);
+  const left = LAST_TURN - S.turn;
+  if (left <= 15 && !S.over) t.push(['bad', `The Collapse comes in ${left * YEARS_PER_TURN} years. Prepare strong walls, full granaries and a loyal people.`]);
+  t.sort((a, b) => (b[0] === 'bad') - (a[0] === 'bad'));
+  return t.length ? t.slice(0, 4) : [['good', 'All is well. End the turn when you are ready.']];
+}
+function renderAdvice(c) {
+  if (S.over) { $('#advice').innerHTML = '<p class="tip good"><span class="cu" aria-hidden="true">' + SIGN.wedge + '</span><span>The game is over. Start a new one with the New game button.</span></p>'; return; }
+  const buffs = S.buffs.length ? `<div class="buffs">${S.buffs.map(b => `<span class="pill">${b.name}${b.food ? ` food ${pct(b.food)}` : ''} · ${b.turns} turn${b.turns > 1 ? 's' : ''}</span>`).join('')}</div>` : '';
+  $('#advice').innerHTML = `<p class="h">Advisors</p>` + tips(c).map(([k, text]) => `<p class="tip ${k}"><span class="cu" aria-hidden="true">${SIGN.wedge}</span><span>${text}</span></p>`).join('') + buffs;
+}
+
+const TABS = [['people', 'People'], ['build', 'Build'], ['research', 'Research'], ['neighbors', 'Neighbors'], ['trade', 'Trade'], ['chronicle', 'Chronicle']];
+function renderTabs() {
+  const dots = {
+    research: !S.research && !S.over && Object.keys(TECHS).some(id => !has(id) && TECHS[id].req.every(has)),
+    neighbors: S.ais.some(a => a.alive && a.war),
+  };
+  $('#tabs').innerHTML = TABS.map(([id, label]) => `<button class="tab" role="tab" id="tab-${id}" aria-selected="${ui.tab === id}" data-act="tab" data-arg="${id}">${label}${dots[id] ? '<span class="dot" aria-label="needs attention"></span>' : ''}</button>`).join('');
+  $('#pane').setAttribute('aria-labelledby', `tab-${ui.tab}`);
+}
+function renderPane(c) {
+  const fn = { people: paneP, build: paneBuild, research: paneResearch, neighbors: paneNeighbors, trade: paneTrade, chronicle: paneChronicle }[ui.tab];
+  $('#pane').innerHTML = fn(c);
+}
+
+function paneP(c) {
+  const j = S.jobs;
+  const outs = {
+    farmers: `+${c.farmFood} food · ${c.goodFarmers} of ${c.farmSlots} on good farmland`,
+    workers: `+${c.matIn} materials`,
+    soldiers: `Army strength ${c.strength}`,
+    scholars: `+${fmt1(c.know)} knowledge`,
+  };
+  let h = `<div class="steps"><span class="muted small">Move people in groups of</span>${[1, 5, 10, 25].map(n => `<button class="chipbtn" data-act="step" data-arg="${n}" aria-pressed="${ui.step === n}">${n}</button>`).join('')}</div>`;
+  h += '<div class="jobs">' + JOBS.map(job => `<div class="job">${cu(job.sign)}<div class="job-txt"><b>${job.name}</b><span class="muted small">${job.desc}</span><span class="out">${outs[job.key]}</span></div><div class="stepper"><button class="btn sq ghost" data-act="job" data-arg="${job.key}:-" ${j[job.key] && !S.over ? '' : 'disabled'} aria-label="Fewer ${job.name.toLowerCase()}">−</button><span class="n">${j[job.key]}</span><button class="btn sq" data-act="job" data-arg="${job.key}:+" ${c.foragers && !S.over ? '' : 'disabled'} aria-label="More ${job.name.toLowerCase()}">+</button></div></div>`).join('');
+  h += `<div class="job">${cu('people')}<div class="job-txt"><b>Foragers</b><span class="muted small">People without a job gather wild food.</span><span class="out">+${c.gatherFood} food</span></div><div class="stepper"><span class="n">${c.foragers}</span></div></div></div>`;
+  h += `<p class="h">Grain each turn</p><div class="ledger"><span>Fields</span><span>+${c.farmFood}</span><span>Foraging</span><span>+${c.gatherFood}</span>${c.extraFood ? `<span>Pastures and fishing</span><span>+${c.extraFood}</span>` : ''}<span>Eaten</span><span>−${c.foodOut}</span><span class="tot">Balance</span><span class="tot ${c.foodNet < 0 ? 'neg' : 'pos'}">${signed(c.foodNet)}</span></div>`;
+  h += `<p class="h">People next turn</p><div class="ledger"><span>Births</span><span>+${c.births}</span>${c.crowd ? `<span>Deaths from crowding</span><span class="neg">−${c.crowd}</span>` : ''}${c.starve ? `<span>Starvation</span><span class="neg">−${c.starve}</span>` : ''}<span>Housing</span><span>${S.pop} / ${c.housing}</span></div>`;
+  h += `<p class="h">Stability ${S.stability} → ${c.stabTarget}</p><div class="ledger">${c.stabParts.map(([k, v]) => `<span>${k}</span><span class="${v < 0 ? 'neg' : ''}">${k === 'Base' ? v : signed(v)}</span>`).join('')}</div><p class="muted small">Stability moves part of the way toward its target each turn. Below 30, work slows. Below 15, riots break out. At 0 the realm falls into civil war.</p>`;
+  return h;
+}
+
+function paneBuild() {
+  let h = '<p class="h">Buildings</p><div>';
+  for (const [id, b] of Object.entries(BUILDINGS)) {
+    const why = S.over ? 'Game over' : buildCheck(id);
+    const locked = b.tech && !has(b.tech);
+    h += `<div class="item${locked ? ' locked' : ''}"><div><h4>${b.name} <span class="count">${S.b[id]}${b.max < 99 ? ` of ${b.max}` : ''}</span></h4><p class="meta">${b.desc()} · ${costText(buildCost(id))}</p>${why && why !== 'Maximum built' ? `<p class="why">${why}</p>` : ''}</div><button class="btn" data-act="build" data-arg="${id}" ${why ? 'disabled' : ''}>${why === 'Maximum built' ? 'Built' : 'Build'}</button></div>`;
+  }
+  h += '</div><p class="h">Bronze projects</p><div>';
+  for (const [id, p] of Object.entries(PROJECTS)) {
+    const why = S.over ? 'Game over' : projectCheck(id);
+    h += `<div class="item${!has(p.tech) ? ' locked' : ''}"><div><h4>${p.name}</h4><p class="meta">${p.desc} · ${costText({ bronze: p.bronze, materials: p.materials })}</p>${why && why !== 'Done' ? `<p class="why">${why}</p>` : ''}</div><button class="btn" data-act="project" data-arg="${id}" ${why ? 'disabled' : ''}>${why === 'Done' ? 'Done' : 'Make'}</button></div>`;
+  }
+  h += '</div><p class="muted small">Mines, canals, pastures, quarries and harbors go on a single tile. Select land you own on the map to build one.</p>';
+  return h;
+}
+
+function paneResearch(c) {
+  const ids = Object.keys(TECHS).filter(id => !has(id));
+  const avail = ids.filter(id => TECHS[id].req.every(has));
+  const locked = ids.filter(id => !TECHS[id].req.every(has));
+  let h = '<div class="current"><p class="h">Studying</p>';
+  if (S.research) {
+    const t = TECHS[S.research], p = Math.min(S.progress, t.cost);
+    const turns = c.know > 0 ? Math.ceil((t.cost - S.progress) / c.know) : '∞';
+    h += `<h4>${t.name}</h4><div class="bar"><i style="width:${(p / t.cost * 100).toFixed(1)}%"></i></div><p class="muted small">${R(p)} of ${t.cost} knowledge · about ${turns} turn${turns === 1 ? '' : 's'} at ${fmt1(c.know)} a turn</p>`;
+  } else {
+    h += `<p>${avail.length ? 'Nothing yet. Pick a subject below.' : 'Our scholars have learned all there is to know.'}${S.progress >= 1 ? ` ${R(S.progress)} knowledge is saved up and will count toward it.` : ''}</p>`;
+  }
+  h += '</div>';
+  if (avail.length) {
+    h += '<p class="h">Ready to study</p><div>' + avail.map(id => {
+      const t = TECHS[id], on = S.research === id;
+      return `<div class="item"><div><h4>${t.name} <span class="count">${t.cost}</span></h4><p class="meta">${t.desc}</p><p class="note">${t.note}</p></div><button class="btn${on ? ' ghost' : ''}" data-act="research" data-arg="${id}" ${on || S.over ? 'disabled' : ''}>${on ? 'Studying' : 'Study'}</button></div>`;
+    }).join('') + '</div>';
+  }
+  if (locked.length) {
+    h += '<p class="h">Later</p><div>' + locked.map(id => {
+      const t = TECHS[id];
+      return `<div class="item locked"><div><h4>${t.name} <span class="count">${t.cost}</span></h4><p class="meta">${t.desc}</p><p class="why">Needs ${t.req.filter(r => !has(r)).map(r => TECHS[r].name).join(' and ')}</p></div></div>`;
+    }).join('') + '</div>';
+  }
+  h += `<p class="h">Known</p><p>${S.techs.map(id => TECHS[id].name).join(' · ')}</p>`;
+  return h;
+}
+
+function moodOf(att) {
+  if (att < -40) return 'Hostile';
+  if (att < -10) return 'Wary';
+  if (att < 20) return 'Neutral';
+  if (att < 50) return 'Friendly';
+  return 'Kin';
+}
+function paneNeighbors(c) {
+  let h = `<p class="muted small">Our army: strength <b>${c.strength}</b>, defence <b>${c.defense}</b>. Their armies are estimates. A hostile neighbor on our border may declare war when its army outmatches our defence.</p>`;
+  for (const ai of S.ais) {
+    const d = AI_DEF[ai.id];
+    if (!ai.alive) {
+      h += `<div class="nb gone" style="--oc: var(--o-${ai.id})"><div class="nb-head"><span class="sw"></span><h4>${ai.name}</h4><span class="pill">Gone</span></div><p class="muted small">Their lands are ours now.</p></div>`;
+      continue;
+    }
+    const n = tilesOwnedBy(ai.id).length, off = S.over ? 'disabled' : '';
+    const gifts = Object.entries(GIFTS).map(([k, [amt]]) => `<button class="btn ghost" data-act="gift" data-arg="${ai.id}:${k}" ${S.res[k] >= amt && !S.over ? '' : 'disabled'}>Give ${amt} ${k}</button>`).join('');
+    const main = ai.war
+      ? `<button class="btn" data-act="peace" data-arg="${ai.id}" ${off}>Ask for peace</button>`
+      : `<button class="btn ghost" data-act="tribute" data-arg="${ai.id}" ${canTribute(ai, c) && !S.over ? '' : 'disabled'}>Demand tribute</button>`;
+    h += `<div class="nb" style="--oc: var(--o-${ai.id})">
+      <div class="nb-head"><span class="sw"></span><h4>${ai.name}</h4><span class="muted small">${d.epithet}</span><span class="pill ${ai.war ? 'war' : 'peace'}">${ai.war ? 'At war' : 'At peace'}</span></div>
+      <div class="nb-stats"><span>Mood <b>${moodOf(ai.att)}</b></span><span>Army about <b>${R10(ai.army)}</b></span><span>Lands <b>${n}</b></span><span>${bordersPlayer(ai.id) ? 'Shares our border' : 'No shared border'}</span></div>
+      <div class="meter" aria-hidden="true"><i style="left:${((ai.att + 100) / 2).toFixed(1)}%"></i></div>
+      <div class="nb-acts">${gifts}${main}</div>
+      ${ai.war ? '' : `<p class="muted small">Tribute needs an army 1.5 times theirs${ai.cool ? `, and they paid recently (${ai.cool} turn${ai.cool > 1 ? 's' : ''} ago at most)` : ''}.</p>`}
+    </div>`;
+  }
+  return h;
+}
+
+function paneTrade(c) {
+  const left = Math.max(0, c.caravans - S.tradeUsed);
+  let h = `<p>Merchants weigh silver in shekels. Each deal sends one caravan.</p><div class="ti-stats"><span>Caravans left <b>${left} of ${c.caravans}</b></span><span>Silver <b>${S.res.silver}</b> shekels</span></div>`;
+  if (!c.caravans) h += '<p class="why">No one will trade with us. Make peace, win friends with gifts, or build a harbor.</p>';
+  else h += `<p class="muted small">Trading with ${c.partners.map(a => a.name).join(', ') || 'no neighbors'}${c.harbors ? ', and ships from distant ports' : ''}.${c.tinDeal ? ' Dilmun sells us tin at a discount.' : ''}</p>`;
+  h += '<div class="scroll"><table class="trade"><thead><tr><th>Goods</th><th>Lot</th><th>Buy</th><th>Sell</th><th><span class="muted">Deal</span></th></tr></thead><tbody>';
+  for (const [g, G] of Object.entries(GOODS)) {
+    const buy = price(g, 'buy', c), sell = price(g, 'sell', c), ok = left && !S.over;
+    h += `<tr><td>${cu(g)}${G.name} <span class="muted small">(have ${S.res[g]})</span></td><td>${G.lot}</td><td>${buy}</td><td>${sell}</td><td><div class="acts"><button class="btn" data-act="buy" data-arg="${g}" ${ok && S.res.silver >= buy ? '' : 'disabled'}>Buy</button><button class="btn ghost" data-act="sell" data-arg="${g}" ${ok && S.res[g] >= G.lot ? '' : 'disabled'}>Sell</button></div></td></tr>`;
+  }
+  h += '</tbody></table></div><p class="muted small">Prices are shekels per lot. A market, peace and friendly neighbors make trade easier.</p>';
+  return h;
+}
+
+function paneChronicle() {
+  let h = '<p class="h">Chronicle</p><ol class="chron">';
+  h += S.log.slice(0, 80).map(e => `<li class="${e.kind}"><span class="yr">${fmtYear(e.y)}</span><span>${escapeHTML(e.text)}</span></li>`).join('');
+  h += '</ol><p class="h">The signs</p><p class="muted small">The icons are Sumerian cuneiform signs, pressed into clay with a reed stylus.</p><div class="gloss">';
+  h += GLOSSARY.map(([k, reading, meaning]) => `<div>${cu(k)}<span><b>${reading}</b> <span class="muted">${meaning}</span></span></div>`).join('');
+  return h + '</div>';
+}
+
+function renderBar() {
+  const p = Math.min(100, S.turn / LAST_TURN * 100);
+  $('#timeline').innerHTML = `<div class="tl-labels"><span class="edge">${START_YEAR} BC</span><b>${fmtYear(S.turn)} · turn ${S.turn} of ${LAST_TURN}</b><span class="edge col">${END_YEAR} BC · Collapse</span></div><div class="tl-track"><i style="width:${p.toFixed(1)}%"></i></div>`;
+  const btn = $('#endBtn');
+  btn.disabled = S.over;
+  btn.innerHTML = S.over ? 'Game over' : `End turn<small>to ${fmtYear(S.turn + 1)}</small>`;
+}
+
+function toast(text) {
+  const el = $('#toast');
+  el.textContent = text;
+  el.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.hidden = true; }, 2800);
+}
+
+/* ---------- 11. Modals ---------- */
+const NAMES = { food: 'food', materials: 'materials', copper: 'copper', tin: 'tin', bronze: 'bronze', silver: 'silver', pop: 'people', stability: 'stability', knowledge: 'knowledge' };
+function describe(cost, fx) {
+  const parts = [];
+  Object.entries(cost || {}).forEach(([k, v]) => parts.push(`−${v} ${NAMES[k]}`));
+  Object.entries(fx || {}).forEach(([k, v]) => { if (v) parts.push(`${signed(v)} ${NAMES[k]}`); });
+  return parts.join(', ');
+}
+function pushModal(m) {
+  modalQueue.push(m);
+  if (!modalOpen) nextModal();
+}
+function nextModal() {
+  currentModal = modalQueue.shift() || null;
+  const box = $('#modal');
+  if (!currentModal) { modalOpen = false; box.hidden = true; return; }
+  modalOpen = true;
+  const m = currentModal;
+  const choices = m.choices.map((ch, k) => {
+    const ok = canAfford(ch.cost);
+    let hint = ch.hint ?? describe(ch.cost, ch.fx);
+    if (!ok) hint = `Not enough: ${describe(ch.cost)}`;
+    return `<button class="btn choice${ch.ghost ? ' ghost' : ''}${ch.danger ? ' danger' : ''}" data-act="choose" data-arg="${k}" ${ok ? '' : 'disabled'}><span>${ch.label}</span>${hint ? `<span class="hint">${hint}</span>` : ''}</button>`;
+  }).join('');
+  $('#mCard').innerHTML = `${m.sign ? `<div class="bigcu cu" aria-hidden="true">${SIGN[m.sign]}</div>` : ''}<h2 id="mTitle">${m.title}</h2>${m.body ? `<p>${m.body}</p>` : ''}${m.html || ''}<div class="choices">${choices}</div>`;
+  box.hidden = false;
+  const focusEl = $('#mCard input') || $('#mCard .choice:not(:disabled)');
+  if (focusEl) focusEl.focus();
+}
+function choose(k) {
+  const ch = currentModal && currentModal.choices[k];
+  if (!ch || !canAfford(ch.cost)) return;
+  pay(ch.cost);
+  if (ch.fx) applyFx(ch.fx);
+  if (ch.run) ch.run();
+  nextModal();
+  save();
+  renderAll();
+}
+
+const HOWTO = `<ul>
+  <li>Each turn is 20 years. Everyone eats 1 grain a turn.</li>
+  <li>In <b>People</b>, move people between farming, labor, soldiering and study. River farmland feeds the most.</li>
+  <li>Click land with a dotted gold edge to <b>settle</b> it. Click your own land to build mines, canals and pastures.</li>
+  <li>Study new ideas, raise buildings, and cast bronze from 2 copper and 1 tin. Tin only comes from mountains or traders.</li>
+  <li>Keep <b>stability</b> up with temples, food and peace. At 0 the realm falls apart.</li>
+  <li>In 1200 BC the Bronze Age Collapse tests your walls, your granaries and your people's unity.</li>
+</ul>`;
+function showIntro() {
+  pushModal({
+    sign: 'king', title: 'Bronze Dawn',
+    body: 'It is 3000 BC. Your small tribe farms the silt beside a great river. Grow it into a city, and keep it standing through the Bronze Age Collapse of 1200 BC.',
+    html: `${HOWTO}<label for="peopleName">Name your people</label><input id="peopleName" maxlength="24" autocomplete="off" value="${escapeHTML(S.name)}">`,
+    choices: [{
+      label: 'Begin',
+      run: () => {
+        const v = ($('#peopleName').value || '').trim();
+        if (v) S.name = v;
+        S.log = [];
+        log(`The ${S.name} settle beside the river.`, 'big');
+      },
+    }],
+  });
+}
+function showHelp() {
+  pushModal({ sign: 'knowledge', title: 'How to play', html: HOWTO + '<p class="muted small">Your game saves itself in this browser after every action.</p>', choices: [{ label: 'Back to the game' }] });
+}
+function confirmNew() {
+  pushModal({ sign: 'land', title: 'Start a new game?', body: 'Your current game will be lost.', choices: [{ label: 'Start over', danger: true, run: startNew }, { label: 'Keep playing', ghost: true }] });
+}
+
+/* ---------- 12. Boot ---------- */
+const ACTIONS = {
+  select: (i, viaKey) => {
+    ui.sel = +i;
+    renderAll();
+    if (viaKey) document.querySelector(`.tile[data-arg="${i}"]`)?.focus();
+  },
+  tab: id => { ui.tab = id; },
+  step: n => { ui.step = +n; },
+  job: arg => { const [k, d] = arg.split(':'); changeJob(k, d); },
+  build, project, improve, settle, attack,
+  dismantle: () => { const t = S.tiles[ui.sel]; if (t && t.owner === 'player') t.imp = null; },
+  research: setResearch,
+  gift,
+  peace: askPeace,
+  tribute: demandTribute,
+  buy: g => trade(g, 'buy'),
+  sell: g => trade(g, 'sell'),
+  end: endTurn,
+  choose: k => choose(+k),
+  help: showHelp,
+  menu: confirmNew,
+};
+// actions that render (and save) on their own
+const SELF_RENDER = new Set(['select', 'end', 'choose', 'help', 'menu']);
+
+function bindEvents() {
+  document.addEventListener('click', e => {
+    const el = e.target.closest('[data-act]');
+    if (!el || el.disabled || !S) return;
+    const act = el.dataset.act;
+    if (modalOpen && act !== 'choose') return;
+    if (!ACTIONS[act]) return;
+    ACTIONS[act](el.dataset.arg);
+    if (!SELF_RENDER.has(act)) { save(); renderAll(); }
+  });
+  document.addEventListener('keydown', e => {
+    const tile = e.target.closest && e.target.closest('.tile');
+    if (tile && !modalOpen && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      ACTIONS.select(tile.dataset.arg, true);
+    }
+    if (e.target.id === 'peopleName' && e.key === 'Enter') { e.preventDefault(); choose(0); }
+  });
+}
+
+function start(data) {
+  bindEvents();
+  const saved = (data && data.save) || loadSave();
+  if (saved && !saved.over) {
+    S = saved;
+    ui.sel = tilesOwnedBy('player').find(i => S.tiles[i].capital) ?? null;
+    renderAll();
+  } else {
+    newGame('Uruma');
+    renderAll();
+    showIntro();
+  }
+}
+
+window.claude?.hot?.snapshot?.(() => ({ save: S }));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
+</body>
+</html>
