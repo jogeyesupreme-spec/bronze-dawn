@@ -135,8 +135,8 @@ kbd {
 }
 .chip .cu { grid-row: span 2; font-size: 1.15rem; letter-spacing: -.12em; color: var(--gold); min-width: 1.4rem; text-align: center; }
 .chip .lab { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
-.chip .val { font-size: 1.12rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.chip .d { font-size: .8rem; font-weight: 500; }
+.chip .val { font-size: 1.12rem; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 0; }
+.chip .d { font-size: .8rem; font-weight: 500; white-space: nowrap; }
 .chip.warn { border-color: var(--carnelian); }
 @media (max-width: 560px) {
   .res { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
@@ -257,6 +257,7 @@ kbd {
 .btn:disabled { background: var(--panel-2); color: var(--muted); border-color: var(--line); cursor: not-allowed; }
 .btn.ghost { background: transparent; color: var(--shell); border-color: var(--line); }
 .btn.ghost:hover:not(:disabled) { border-color: var(--gold); }
+.btn.ghost:disabled { background: transparent; color: var(--muted); border-color: var(--line); opacity: .55; }
 .btn.danger { background: linear-gradient(#ef8a6d, var(--carnelian)); }
 .btn.sq { width: 34px; height: 34px; padding: 0; font-size: 1.2rem; line-height: 1; }
 .chipbtn {
@@ -636,6 +637,7 @@ const BUILDINGS = {
   walls:      { name: 'Walls', one: 'a stretch of wall', cost: 90, max: 3, tech: 'masonry', desc: () => 'Defence +30%' },
   forge:      { name: 'Forge', one: 'a forge', cost: 60, max: 4, tech: 'bronzeWorking', desc: () => `Casts up to ${forgeSize()} bronze a turn, each from 2 copper and 1 tin` },
   scribe:     { name: 'Scribe house', one: 'a scribe house', cost: 70, max: 3, tech: 'writing', desc: () => 'Knowledge +25%' },
+  stele:      { name: 'Victory stele', one: 'a victory stele', cost: 150, max: 99, tech: 'writing', desc: () => `Our deeds carved in stone. +${STELE_SCORE} to the final score; each costs more than the last` },
   market:     { name: 'Market', one: 'the market', cost: 100, max: 1, tech: 'currency', desc: () => 'Better prices, +2 caravans, +3 stability, and market dues of 2 silver a turn plus 1 for every 100 people' },
   tombs:      { name: 'Royal tombs', one: 'the royal tombs', cost: 220, bronze: 30, max: 1, tech: 'bronzeWorking', wonder: 150, desc: () => '+8 stability. Our kings go to the grave with lyres, gold and lapis.' },
   greatCanal: { name: 'Great canal', one: 'the great canal', cost: 320, max: 1, tech: 'engineering', wonder: 150, desc: () => '+60 farmland. Droughts hurt half as much.' },
@@ -644,6 +646,7 @@ const BUILDINGS = {
   palace:     { name: 'Royal palace', one: 'the royal palace', cost: 450, bronze: 30, silver: 100, max: 1, tech: 'bureaucracy', wonder: 150, desc: () => '+150 housing, +5 stability, and 3 more lands before unrest' },
 };
 const WONDERS = Object.keys(BUILDINGS).filter(k => BUILDINGS[k].wonder);
+const STELE_SCORE = 25;
 
 // One-time bronze-age upgrades. Those with `arms` need bronze every turn to keep the army equipped.
 const PROJECTS = {
@@ -731,7 +734,7 @@ const GOODS = {
   bronze: { name: 'Bronze', lot: 5, value: 6 },
 };
 const GIFTS = { food: [50, 8], silver: [10, 12], bronze: [5, 14] }; // amount, goodwill
-const PACT_COST = 20, ALLY_COST = 10, MERC_COST = 40;
+const PACT_COST = 20, ALLY_COST = 10;
 
 const TITLES = ['Tribe', 'Chiefdom', 'Town', 'City-state', 'Kingdom', 'Empire'];
 
@@ -957,7 +960,10 @@ function loadMeta() {
 function saveMeta(m) {
   try { localStorage.setItem(META_KEY, JSON.stringify(m)); } catch (e) { /* storage blocked */ }
 }
+const sessionAch = new Set(); // so a browser that blocks storage is not told about the same achievement on every click
 function unlock(id) {
+  if (sessionAch.has(id)) return;
+  sessionAch.add(id);
   const m = loadMeta();
   if (m.ach[id]) return;
   m.ach[id] = Date.now();
@@ -1159,11 +1165,13 @@ function calc() {
   if (S.pop >= 400) parts.push(['Big-city quarrels', -Math.min(25, Math.floor((S.pop - 300) / 80))]);
   c.landLimit = 5 + (has('lawCode') ? 4 : 0) + (has('bureaucracy') ? 3 : 0) + (S.b.palace ? 3 : 0);
   if (tiles > c.landLimit) parts.push(['Too many lands to govern', -(tiles - c.landLimit) * 3]);
-  const wars = S.ais.filter(a => a.alive && a.war).length;
-  if (wars) parts.push(['War', -5 * wars]);
+  const wars = S.ais.filter(a => a.alive && a.war);
+  if (wars.length) parts.push(['War', -5 * wars.length]);
+  const weary = Math.min(12, Math.floor(Math.max(0, ...wars.map(a => a.warTurns)) / 2));
+  if (weary) parts.push(['War weariness', -weary]);
   if (c.foodAfter < 0) parts.push(['Hunger', -10]);
   if (c.tribute) parts.push([`Bowing to ${S.vassal.to}`, -3]);
-  S.buffs.forEach(b => { if (b.stab) parts.push([b.name, b.stab]); });
+  groupBuffs().forEach(b => { if (b.stab) parts.push([b.n > 1 ? `${b.name} ×${b.n}` : b.name, b.stab]); });
   c.stabParts = parts;
   c.stabTarget = clamp(parts.reduce((a, p) => a + p[1], 0), 0, 100);
 
@@ -1207,6 +1215,18 @@ function canAfford(cost) { return !cost || Object.entries(cost).every(([k, v]) =
 function pay(cost) { Object.entries(cost || {}).forEach(([k, v]) => { S.res[k] -= v; }); }
 function costText(cost) { return Object.entries(cost).filter(([, v]) => v).map(([k, v]) => `${v} ${k}`).join(', '); }
 function addBuff(name, turns, fx) { S.buffs.push({ name, turns, ...fx }); }
+// Buffs with the same name stack; for display they are summed into one line
+function groupBuffs() {
+  const g = new Map();
+  S.buffs.forEach(b => {
+    const e = g.get(b.name) || { name: b.name, n: 0, turns: 0, food: 0, stab: 0, army: 0, caravan: 0 };
+    e.n++;
+    e.turns = Math.max(e.turns, b.turns);
+    for (const k of ['food', 'stab', 'army', 'caravan']) e[k] += b[k] || 0;
+    g.set(b.name, e);
+  });
+  return [...g.values()];
+}
 function earn(n) { if (n > 0) { S.res.silver += n; S.stats.silverEarned += n; } }
 
 function applyFx(fx) {
@@ -1272,7 +1292,8 @@ function autoFarm() {
 
 const buildCost = id => {
   const b = BUILDINGS[id], n = S.b.house;
-  const base = id === 'house' ? b.cost + 4 * n + Math.floor(n * n / 8) : b.cost; // each new row of houses costs more
+  // each new row of houses, and each stele, costs more than the last
+  const base = id === 'house' ? b.cost + 4 * n + Math.floor(n * n / 8) : id === 'stele' ? b.cost + 75 * S.b.stele : b.cost;
   return { materials: R(base * (has('mathematics') ? 0.9 : 1)), ...(b.bronze ? { bronze: b.bronze } : {}), ...(b.silver ? { silver: b.silver } : {}) };
 };
 function buildCheck(id) {
@@ -1512,12 +1533,14 @@ function festival() {
 }
 
 const mercPower = () => R(20 + S.turn * 2.5);
-const hasMercs = () => S.buffs.some(b => b.army);
+const mercCost = () => 30 + S.turn;
+const hasMercs = () => S.buffs.some(b => b.name === 'Mercenaries');
 function hireMercs() {
-  if (S.res.silver < MERC_COST || hasMercs()) return;
-  S.res.silver -= MERC_COST;
+  const cost = mercCost();
+  if (S.res.silver < cost || hasMercs()) return;
+  S.res.silver -= cost;
   addBuff('Mercenaries', 3, { army: mercPower() });
-  log(`We hired mercenaries for ${MERC_COST} silver.`);
+  log(`We hired mercenaries for ${cost} silver.`);
   toast(`Mercenaries join us (+${mercPower()} army for 3 turns)`);
   Sound.play('war');
 }
@@ -2474,15 +2497,19 @@ function computeScore(passes) {
   const c = calc();
   const parts = [
     ['People', R(S.pop * 0.5)],
-    ['Lands', c.tiles * 50],
+    ['Lands', c.tiles * 45],
     ['Ideas mastered', (S.techs.length - 1) * 40],
     [LORE.name, S.lore * LORE.score],
-    ['Buildings', (totalBuildings() - S.b.house) * 15],
+    ['Buildings', (totalBuildings() - S.b.house - S.b.stele) * 15],
+    ['Victory steles', S.b.stele * STELE_SCORE],
     ['Bronze projects', S.proj.length * 40],
     ['Great works', WONDERS.reduce((a, k) => a + (S.b[k] ? BUILDINGS[k].wonder : 0), 0)],
     ['Stability', S.stability * 2],
     ['Lands conquered', S.conquered * 10],
     ['Goals reached', S.goals.length * GOAL_SCORE],
+    ['Allies', S.ais.filter(x => x.alive && x.ally).length * 75],
+    ['Trade pacts', S.ais.filter(x => x.alive && x.pact).length * 25],
+    ['Peace kept all age long', S.stats.wars === 0 ? 250 : 0],
     ...S.fame,
     ['Collapse tests passed', passes * 300],
   ];
@@ -2503,7 +2530,7 @@ function recordBest(sc, outcome) {
   saveMeta(m);
 }
 function startNew() {
-  newGame('Uruma');
+  newGame(S ? S.name : 'Uruma', S ? S.diff : 'normal');
   showIntro();
 }
 
@@ -2556,7 +2583,7 @@ function renderHeader(c) {
 
 function chip(sign, label, value, delta, warn, tip) {
   const d = delta == null ? '' : ` <span class="d ${delta < 0 ? 'neg' : 'pos'}">${signed(delta)}</span>`;
-  return `<div class="chip${warn ? ' warn' : ''}" title="${escapeHTML(tip)}"><span class="cu" aria-hidden="true">${SIGN[sign]}</span><span class="lab">${label}</span><span class="val">${value}${d}</span></div>`;
+  return `<div class="chip${warn ? ' warn' : ''}" title="${escapeHTML(tip)}" tabindex="0" role="button" aria-label="${escapeHTML(`${label}: ${tip}`)}"><span class="cu" aria-hidden="true">${SIGN[sign]}</span><span class="lab">${label}</span><span class="val">${value}${d}</span></div>`;
 }
 function renderRes(c) {
   const r = S.res;
@@ -2719,14 +2746,14 @@ function tips(c) {
 }
 function buffText(b) {
   const fx = [b.food ? `food ${pct(b.food)}` : '', b.stab ? `stability ${signed(b.stab)}` : '', b.army ? `army +${b.army}` : '', b.caravan ? `caravans ${signed(b.caravan)}` : ''].filter(Boolean).join(', ');
-  return `${escapeHTML(b.name)}${fx ? ` · ${fx}` : ''} · ${plural(b.turns, 'turn')}`;
+  return `${escapeHTML(b.name)}${b.n > 1 ? ` ×${b.n}` : ''}${fx ? ` · ${fx}` : ''} · ${b.n > 1 ? 'up to ' : ''}${plural(b.turns, 'turn')}`;
 }
 function goalsHTML(list) {
   return `<ul class="goals">${list.map(g => `<li class="${S.goals.includes(g.id) ? 'done' : ''}"><span>${g.text}</span><span class="rw">${describe(null, g.reward)}</span></li>`).join('')}</ul>`;
 }
 function renderAdvice(c) {
   if (S.over) { $('#advice').innerHTML = `<p class="tip good">${cu('wedge')}<span>The game is over. Start a new one from the Game menu.</span></p>`; return; }
-  const buffs = S.buffs.length ? `<div class="buffs">${S.buffs.map(b => `<span class="pill${b.stab < 0 || b.food < 0 || b.caravan < 0 ? ' bad' : ''}">${buffText(b)}</span>`).join('')}</div>` : '';
+  const buffs = S.buffs.length ? `<div class="buffs">${groupBuffs().map(b => `<span class="pill${b.stab < 0 || b.food < 0 || b.caravan < 0 ? ' bad' : ''}">${buffText(b)}</span>`).join('')}</div>` : '';
   const next = GOALS.filter(g => !S.goals.includes(g.id)).slice(0, 2);
   const goals = next.length ? `<p class="h">Goals</p>${goalsHTML(next)}` : '';
   $('#advice').innerHTML = `<p class="h">Advisors</p>` + tips(c).map(([k, text]) => `<p class="tip ${k}">${cu('wedge')}<span>${text}</span></p>`).join('') + buffs + goals;
@@ -2839,7 +2866,8 @@ function moodOf(att) {
 function paneNeighbors(c) {
   const off = S.over ? 'disabled' : '';
   let h = `<p class="muted small">Our army: strength <b>${c.strength}</b>, defence <b>${c.defense}</b>${c.allyHelp ? ` (allies add ${c.allyHelp})` : ''}. Their armies are estimates. A hostile neighbor on our border may declare war when its army outmatches our defence.</p>`;
-  h += `<div class="item"><div><h4>Hire mercenaries</h4><p class="meta">+${mercPower()} army for 3 turns · ${MERC_COST} silver</p>${hasMercs() ? '<p class="why">Mercenaries already serve us.</p>' : S.res.silver < MERC_COST ? `<p class="why">Needs ${MERC_COST} silver</p>` : ''}</div><button class="btn" data-act="mercs" ${!hasMercs() && S.res.silver >= MERC_COST && !S.over ? '' : 'disabled'}>Hire</button></div>`;
+  const mc = mercCost();
+  h += `<div class="item"><div><h4>Hire mercenaries</h4><p class="meta">+${mercPower()} army for 3 turns · ${mc} silver</p>${hasMercs() ? '<p class="why">Mercenaries already serve us.</p>' : S.res.silver < mc ? `<p class="why">Needs ${mc} silver</p>` : ''}</div><button class="btn" data-act="mercs" ${!hasMercs() && S.res.silver >= mc && !S.over ? '' : 'disabled'}>Hire</button></div>`;
   if (S.vassal || S.threats.length) {
     h += `<div class="nb threat"><div class="nb-head">${cu('king')}<h4>Great powers</h4></div>`;
     if (S.vassal) h += `<p class="small">We bow to <b>${S.vassal.to}</b> and pay ${S.vassal.silver} silver a turn until ${fmtYear(S.vassal.until)}. While we do, no neighbor dares attack us.</p>`;
@@ -3095,7 +3123,7 @@ function showIntro() {
   });
 }
 function showHelp() {
-  pushModal({ sign: 'knowledge', title: 'How to play', html: HOWTO + KEYS + '<p class="muted small">Your game saves itself in this browser after every action. Hover over a resource to see where it comes from.</p>', choices: [{ label: 'Back to the game', cancel: true }] });
+  pushModal({ sign: 'knowledge', title: 'How to play', html: HOWTO + KEYS + '<p class="muted small">Your game saves itself in this browser after every action. Hover over or tap a resource to see where it comes from.</p>', choices: [{ label: 'Back to the game', cancel: true }] });
 }
 function confirmNew() {
   pushModal({ sign: 'land', title: 'Start a new game?', body: 'Your current game will be lost.', choices: [{ label: 'Start over', danger: true, run: startNew }, { label: 'Keep playing', ghost: true, cancel: true }] });
@@ -3372,6 +3400,9 @@ function nearestHist(svg, clientX) {
 }
 function bindEvents() {
   document.addEventListener('click', e => {
+    // tapping a resource explains it, for screens without hover
+    const chipEl = e.target.closest('.chip');
+    if (chipEl && !modalOpen) { toast(chipEl.title); return; }
     const el = e.target.closest('[data-act]');
     if (!el || el.disabled || !S) return;
     const act = el.dataset.act;
@@ -3400,6 +3431,8 @@ function bindEvents() {
       chartPoint(chart, idx + (e.key === 'ArrowLeft' ? -1 : 1));
       return;
     }
+    const chipEl = e.target.closest && e.target.closest('.chip');
+    if (chipEl && !modalOpen && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toast(chipEl.title); return; }
     const tile = e.target.closest && e.target.closest('.tile');
     if (tile && !modalOpen) {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ACTIONS.select(tile.dataset.arg, true); return; }
