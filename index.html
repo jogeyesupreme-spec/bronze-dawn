@@ -8,54 +8,43 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Eczar:wght@500;600;700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Noto+Sans+Cuneiform&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Eczar:wght@500;600;700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400&family=Noto+Sans+Cuneiform&display=swap">
 <style>
 :root {
-  /* Layout: a lapis-and-shell plaque after the Standard of Ur. Inlay frieze on top,
-     map tablet on the left, ledger of tabs on the right, timeline bar fixed below. */
+  /* Layout: a war table under lamplight. The painted map fills the room; an inlaid
+     lapis-and-gold frame holds the resource frieze above, the council drawer at the
+     right with its rail of cuneiform tabs, and the year-line with the End turn seal below. */
   color-scheme: dark;
-  --lapis: #16224f;
-  --lapis-deep: #0c1535;
-  --panel: #111a41;
-  --panel-2: #1a2759;
-  --line: #2d3d7c;
-  --shell: #f2e9d6;
-  --muted: #a9b0d2;
-  --gold: #ecbf5a;
+  --ink: #080c1d;          /* bitumen: frame and deepest ground */
+  --lapis: #121b42;        /* drawer and cards */
+  --lapis-2: #1a285b;      /* raised surfaces */
+  --line: #2e4083;         /* inlay seams */
+  --shell: #f3ead7;        /* text, shell inlay */
+  --muted: #a7aed0;
+  --gold: #ecc061;         /* gold leaf: the one accent */
   --bronze: #c48a43;
-  --carnelian: #e2694b;
-  --verdigris: #6cc4a6;
-  --bitumen: #070b1f;
-  --water: #8fc9d8;
-  --river: #4f9fbf;
-  --tin: #b9c3d6;
-  --t-R: #3b6a59; --t-P: #75703f; --t-F: #2c5236; --t-H: #6d5236;
-  --t-M: #5b5770; --t-D: #978257; --t-S: #13245a;
-  --o-player: #ecbf5a; --o-kesh: #f2e9d6; --o-hattu: #e2694b;
+  --carnelian: #e66a4c;    /* danger */
+  --verdigris: #6cc6a7;    /* good */
+  --glass: rgba(9, 14, 34, .9);
+  --o-player: #ecc061; --o-kesh: #f3ead7; --o-hattu: #e66a4c;
   --o-amurru: #b693e8; --o-dilmun: #56d4c9;
   --font-display: "Eczar", Georgia, "Times New Roman", serif;
   --font-body: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
   --font-cu: "Noto Sans Cuneiform", "Segoe UI Historic", sans-serif;
   --radius: 8px;
+  --pane: 400px;
+  --grain: none;           /* a painted grain tile, generated at start-up */
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+html, body { height: 100%; }
 body {
   margin: 0;
   color: var(--shell);
-  font-family: var(--font-body);
-  font-size: 16px;
-  line-height: 1.45;
-  background-color: var(--lapis);
-  /* pyrite flecks in lapis lazuli */
-  background-image:
-    radial-gradient(rgba(236, 191, 90, .32) .7px, transparent 1.3px),
-    radial-gradient(rgba(236, 191, 90, .16) .6px, transparent 1.1px),
-    radial-gradient(120% 80% at 50% 0%, rgba(255, 255, 255, .05), transparent 60%);
-  background-size: 41px 37px, 23px 29px, 100% 100%;
-  background-position: 0 0, 13px 19px, 0 0;
+  background: var(--ink);
+  font: 16px/1.45 var(--font-body);
 }
-button { font: inherit; }
+button { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--shell); outline-offset: 2px; }
 .cu { font-family: var(--font-cu); line-height: 1; font-weight: 400; }
 .muted { color: var(--muted); }
@@ -64,7 +53,7 @@ button { font: inherit; }
 .neg { color: var(--carnelian); }
 .h {
   margin: 0;
-  font: 700 .74rem/1.2 var(--font-body);
+  font: 700 .72rem/1.2 var(--font-body);
   text-transform: uppercase;
   letter-spacing: .16em;
   color: var(--muted);
@@ -75,241 +64,319 @@ kbd {
   border: 1px solid var(--line);
   border-bottom-width: 2px;
   border-radius: 4px;
-  background: var(--lapis-deep);
+  background: var(--ink);
   color: var(--shell);
 }
+.grainy { position: relative; isolation: isolate; }
+.grainy::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: var(--grain);
+  opacity: .07;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
 
-/* ---------- frieze and header ---------- */
-.frieze {
-  height: 12px;
+/* ---------- the frame ---------- */
+.game { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+
+/* frieze: crest, resources, buttons */
+.topbar {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px 22px;
+  padding-block: 8px 12px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: linear-gradient(#18234f, #0e1636);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .45);
+}
+.topbar::after {
+  /* shell-and-carnelian triangles, after the Standard of Ur */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5px;
   background-color: var(--shell);
   background-image:
     linear-gradient(to bottom right, transparent 50%, var(--carnelian) 50%),
     linear-gradient(to bottom left, transparent 50%, var(--carnelian) 50%);
-  background-size: 14px 12px;
-  border-bottom: 3px solid var(--bitumen);
+  background-size: 10px 5px;
+  opacity: .9;
 }
-.app {
-  max-width: 1320px;
-  margin: 0 auto;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 0 130px;
+.crest { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 0 1 auto; }
+.seal {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
   display: grid;
-  gap: 14px;
-}
-.top {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px 28px;
-  padding-block: 16px 2px;
-}
-.brand { display: grid; gap: 4px; min-width: 0; }
-.brand h1 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(1.8rem, 4vw, 2.5rem);
-  line-height: 1;
+  place-items: center;
+  font-size: 1.15rem;
+  letter-spacing: -.1em;
   color: var(--gold);
-  text-wrap: balance;
-  overflow-wrap: anywhere;
+  background: radial-gradient(circle at 35% 30%, #23336f, var(--ink) 75%);
+  box-shadow: 0 0 0 2px var(--gold), 0 0 0 4px var(--ink), 0 4px 14px rgba(0, 0, 0, .6);
 }
-.realm { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: flex-end; }
-.stat { display: grid; gap: 2px; }
-.stat .v { font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; line-height: 1.1; }
-.hdr-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-
-/* ---------- resources ---------- */
-.res { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.crest h1 {
+  margin: 0;
+  font: 700 clamp(1.25rem, 2vw, 1.6rem)/1.05 var(--font-display);
+  color: var(--gold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.crest .sub { margin: 2px 0 0; font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.crest .sub b { color: var(--shell); font-weight: 700; }
+.res { flex: 1 1 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 4px; min-width: 0; }
 .chip {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  column-gap: 9px;
+  grid-template-columns: auto auto;
   align-items: center;
-  padding: 8px 10px;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  column-gap: 7px;
+  padding: 3px 9px 3px 7px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   cursor: help;
+  font-variant-numeric: tabular-nums;
 }
-.chip .cu { grid-row: span 2; font-size: 1.15rem; letter-spacing: -.12em; color: var(--gold); min-width: 1.4rem; text-align: center; }
-.chip .lab { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
-.chip .val { font-size: 1.12rem; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 0; }
-.chip .d { font-size: .8rem; font-weight: 500; white-space: nowrap; }
-.chip.warn { border-color: var(--carnelian); }
-@media (max-width: 560px) {
-  .res { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-  .chip { padding: 6px 8px; column-gap: 5px; }
-  .chip .cu { grid-row: auto; font-size: .85rem; min-width: 0; }
-  .chip .lab { font-size: .62rem; letter-spacing: .06em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .chip .val { grid-column: 1 / -1; font-size: 1rem; }
-  .chip .val .muted { display: none; }
-}
-
-/* ---------- main layout ---------- */
-.main { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 960px) {
-  .main { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: start; }
-  .board { position: sticky; top: 10px; }
-}
-
-/* ---------- map ---------- */
-.board {
-  background: var(--lapis-deep);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 10px;
-  box-shadow: inset 0 0 0 4px var(--panel), 0 10px 30px rgba(0, 0, 0, .35);
+.chip:hover, .chip:focus-visible { border-color: rgba(236, 192, 97, .45); background: rgba(255, 255, 255, .04); }
+.chip .cu { grid-row: span 2; font-size: 1.05rem; letter-spacing: -.12em; color: var(--gold); text-align: center; min-width: 1.3rem; }
+.chip .lab { font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); line-height: 1.1; white-space: nowrap; }
+.chip .val { font-size: 1.02rem; font-weight: 800; line-height: 1.15; white-space: nowrap; }
+.chip .val .muted { font-weight: 500; font-size: .8rem; }
+.chip .d { font-size: .76rem; font-weight: 700; }
+.chip.warn .lab { color: var(--carnelian); }
+.chip.warn { background: rgba(230, 106, 76, .1); }
+.chip.metals { grid-template-columns: auto; }
+.chip .mv { display: inline-flex; align-items: baseline; gap: 3px; }
+.chip .mv + .mv { margin-left: 9px; }
+.chip .mv .cu { font-size: .85rem; color: var(--gold); letter-spacing: -.12em; }
+.hdr-btns { display: flex; gap: 6px; flex: none; }
+.iconbtn[aria-pressed="false"] .wave { opacity: .15; }
+.iconbtn {
+  width: 38px;
+  height: 38px;
   display: grid;
-  gap: 8px;
-  min-width: 0;
-}
-.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; padding: 4px 6px 0; font-size: .85rem; color: var(--muted); }
-.legend span { display: inline-flex; align-items: center; gap: 6px; }
-.legend i { width: 10px; height: 10px; border-radius: 2px; background: var(--oc); display: inline-block; }
-#map { display: block; width: 100%; height: auto; touch-action: manipulation; }
-.hex { stroke: var(--bitumen); stroke-width: 1.5; }
-.t-R { fill: var(--t-R); } .t-P { fill: var(--t-P); } .t-F { fill: var(--t-F); } .t-H { fill: var(--t-H); }
-.t-M { fill: var(--t-M); } .t-D { fill: var(--t-D); } .t-S { fill: var(--t-S); }
-.deco { fill: none; stroke: rgba(242, 233, 214, .35); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
-.deco-R { stroke: rgba(170, 220, 160, .5); }
-.deco-F { fill: rgba(8, 26, 14, .55); stroke: none; }
-.deco-M { fill: rgba(220, 215, 240, .16); stroke: rgba(242, 233, 214, .4); }
-.deco-S { stroke: rgba(143, 201, 216, .35); }
-.deco-D { stroke: rgba(60, 40, 20, .55); stroke-width: 2.6; }
-.river-bank { fill: none; stroke: rgba(7, 11, 31, .55); stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
-.river { fill: none; stroke: var(--river); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
-.river-glint { fill: none; stroke: rgba(200, 235, 245, .45); stroke-width: 1.2; stroke-dasharray: 2 9; stroke-linecap: round; pointer-events: none; }
-.ownfill { fill: var(--oc); fill-opacity: .13; pointer-events: none; }
-.ownfill.fresh { animation: claim 1.4s ease-out 1; }
-@keyframes claim { 0% { fill-opacity: .6; } 100% { fill-opacity: .13; } }
-.border { fill: none; stroke: var(--oc); stroke-width: 3.2; stroke-linecap: round; pointer-events: none; }
-.border.war { stroke-dasharray: 5 4; }
-.claim { fill: none; stroke: var(--gold); stroke-width: 1.5; stroke-dasharray: 3 4; opacity: .75; pointer-events: none; }
-.sel { fill: none; stroke: var(--shell); stroke-width: 3; pointer-events: none; }
-.cap { fill: var(--oc); stroke: var(--bitumen); stroke-width: 1.2; pointer-events: none; }
-.impi { stroke: var(--bitumen); stroke-width: 1; stroke-linejoin: round; stroke-linecap: round; pointer-events: none; }
-.impi-bg { fill: rgba(7, 11, 31, .72); stroke: var(--bronze); stroke-width: 1; pointer-events: none; }
-.swords { fill: none; stroke: var(--carnelian); stroke-width: 2.2; stroke-linecap: round; pointer-events: none; }
-.tile { cursor: pointer; outline: none; }
-.tile:hover .hex { filter: brightness(1.2); }
-.tile:focus-visible .hex { stroke: var(--shell); stroke-width: 3; }
-
-.tileinfo { display: grid; gap: 8px; padding: 6px 6px 4px; }
-.ti-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; }
-.ti-head h3 { margin: 0; font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; }
-.ti-stats { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .9rem; color: var(--muted); }
-.ti-stats b { color: var(--shell); font-variant-numeric: tabular-nums; }
-.tileinfo p { margin: 0; }
-
-/* ---------- side panel ---------- */
-.side {
-  background: var(--panel);
+  place-items: center;
+  border-radius: 50%;
   border: 1px solid var(--line);
-  border-radius: 12px;
-  overflow: hidden;
-  min-width: 0;
-}
-.advice { display: grid; gap: 6px; padding: 12px 14px; border-bottom: 1px solid var(--line); background: var(--panel-2); }
-.tip { margin: 0; display: grid; grid-template-columns: 1.3rem minmax(0, 1fr); gap: 6px; font-size: .95rem; }
-.tip .cu { color: var(--bronze); font-size: 1rem; padding-top: .2em; }
-.tip.bad .cu, .tip.bad { color: var(--carnelian); }
-.tip.good .cu { color: var(--verdigris); }
-.buffs { display: flex; flex-wrap: wrap; gap: 6px; }
-.goals { display: grid; gap: 4px; margin: 4px 0 0; padding: 8px 10px; list-style: none; background: var(--lapis-deep); border-radius: 6px; }
-.goals li { display: grid; grid-template-columns: 1.1rem minmax(0, 1fr) auto; gap: 6px; font-size: .9rem; align-items: baseline; }
-.goals li::before { content: ''; width: 9px; height: 9px; border: 1.5px solid var(--gold); transform: rotate(45deg); align-self: center; justify-self: center; }
-.goals li.done::before { background: var(--gold); }
-.goals li.done { color: var(--muted); }
-.goals .rw { color: var(--muted); font-size: .8rem; white-space: nowrap; }
-.tabs { display: flex; flex-wrap: wrap; gap: 0 2px; background: var(--lapis-deep); border-bottom: 1px solid var(--line); }
-.tab {
-  flex: 0 0 auto;
-  position: relative;
-  background: transparent;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  color: var(--muted);
-  font-weight: 700;
-  font-size: .95rem;
-  padding: 10px 14px;
+  background: rgba(255, 255, 255, .03);
+  color: var(--shell);
   cursor: pointer;
 }
-.tab[aria-selected="true"] { color: var(--gold); border-bottom-color: var(--gold); }
-.tab .dot { position: absolute; top: 8px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--carnelian); }
-.pane { display: grid; gap: 12px; padding: 14px; }
+.iconbtn:hover { border-color: var(--gold); color: var(--gold); }
+.iconbtn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.iconbtn[aria-pressed="false"] { color: var(--muted); }
+
+/* the room: map and drawer */
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) auto; min-height: 0; }
+.board { position: relative; min-width: 0; min-height: 0; overflow: hidden; background: #0a1028; }
+#terrain, #map { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#map { touch-action: manipulation; }
+.board::after {
+  /* lamplight falling off at the edges of the table */
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 90px 10px rgba(4, 6, 16, .75);
+}
+.legend {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  max-width: calc(100% - 28px);
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(8, 12, 29, .72);
+  font-size: .8rem;
+  color: var(--muted);
+}
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 2px; background: var(--oc); display: inline-block; }
+
+/* map overlay drawn over the painted terrain */
+.hex { fill: transparent; stroke: rgba(8, 12, 29, .28); stroke-width: 1; }
+.tile { cursor: pointer; outline: none; }
+.tile:hover .hex { fill: rgba(255, 244, 214, .12); }
+.tile:focus-visible .hex { stroke: var(--shell); stroke-width: 2.5; }
+.ownfill { fill: var(--oc); fill-opacity: .1; pointer-events: none; }
+.ownfill.fresh { animation: claim 1.4s ease-out 1; }
+@keyframes claim { 0% { fill-opacity: .55; } 100% { fill-opacity: .1; } }
+.border { fill: none; stroke: var(--oc); stroke-width: 3; stroke-linecap: round; pointer-events: none; filter: drop-shadow(0 0 2px rgba(0, 0, 0, .8)); }
+.border.war { stroke-dasharray: 5 4; }
+.claim { fill: none; stroke: var(--gold); stroke-width: 1.5; stroke-dasharray: 3 4; opacity: .85; pointer-events: none; }
+.sel { fill: rgba(255, 244, 214, .1); stroke: var(--gold); stroke-width: 3; pointer-events: none; filter: drop-shadow(0 0 5px rgba(236, 192, 97, .9)); }
+.town { pointer-events: none; }
+.town .plinth { fill: rgba(5, 8, 18, .55); }
+.town .zig { fill: var(--oc); stroke: var(--ink); stroke-width: 1.2; }
+.town .hut { fill: #e9d9b5; stroke: var(--ink); stroke-width: .9; }
+.impi { stroke-linejoin: round; stroke-linecap: round; pointer-events: none; }
+.impi-bg { fill: rgba(8, 12, 29, .82); stroke: var(--bronze); stroke-width: 1.2; pointer-events: none; }
+.swords { fill: none; stroke: var(--carnelian); stroke-width: 2.4; stroke-linecap: round; pointer-events: none; filter: drop-shadow(0 0 2px #000); }
+
+/* the land card that opens beside a selected hex */
+.tilecard {
+  position: absolute;
+  z-index: 4;
+  width: 300px;
+  max-height: calc(100% - 24px);
+  overflow: auto;
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--glass);
+  border: 1px solid rgba(236, 192, 97, .5);
+  border-radius: 10px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .6);
+  animation: pop .14s ease-out;
+}
+@keyframes pop { from { transform: scale(.97); opacity: 0; } }
+.tilecard p { margin: 0; }
+.ti-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; padding-right: 26px; }
+.ti-head h3 { margin: 0; font: 600 1.15rem/1.15 var(--font-display); }
+.ti-stats { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: .85rem; color: var(--muted); }
+.ti-stats b { color: var(--shell); font-variant-numeric: tabular-nums; }
+.close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  line-height: 1;
+}
+.close:hover { color: var(--shell); border-color: var(--gold); }
+.tilecard .item { padding: 8px 0; }
+.tilecard .item:last-child { border-bottom: 0; }
+
+/* drawer: pane plus a rail of tabs */
+.drawer { display: grid; grid-template-columns: minmax(0, 1fr) 68px; min-height: 0; background: var(--lapis); box-shadow: -8px 0 24px rgba(0, 0, 0, .4); }
+.drawer.closed { grid-template-columns: 68px; }
+.drawer.closed .panewrap { display: none; }
+.panewrap { width: var(--pane); display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0; border-right: 1px solid var(--line); }
+.panehead { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px 10px; border-bottom: 1px solid var(--line); }
+.panehead h2 { margin: 0; font: 700 1.3rem/1.1 var(--font-display); color: var(--gold); }
+.pane { display: grid; align-content: start; gap: 12px; padding: 14px 16px 24px; overflow-y: auto; overscroll-behavior: contain; }
 .pane p { margin: 0; }
+.rail { display: flex; flex-direction: column; gap: 2px; padding: 8px 6px; background: linear-gradient(90deg, #0e1636, var(--ink)); overflow-y: auto; }
+.tab {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding: 9px 2px 7px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.tab .cu { font-size: 1.15rem; letter-spacing: -.12em; max-width: 54px; overflow: hidden; white-space: nowrap; }
+.tab .lbl { font-size: .62rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.tab:hover { color: var(--shell); background: rgba(255, 255, 255, .04); }
+.tab[aria-selected="true"] { color: var(--gold); border-color: rgba(236, 192, 97, .4); background: rgba(236, 192, 97, .08); }
+.tab .dot { position: absolute; top: 6px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--carnelian); box-shadow: 0 0 0 2px var(--ink); }
 
 /* ---------- controls ---------- */
 .btn {
-  font-weight: 700;
-  font-size: .92rem;
-  color: var(--bitumen);
-  background: linear-gradient(var(--gold), var(--bronze));
-  border: 1px solid var(--bitumen);
+  font-weight: 800;
+  font-size: .9rem;
+  color: var(--ink);
+  background: linear-gradient(#f3d27f, var(--gold) 45%, var(--bronze));
+  border: 1px solid #5a3c14;
   border-radius: 6px;
   padding: 6px 12px;
   cursor: pointer;
   white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 2px 0 rgba(0, 0, 0, .35);
 }
 .btn:hover:not(:disabled) { filter: brightness(1.08); }
-.btn:disabled { background: var(--panel-2); color: var(--muted); border-color: var(--line); cursor: not-allowed; }
-.btn.ghost { background: transparent; color: var(--shell); border-color: var(--line); }
+.btn:active:not(:disabled) { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3); }
+.btn:disabled { background: var(--lapis-2); color: var(--muted); border-color: var(--line); cursor: not-allowed; box-shadow: none; }
+.btn.ghost { background: transparent; color: var(--shell); border-color: var(--line); box-shadow: none; }
 .btn.ghost:hover:not(:disabled) { border-color: var(--gold); }
 .btn.ghost:disabled { background: transparent; color: var(--muted); border-color: var(--line); opacity: .55; }
-.btn.danger { background: linear-gradient(#ef8a6d, var(--carnelian)); }
-.btn.sq { width: 34px; height: 34px; padding: 0; font-size: 1.2rem; line-height: 1; }
+.btn.danger { background: linear-gradient(#f3a088, var(--carnelian)); border-color: #5a1d10; }
+.btn.sq { width: 32px; height: 32px; padding: 0; font-size: 1.15rem; line-height: 1; }
 .chipbtn {
-  font-weight: 700;
-  font-size: .85rem;
+  font-weight: 800;
+  font-size: .82rem;
   background: transparent;
   color: var(--muted);
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 3px 11px;
+  padding: 3px 10px;
   cursor: pointer;
 }
-.chipbtn[aria-pressed="true"] { background: var(--gold); color: var(--bitumen); border-color: var(--gold); }
-.steps { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.chipbtn[aria-pressed="true"] { background: var(--gold); color: var(--ink); border-color: var(--gold); }
+.steps, .row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
 .pill {
   display: inline-block;
   padding: 2px 9px;
   border-radius: 999px;
-  font-size: .75rem;
-  font-weight: 700;
-  letter-spacing: .04em;
+  font-size: .74rem;
+  font-weight: 800;
+  letter-spacing: .03em;
   border: 1px solid var(--line);
   color: var(--muted);
 }
-.pill.war { background: var(--carnelian); border-color: var(--carnelian); color: var(--bitumen); }
+.pill.war { background: var(--carnelian); border-color: var(--carnelian); color: var(--ink); }
 .pill.peace { border-color: var(--verdigris); color: var(--verdigris); }
 .pill.own { border-color: var(--oc); color: var(--oc); }
 .pill.gold { border-color: var(--gold); color: var(--gold); }
 .pill.bad { border-color: var(--carnelian); color: var(--carnelian); }
 
+/* ---------- council ---------- */
+.glance { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; padding: 12px; background: var(--lapis-2); border-radius: var(--radius); }
+.glance div { display: grid; gap: 2px; min-width: 0; }
+.glance b { font-size: .98rem; }
+.tip { margin: 0; display: grid; grid-template-columns: 1.2rem minmax(0, 1fr); gap: 6px; font-size: .95rem; }
+.tip .cu { color: var(--bronze); font-size: .95rem; padding-top: .25em; }
+.tip.bad .cu, .tip.bad { color: var(--carnelian); }
+.tip.good .cu { color: var(--verdigris); }
+.buffs { display: flex; flex-wrap: wrap; gap: 6px; }
+.goals { display: grid; gap: 4px; margin: 0; padding: 8px 10px; list-style: none; background: var(--ink); border-radius: 6px; }
+.goals li { display: grid; grid-template-columns: 1.1rem minmax(0, 1fr) auto; gap: 6px; font-size: .9rem; align-items: baseline; }
+.goals li::before { content: ""; width: 9px; height: 9px; border: 1.5px solid var(--gold); transform: rotate(45deg); align-self: center; justify-self: center; }
+.goals li.done::before { background: var(--gold); }
+.goals li.done { color: var(--muted); }
+.goals .rw { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+
 /* ---------- people ---------- */
 .jobs { display: grid; }
 .job {
   display: grid;
-  grid-template-columns: 3.2rem minmax(0, 1fr) auto;
+  grid-template-columns: 2.6rem minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
-  padding: 9px 0;
+  gap: 8px;
+  padding: 8px 0;
   border-bottom: 1px solid var(--line);
 }
-.job > .cu { font-size: 1.15rem; letter-spacing: -.12em; color: var(--gold); text-align: center; overflow: hidden; white-space: nowrap; }
+.job > .cu { font-size: 1.05rem; letter-spacing: -.12em; color: var(--gold); text-align: center; overflow: hidden; white-space: nowrap; }
 .job-txt { display: grid; gap: 1px; min-width: 0; }
-.job-txt b { font-size: 1.02rem; }
-.out { font-size: .9rem; font-variant-numeric: tabular-nums; }
-.stepper { display: flex; align-items: center; gap: 6px; }
-.stepper .n { min-width: 3.2ch; text-align: center; font-size: 1.1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.ledger { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 14px; font-size: .95rem; font-variant-numeric: tabular-nums; }
+.job-txt b { font-size: 1rem; }
+.out { font-size: .86rem; font-variant-numeric: tabular-nums; }
+.stepper { display: flex; align-items: center; gap: 4px; }
+.stepper .n { min-width: 3.4ch; text-align: center; font-size: 1.05rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.ledger { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 14px; font-size: .92rem; font-variant-numeric: tabular-nums; }
 .ledger span:nth-child(even) { text-align: right; }
-.ledger .tot { border-top: 1px solid var(--line); padding-top: 4px; font-weight: 700; }
+.ledger .tot { border-top: 1px solid var(--line); padding-top: 4px; font-weight: 800; }
 
 /* ---------- lists ---------- */
 .item {
@@ -320,104 +387,122 @@ kbd {
   padding: 10px 0;
   border-bottom: 1px solid var(--line);
 }
-.item h4 { margin: 0; font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; }
-.item .meta { color: var(--muted); font-size: .9rem; }
-.item .note { color: var(--muted); font-size: .85rem; font-style: italic; }
+.item h4 { margin: 0; font: 600 1.02rem/1.2 var(--font-display); }
+.item .meta { color: var(--muted); font-size: .88rem; }
+.item .note { color: var(--muted); font-size: .84rem; font-style: italic; }
 .item .why { color: var(--carnelian); font-size: .84rem; }
 .item.locked h4 { color: var(--muted); }
 .item.wonder h4 { color: var(--gold); }
-.item.built h4::after { content: ' ✓'; color: var(--verdigris); }
-.count { font-family: var(--font-body); font-size: .85rem; color: var(--muted); font-weight: 500; }
-.bar { height: 8px; background: var(--lapis-deep); border-radius: 4px; overflow: hidden; }
+.item.built h4::after { content: " ✓"; color: var(--verdigris); }
+.count { font-family: var(--font-body); font-size: .84rem; color: var(--muted); font-weight: 500; }
+.bar { height: 8px; background: var(--ink); border-radius: 4px; overflow: hidden; }
 .bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--bronze), var(--gold)); }
-.current { display: grid; gap: 6px; padding: 12px; background: var(--panel-2); border-radius: var(--radius); }
-.current h4 { margin: 0; font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; }
-.godbox { display: grid; gap: 6px; padding: 12px; background: var(--panel-2); border: 1px solid var(--bronze); border-radius: var(--radius); }
-.godbox h4 { margin: 0; font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; color: var(--gold); }
+.current, .godbox { display: grid; gap: 6px; padding: 12px; background: var(--lapis-2); border-radius: var(--radius); }
+.current h4, .godbox h4 { margin: 0; font: 600 1.15rem/1.2 var(--font-display); }
+.godbox { border: 1px solid var(--bronze); }
+.godbox h4 { color: var(--gold); }
 
-/* ---------- neighbors ---------- */
-.nb { display: grid; gap: 8px; padding: 12px; background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius); }
+/* ---------- neighbors and trade ---------- */
+.nb { display: grid; gap: 8px; padding: 12px; background: var(--lapis-2); border: 1px solid var(--line); border-radius: var(--radius); }
 .nb.gone { opacity: .6; }
 .nb.threat { border-color: var(--carnelian); }
 .nb-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
-.nb-head h4 { margin: 0; font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; }
+.nb-head h4 { margin: 0; font: 600 1.1rem/1.2 var(--font-display); }
 .sw { width: 12px; height: 12px; border-radius: 3px; background: var(--oc); }
-.nb-stats { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .9rem; color: var(--muted); }
+.nb-stats { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .88rem; color: var(--muted); }
 .nb-stats b { color: var(--shell); }
-.meter { position: relative; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--carnelian), var(--lapis-deep) 50%, var(--verdigris)); }
+.meter { position: relative; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--carnelian), var(--ink) 50%, var(--verdigris)); }
 .meter i { position: absolute; top: -4px; width: 4px; height: 14px; margin-left: -2px; background: var(--shell); border-radius: 2px; }
 .nb-acts { display: flex; flex-wrap: wrap; gap: 6px; }
-
-/* ---------- trade ---------- */
 .scroll { overflow-x: auto; }
 .trade { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-.trade th { text-align: left; font-size: .7rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); padding: 6px; }
-.trade td { padding: 8px 6px; border-top: 1px solid var(--line); vertical-align: middle; }
+.trade th { text-align: left; font-size: .68rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); padding: 6px 4px; }
+.trade td { padding: 7px 4px; border-top: 1px solid var(--line); vertical-align: middle; }
 .trade td .cu { color: var(--gold); margin-right: 4px; }
-.trade .acts { display: flex; justify-content: flex-end; gap: 6px; }
+.trade .acts { display: flex; justify-content: flex-end; gap: 4px; }
 
 /* ---------- chronicle ---------- */
 .chron { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
-.chron li { display: grid; grid-template-columns: 5.4rem minmax(0, 1fr); gap: 8px; font-size: .95rem; }
+.chron li { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr); gap: 8px; font-size: .92rem; }
 .chron .yr { color: var(--muted); font-variant-numeric: tabular-nums; }
 .chron li.bad { color: var(--carnelian); }
 .chron li.good { color: var(--verdigris); }
 .chron li.big { color: var(--gold); }
-.gloss { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px 14px; }
-.gloss div { display: flex; align-items: center; gap: 10px; font-size: .9rem; }
-.gloss .cu { font-size: 1.35rem; color: var(--gold); min-width: 2.6rem; }
+.gloss { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px 14px; }
+.gloss div { display: flex; align-items: center; gap: 10px; font-size: .88rem; }
+.gloss .cu { font-size: 1.3rem; color: var(--gold); min-width: 2.6rem; }
+.minis { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px 16px; }
+.mini { position: relative; margin: 0; max-width: 360px; }
+.mini figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ctip { position: absolute; top: 22px; padding: 4px 8px; border-radius: 6px; background: var(--ink); border: 1px solid var(--line); font-size: .8rem; pointer-events: none; white-space: nowrap; }
+details summary { cursor: pointer; }
 .chart { display: block; width: 100%; height: auto; overflow: visible; }
 .chart .grid { stroke: var(--line); stroke-width: 1; }
 .chart .axis { fill: var(--muted); font: 500 11px var(--font-body); }
 .chart .ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
-.chart .end { font: 700 11px var(--font-body); }
-.chart .collapse { stroke: var(--carnelian); stroke-dasharray: 3 3; }
-.minis { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px 16px; }
-.mini { position: relative; margin: 0; max-width: 360px; }
-.mini figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.ctip { position: absolute; top: 22px; padding: 4px 8px; border-radius: 6px; background: var(--bitumen); border: 1px solid var(--line); font-size: .8rem; pointer-events: none; white-space: nowrap; }
-details summary { cursor: pointer; }
 .ach { display: grid; gap: 6px; }
-.ach div { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr); gap: 8px; font-size: .92rem; }
+.ach div { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr); gap: 8px; font-size: .9rem; }
 .ach div.locked { color: var(--muted); }
-.ach .cu { color: var(--gold); font-size: 1.1rem; }
+.ach .cu { color: var(--gold); font-size: 1.05rem; }
 .ach div.locked .cu { color: var(--line); }
-.best { width: 100%; border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; }
+.best { width: 100%; border-collapse: collapse; font-size: .88rem; font-variant-numeric: tabular-nums; }
 .best td, .best th { text-align: left; padding: 5px 6px; border-top: 1px solid var(--line); }
-.best th { font-size: .7rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); border-top: 0; }
+.best th { font-size: .68rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); border-top: 0; }
 .best td:last-child, .best th:last-child { text-align: right; }
 
-/* ---------- turn bar ---------- */
+/* ---------- year-line ---------- */
 .turnbar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 20;
-  background: var(--bitumen);
-  border-top: 1px solid var(--line);
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) auto;
+  align-items: center;
+  gap: 18px;
   padding-block: 10px calc(10px + env(safe-area-inset-bottom, 0px));
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: linear-gradient(#0f1838, var(--ink));
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -6px 18px rgba(0, 0, 0, .45);
 }
-.turnbar .inner { max-width: 1320px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
-.timeline { flex: 1; min-width: 0; display: grid; gap: 6px; }
-.tl-labels { display: flex; justify-content: space-between; gap: 10px; font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ticker {
+  display: grid;
+  grid-template-columns: 1.2rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .03);
+  border: 1px solid var(--line);
+  font-size: .92rem;
+  text-align: left;
+  cursor: pointer;
+}
+.ticker:hover { border-color: var(--gold); }
+.ticker .cu { color: var(--bronze); }
+.ticker.bad .cu, .ticker.bad .txt { color: var(--carnelian); }
+.ticker .txt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ticker .more { font-size: .76rem; color: var(--muted); white-space: nowrap; }
+.timeline { min-width: 0; display: grid; gap: 6px; }
+.tl-labels { display: flex; justify-content: space-between; gap: 10px; font-size: .82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .tl-labels b { color: var(--shell); }
 .tl-labels .col { color: var(--carnelian); }
-.tl-track { position: relative; height: 6px; background: var(--panel-2); border-radius: 3px; }
+.tl-track { position: relative; height: 6px; background: var(--lapis-2); border-radius: 3px; }
 .tl-track > i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--bronze), var(--gold)); transition: width .6s ease; }
 .tl-track b { position: absolute; top: -3px; width: 2px; height: 12px; margin-left: -1px; background: var(--muted); border-radius: 1px; }
 .tl-track b.next { background: var(--carnelian); }
-.endturn { font-family: var(--font-display); font-size: 1.1rem; padding: 9px 20px; display: grid; line-height: 1.1; text-align: center; }
-.endturn small { font-family: var(--font-body); font-size: .75rem; font-weight: 500; }
-@media (max-width: 560px) {
-  .tl-labels .edge { display: none; }
-  .tl-labels { justify-content: flex-start; }
-  .endturn { padding: 8px 14px; }
+.endturn {
+  display: grid;
+  line-height: 1.05;
+  text-align: center;
+  font: 700 1.15rem/1.05 var(--font-display);
+  padding: 10px 26px;
+  border-radius: 10px;
 }
+.endturn small { font: 600 .74rem/1.2 var(--font-body); }
 
-/* ---------- modal and toast ---------- */
+/* ---------- dialogs and toast ---------- */
 .modal {
   position: fixed;
   inset: 0;
@@ -425,111 +510,169 @@ details summary { cursor: pointer; }
   display: grid;
   place-items: center;
   padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
-  background: rgba(7, 11, 31, .8);
+  background: rgba(5, 8, 20, .78);
 }
 .card {
-  width: min(560px, 100%);
+  width: min(580px, 100%);
   max-height: calc(100% - 16px);
   overflow: auto;
   display: grid;
   gap: 14px;
-  padding: 22px;
-  background: var(--panel-2);
+  padding: 0 24px 22px;
+  background: var(--lapis);
   border: 1px solid var(--bronze);
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+  border-radius: 14px;
+  box-shadow: 0 0 0 4px var(--ink), 0 0 0 5px rgba(236, 192, 97, .35), 0 24px 70px rgba(0, 0, 0, .65);
   animation: rise .2s ease-out;
 }
 .card p { margin: 0; }
-.card .bigcu { font-size: 2.6rem; color: var(--gold); }
-.card .date { margin: -8px 0 0; font: 700 .74rem/1.2 var(--font-body); text-transform: uppercase; letter-spacing: .16em; color: var(--bronze); }
-.card h2 { margin: 0; font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; line-height: 1.1; text-wrap: balance; }
-.card h3 { margin: 0; font: 700 .74rem/1.2 var(--font-body); text-transform: uppercase; letter-spacing: .16em; color: var(--muted); }
+.banner { display: block; width: calc(100% + 48px); height: 150px; margin: 0 -24px; border-radius: 13px 13px 0 0; }
+.medal {
+  width: 66px;
+  height: 66px;
+  margin-top: -47px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.8rem;
+  letter-spacing: -.1em;
+  color: var(--gold);
+  background: radial-gradient(circle at 35% 30%, #23336f, var(--ink) 75%);
+  box-shadow: 0 0 0 2px var(--gold), 0 0 0 5px var(--ink), 0 6px 18px rgba(0, 0, 0, .6);
+  overflow: hidden;
+}
+.card .date { margin: -6px 0 -8px; font: 800 .74rem/1.2 var(--font-body); text-transform: uppercase; letter-spacing: .16em; color: var(--bronze); }
+.card h2 { margin: 0; font: 700 1.65rem/1.1 var(--font-display); text-wrap: balance; }
+.card h3 { margin: 0; font: 800 .72rem/1.2 var(--font-body); text-transform: uppercase; letter-spacing: .16em; color: var(--muted); }
 .card ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 5px; }
-.card label { font-weight: 700; }
+.card label { font-weight: 800; }
 .card input, .card textarea {
   width: 100%;
   font: inherit;
   color: var(--shell);
-  background: var(--lapis-deep);
+  background: var(--ink);
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 8px 10px;
 }
-.card textarea { font: 500 .78rem/1.35 ui-monospace, Menlo, Consolas, monospace; min-height: 90px; resize: vertical; word-break: break-all; }
+.card textarea { font: 500 .78rem/1.35 ui-monospace, Menlo, Consolas, monospace; min-height: 80px; resize: vertical; word-break: break-all; }
 .seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px; }
 .seg .btn { display: grid; gap: 1px; text-align: left; white-space: normal; padding: 8px 12px; }
-.seg .btn[aria-pressed="true"] { outline: 2px solid var(--shell); outline-offset: 1px; }
+.seg .btn[aria-pressed="true"] { outline: 2px solid var(--gold); outline-offset: 1px; color: var(--gold); }
 .seg .btn small { font-weight: 500; font-size: .8rem; opacity: .85; }
 .choices { display: grid; gap: 8px; }
 .choice { display: grid; gap: 2px; text-align: left; padding: 10px 14px; white-space: normal; }
 .choice .hint { font-weight: 500; font-size: .85rem; opacity: .85; }
 .tests { display: grid; gap: 6px; }
-.tests div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 8px 10px; background: var(--lapis-deep); border-radius: 6px; }
-.rank { font-family: var(--font-display); font-size: 1.3rem; color: var(--gold); }
+.tests div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 8px 10px; background: var(--ink); border-radius: 6px; }
+.rank { font: 600 1.3rem/1.2 var(--font-display); color: var(--gold); }
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   transform: translateX(-50%);
   z-index: 60;
   max-width: calc(100% - 32px);
-  padding: 8px 16px;
+  padding: 9px 18px;
   background: var(--shell);
-  color: var(--bitumen);
-  border-radius: 6px;
-  font-weight: 700;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, .4);
-  animation: rise .2s ease-out;
+  color: var(--ink);
+  border-radius: 8px;
+  font-weight: 800;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
+  pointer-events: none;
+  animation: toastIn .2s ease-out;
 }
 .toast.gold { background: var(--gold); }
 @keyframes rise { from { transform: translateY(8px); opacity: 0; } }
-.toast { animation-name: toastIn; }
 @keyframes toastIn { from { transform: translate(-50%, 8px); opacity: 0; } }
+
+/* ---------- narrower screens ---------- */
+@media (max-width: 1600px) {
+  .chip .lab { display: none; }
+  .chip .cu { grid-row: auto; }
+}
+@media (max-width: 1180px) {
+  :root { --pane: 360px; }
+  .turnbar { grid-template-columns: minmax(0, 1fr) auto; }
+  .ticker { display: none; }
+}
+@media (max-width: 860px) {
+  html, body { height: auto; }
+  .game { display: block; height: auto; padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+  .topbar { flex-wrap: wrap; }
+  .crest { flex: 1 1 100%; }
+  .hdr-btns { position: absolute; top: 12px; right: max(16px, env(safe-area-inset-right, 0px)); }
+  .res { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; }
+  .chip { padding: 3px 4px; column-gap: 4px; }
+  .chip .val { font-size: .9rem; }
+  .chip .val .muted, .chip .d { display: none; }
+  .chip.metals { grid-column: span 2; }
+  .stage { display: block; }
+  .crest { padding-right: 132px; }
+  .drawer, .drawer.closed { display: flex; flex-direction: column; }
+  .rail { order: -1; }
+  [data-act="fold"] { display: none; }
+  .board { aspect-ratio: 571 / 386; width: 100%; }
+  .legend { display: none; }
+  .drawer, .drawer.closed { box-shadow: none; }
+  .drawer.closed .panewrap { display: grid; }
+  .panewrap { width: auto; border-right: 0; }
+  .rail { flex-direction: row; overflow-x: auto; padding: 6px max(16px, env(safe-area-inset-left, 0px)); position: sticky; top: 0; z-index: 2; }
+  .tab { flex: 1 0 auto; padding: 6px 8px; }
+  .pane { overflow: visible; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .panehead { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .tilecard { position: fixed; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); width: auto; top: auto !important; bottom: calc(88px + env(safe-area-inset-bottom, 0px)); max-height: 55vh; }
+  .turnbar { position: fixed; left: 0; right: 0; bottom: 0; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; }
+  .tl-labels .edge { display: none; }
+  .endturn { padding: 8px 16px; }
+  .toast { bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
+}
 @media (prefers-reduced-motion: reduce) {
-  .card, .toast { animation: none; }
+  .card, .toast, .tilecard { animation: none; }
   .tl-track > i { transition: none; }
   .ownfill.fresh { animation: none; }
 }
 </style>
 </head>
 <body>
-<div class="frieze" aria-hidden="true"></div>
-<div class="app">
-  <header class="top">
-    <div class="brand">
-      <p class="h">Bronze Dawn · <span id="era"></span></p>
-      <h1 id="realmName">The Uruma</h1>
+<div class="game">
+  <header class="topbar">
+    <div class="crest">
+      <div class="seal cu" aria-hidden="true">&#x12217;</div>
+      <div style="min-width:0">
+        <h1 id="realmName">The Uruma</h1>
+        <p class="sub" id="era"></p>
+      </div>
     </div>
-    <div class="realm" id="realm"></div>
+    <section class="res" id="res" aria-label="Resources"></section>
     <div class="hdr-btns">
-      <button class="btn ghost" id="soundBtn" data-act="sound" aria-pressed="true" title="Sound (M)">Sound</button>
-      <button class="btn ghost" data-act="help">How to play</button>
-      <button class="btn ghost" data-act="menu">Game</button>
+      <button class="iconbtn" id="soundBtn" data-act="sound" aria-pressed="true" title="Sound (M)" aria-label="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="wave" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg></button>
+      <button class="iconbtn" data-act="help" title="How to play (?)" aria-label="How to play"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.4c-.7.3-1 .8-1 1.5v.6"/><path d="M12 17h.01"/></svg></button>
+      <button class="iconbtn" data-act="menu" title="Game menu" aria-label="Game menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     </div>
   </header>
 
-  <section class="res" id="res" aria-label="Resources"></section>
-
-  <div class="main">
-    <section class="board" aria-label="Map">
+  <main class="stage">
+    <section class="board" id="board" aria-label="Map">
+      <canvas id="terrain" aria-hidden="true"></canvas>
+      <svg id="map" role="group" aria-label="Map of the land" preserveAspectRatio="xMidYMid meet"></svg>
       <div class="legend" id="legend"></div>
-      <svg id="map" role="group" aria-label="Map of the land"></svg>
-      <div class="tileinfo" id="tileinfo" aria-live="polite"></div>
+      <div class="tilecard" id="tileinfo" aria-live="polite" hidden></div>
     </section>
-    <section class="side">
-      <div class="advice" id="advice" aria-label="Advisors"></div>
-      <div class="tabs" role="tablist" id="tabs"></div>
-      <div class="pane" id="pane" role="tabpanel"></div>
-    </section>
-  </div>
-</div>
+    <aside class="drawer" id="drawer">
+      <div class="panewrap grainy">
+        <div class="panehead"><h2 id="paneTitle">Council</h2><button class="btn ghost" data-act="fold" title="Fold the drawer away">Fold</button></div>
+        <div class="pane" id="pane" role="tabpanel"></div>
+      </div>
+      <nav class="rail" role="tablist" aria-label="Panels" id="tabs"></nav>
+    </aside>
+  </main>
 
-<div class="turnbar">
-  <div class="inner">
+  <footer class="turnbar">
+    <button class="ticker" id="ticker" data-act="tab" data-arg="council"></button>
     <div class="timeline" id="timeline"></div>
     <button class="btn endturn" id="endBtn" data-act="end">End turn</button>
-  </div>
+  </footer>
 </div>
 
 <div class="modal" id="modal" hidden>
@@ -544,7 +687,7 @@ details summary { cursor: pointer; }
    One file: data, rules, neighbor AI, history, events, sound and UI.
    Sections: 1 data · 2 state · 3 map geometry · 4 economy · 5 player
    actions · 6 end of turn · 7 neighbors · 8 events and history ·
-   9 end of game · 10 rendering · 11 modals · 12 sound · 13 boot
+   9 end of game · 10 painting and rendering · 11 modals · 12 sound · 13 boot
    ===================================================================== */
 
 /* ---------- 1. Data ---------- */
@@ -784,7 +927,7 @@ const ACHIEVEMENTS = [
 
 /* ---------- 2. State ---------- */
 let S = null;                                  // the whole saved game
-const ui = { tab: 'people', sel: null, step: 5, fresh: new Set(), series: { pop: true, army: true, know: false, food: false } };
+const ui = { tab: 'council', drawer: true, sel: null, step: 5, fresh: new Set(), series: { pop: true, army: true, know: false, food: false } };
 let modalQueue = [], modalOpen = false, currentModal = null, toastTimer = 0;
 
 const has = id => S.techs.includes(id);
@@ -864,8 +1007,8 @@ function newGame(name, diff = 'normal') {
   S.era = eraOf();
   S.title = titleOf();
   log(`The ${name} settle beside the river.`, 'big');
-  ui.sel = p;
-  ui.tab = 'people';
+  ui.sel = null;
+  ui.tab = 'council';
   ui.fresh = new Set();
   recordHistory();
 }
@@ -2538,17 +2681,540 @@ function startNew() {
   showIntro();
 }
 
-/* ---------- 10. Rendering ---------- */
-const DECO = {
-  R: 'M-14 6 v-6 M-11 7 v-8 M-8 6 v-5 M9 -4 v-6 M12 -3 v-8 M15 -4 v-5',
-  P: 'M-12 4 l2 -7 l2 7 M3 -2 l2 -7 l2 7 M-4 12 l2 -6 l2 6 M10 10 l2 -6 l2 6',
-  F: 'M-15 9 l6 -15 l6 15 z M-4 3 l6 -15 l6 15 z M6 11 l6 -15 l6 15 z',
-  H: 'M-18 8 q8 -14 16 0 M-2 8 q8 -14 16 0 M-10 -4 q6 -10 12 0',
-  M: 'M-19 10 L-7 -12 L5 10 Z M-3 10 L8 -6 L19 10 Z',
-  D: 'M-11 -7 h.1 M3 -10 h.1 M12 -2 h.1 M-3 2 h.1 M-14 8 h.1 M7 9 h.1 M-6 14 h.1',
-  S: 'M-16 -5 q4 -4 8 0 t8 0 t8 0 M-10 7 q4 -4 8 0 t8 0 t8 0',
+/* ---------- 10. Painting: the terrain under the map, and the banners on event cards ---------- */
+// Painting uses its own seeded noise, never the game's dice, so redrawing cannot change a game.
+const VB = { w: PAD * 2 + HEX * SQ3 * (COLS + 0.5), h: PAD * 2 + HEX * 2 + HEX * 1.5 * (ROWS - 1) };
+function hashRand(seed) {
+  let s = (seed >>> 0) || 1;
+  return () => { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return (s >>> 0) / 4294967296; };
+}
+const hashStr = str => [...String(str)].reduce((h, ch) => Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0, 2166136261);
+function shade(hex, amt) {
+  const n = parseInt(hex.slice(1), 16), f = v => clamp(Math.round(v + (amt > 0 ? (255 - v) * amt : v * amt)), 0, 255);
+  return `rgb(${f(n >> 16)}, ${f((n >> 8) & 255)}, ${f(n & 255)})`;
+}
+function hexPath(ctx, x, y, size) {
+  for (let k = 0; k < 6; k++) {
+    const [px, py] = hexCorner(x, y, size, k);
+    if (k) ctx.lineTo(px, py); else ctx.moveTo(px, py);
+  }
+  ctx.closePath();
+}
+let grainTile = null;
+function grain() {
+  if (grainTile) return grainTile;
+  const c = document.createElement('canvas');
+  c.width = c.height = 160;
+  const g = c.getContext('2d'), img = g.createImageData(160, 160), r = hashRand(7);
+  for (let k = 0; k < img.data.length; k += 4) {
+    const v = 128 + (r() - 0.5) * 110;
+    img.data[k] = img.data[k + 1] = img.data[k + 2] = v;
+    img.data[k + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  return (grainTile = c);
+}
+function grainOver(ctx, W, H, alpha) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'overlay';
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = ctx.createPattern(grain(), 'repeat');
+  ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+}
+
+// Base, shadow and light for each kind of land
+const PAINT = {
+  R: ['#557f58', '#3b6343', '#86b178'],
+  P: ['#a29450', '#7f733c', '#cbb86c'],
+  F: ['#2f5a3b', '#1c3e27', '#5b9161'],
+  H: ['#8d6c47', '#654b30', '#b8915f'],
+  M: ['#7a7590', '#4f4b64', '#b4afc8'],
+  D: ['#cfae72', '#a6874f', '#ecd39d'],
+  S: ['#1d3c70', '#122a54', '#4775b0'],
 };
+const BRUSH = {
+  R(ctx, x, y, r, P) {
+    // irrigated strips and reeds along the river
+    ctx.save();
+    ctx.beginPath(); hexPath(ctx, x, y, HEX - 2); ctx.clip();
+    ctx.translate(x, y); ctx.rotate(-0.5 + r() * 0.3);
+    for (let k = -5; k <= 5; k++) {
+      ctx.fillStyle = k % 2 ? P[2] : P[1];
+      ctx.globalAlpha = 0.28 + r() * 0.15;
+      ctx.fillRect(-40, k * 6 + r() * 2, 80, 3.2);
+    }
+    ctx.restore();
+    ctx.strokeStyle = P[2]; ctx.lineWidth = 1.1; ctx.globalAlpha = 0.7;
+    for (let k = 0; k < 7; k++) {
+      const a = r() * Math.PI * 2, d = 14 + r() * 12, bx = x + Math.cos(a) * d, by = y + Math.sin(a) * d * 0.8;
+      ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx - 1 + r() * 2, by - 5 - r() * 3); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  },
+  P(ctx, x, y, r, P) {
+    ctx.lineWidth = 1.2;
+    for (let k = 0; k < 34; k++) {
+      const a = r() * Math.PI * 2, d = Math.sqrt(r()) * 27, bx = x + Math.cos(a) * d, by = y + Math.sin(a) * d * 0.85;
+      ctx.strokeStyle = r() < 0.5 ? P[2] : P[1];
+      ctx.globalAlpha = 0.55 + r() * 0.35;
+      ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + 1.5 + r() * 1.5, by - 4 - r() * 3); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  },
+  F(ctx, x, y, r, P) {
+    const trees = [];
+    for (let k = 0; k < 11; k++) {
+      const a = r() * Math.PI * 2, d = Math.sqrt(r()) * 22;
+      trees.push([x + Math.cos(a) * d, y + Math.sin(a) * d * 0.85, 4.5 + r() * 3]);
+    }
+    trees.sort((a, b) => a[1] - b[1]);
+    for (const [tx, ty, tr] of trees) {
+      ctx.fillStyle = 'rgba(5, 15, 8, .45)';
+      ctx.beginPath(); ctx.ellipse(tx + 2, ty + 3, tr, tr * 0.7, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = P[1];
+      ctx.beginPath(); ctx.arc(tx, ty, tr, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = P[2];
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath(); ctx.arc(tx - tr * 0.3, ty - tr * 0.35, tr * 0.55, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  },
+  H(ctx, x, y, r, P) {
+    const hills = [[-11, 4, 14], [10, 6, 13], [-1, -8, 12]].map(([dx, dy, w]) => [x + dx + r() * 4 - 2, y + dy + r() * 3, w * (0.85 + r() * 0.3)]);
+    hills.sort((a, b) => a[1] - b[1]);
+    for (const [hx, hy, w] of hills) {
+      const g = ctx.createLinearGradient(hx - w, hy - w, hx + w, hy);
+      g.addColorStop(0, P[2]); g.addColorStop(1, P[1]);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.moveTo(hx - w, hy); ctx.quadraticCurveTo(hx - w * 0.2, hy - w * 1.15, hx + w, hy); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(40, 25, 10, .45)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(hx - w, hy); ctx.lineTo(hx + w, hy); ctx.stroke();
+    }
+  },
+  M(ctx, x, y, r, P) {
+    const peaks = [[-9, 9, 13, 21], [8, 11, 12, 17]].map(([dx, dy, w, h]) => [x + dx + r() * 3, y + dy, w * (0.9 + r() * 0.2), h * (0.9 + r() * 0.25)]);
+    for (const [px, py, w, h] of peaks) {
+      ctx.fillStyle = 'rgba(10, 8, 25, .35)';
+      ctx.beginPath(); ctx.moveTo(px - w + 3, py + 2); ctx.lineTo(px + 3, py - h + 2); ctx.lineTo(px + w + 3, py + 2); ctx.fill();
+      ctx.fillStyle = P[2];
+      ctx.beginPath(); ctx.moveTo(px - w, py); ctx.lineTo(px, py - h); ctx.lineTo(px + 1, py); ctx.fill();
+      ctx.fillStyle = P[1];
+      ctx.beginPath(); ctx.moveTo(px, py - h); ctx.lineTo(px + w, py); ctx.lineTo(px + 1, py); ctx.fill();
+      ctx.fillStyle = 'rgba(245, 245, 255, .9)';
+      ctx.beginPath(); ctx.moveTo(px - w * 0.3, py - h * 0.7); ctx.lineTo(px, py - h); ctx.lineTo(px + w * 0.3, py - h * 0.7); ctx.lineTo(px + w * 0.1, py - h * 0.62); ctx.lineTo(px - w * 0.08, py - h * 0.72); ctx.closePath(); ctx.fill();
+    }
+  },
+  D(ctx, x, y, r, P) {
+    ctx.lineWidth = 1.4;
+    for (let k = 0; k < 4; k++) {
+      const bx = x - 18 + r() * 14, by = y - 14 + k * 9 + r() * 3, w = 16 + r() * 12;
+      ctx.strokeStyle = P[2]; ctx.globalAlpha = 0.75;
+      ctx.beginPath(); ctx.moveTo(bx, by); ctx.quadraticCurveTo(bx + w / 2, by - 5, bx + w, by); ctx.stroke();
+      ctx.strokeStyle = P[1]; ctx.globalAlpha = 0.5;
+      ctx.beginPath(); ctx.moveTo(bx + 2, by + 1.5); ctx.quadraticCurveTo(bx + w / 2, by - 2.5, bx + w - 2, by + 1.5); ctx.stroke();
+    }
+    ctx.fillStyle = P[1]; ctx.globalAlpha = 0.6;
+    for (let k = 0; k < 9; k++) { ctx.beginPath(); ctx.arc(x - 22 + r() * 44, y - 20 + r() * 40, 0.9, 0, Math.PI * 2); ctx.fill(); }
+    ctx.globalAlpha = 1;
+  },
+  S(ctx, x, y, r, P) {
+    ctx.strokeStyle = P[2]; ctx.lineWidth = 1.1;
+    for (let k = 0; k < 6; k++) {
+      const bx = x - 20 + r() * 34, by = y - 18 + r() * 36;
+      ctx.globalAlpha = 0.25 + r() * 0.3;
+      ctx.beginPath(); ctx.moveTo(bx, by); ctx.quadraticCurveTo(bx + 3, by - 3, bx + 6, by); ctx.quadraticCurveTo(bx + 9, by + 3, bx + 12, by); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  },
+};
+const terrainCache = { key: '' };
+function paintTerrain() {
+  const cv = $('#terrain');
+  if (!cv || !S) return;
+  const box = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = Math.round(box.width * dpr), H = Math.round(box.height * dpr);
+  if (!W || !H) return;
+  const key = `${W}x${H}:${S.tiles.map(t => t.t).join('')}`;
+  if (key === terrainCache.key) return;
+  terrainCache.key = key;
+  cv.width = W;
+  cv.height = H;
+  const ctx = cv.getContext('2d');
+  const s = Math.min(W / VB.w, H / VB.h), ox = (W - VB.w * s) / 2, oy = (H - VB.h * s) / 2;
+  const centers = S.tiles.map((t, i) => hexCenter(i % COLS, Math.floor(i / COLS)));
+
+  // beyond the known world: dark water fading into the frame
+  const bg = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.7);
+  bg.addColorStop(0, '#16285a'); bg.addColorStop(1, '#070b1c');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // flat colour per land, painted soft (scaled down and up again) then sharp on top, so lands bleed into each other
+  const flat = document.createElement('canvas');
+  flat.width = W; flat.height = H;
+  const f = flat.getContext('2d');
+  f.setTransform(s, 0, 0, s, ox, oy);
+  S.tiles.forEach((t, i) => {
+    const r = hashRand(i * 97 + 13);
+    f.fillStyle = shade(PAINT[t.t][0], (r() - 0.5) * 0.14);
+    f.beginPath(); hexPath(f, ...centers[i], HEX + 1.2); f.fill();
+  });
+  const small = document.createElement('canvas'), k = 12;
+  small.width = Math.max(1, Math.round(W / k)); small.height = Math.max(1, Math.round(H / k));
+  const sm = small.getContext('2d');
+  sm.imageSmoothingQuality = 'high';
+  sm.drawImage(flat, 0, 0, small.width, small.height);
+  ctx.save();
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(small, 0, 0, W, H);
+  ctx.globalAlpha = 0.62;
+  ctx.drawImage(flat, 0, 0);
+  ctx.restore();
+
+  // brushwork, coasts and rivers in map units
+  ctx.save();
+  ctx.setTransform(s, 0, 0, s, ox, oy);
+  S.tiles.forEach((t, i) => BRUSH[t.t](ctx, ...centers[i], hashRand(i * 7919 + 3), PAINT[t.t]));
+  ctx.strokeStyle = 'rgba(232, 244, 250, .55)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 3]);
+  S.tiles.forEach((t, i) => {
+    if (t.t === 'S') return;
+    for (let e = 0; e < 6; e++) {
+      const n = nbDir(i, e);
+      if (n < 0 || S.tiles[n].t !== 'S') continue;
+      const a = hexCorner(...centers[i], HEX + 1, e), b = hexCorner(...centers[i], HEX + 1, (e + 1) % 6);
+      ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
+    }
+  });
+  ctx.setLineDash([]);
+  RIVERS.forEach(course => {
+    const pts = course.map(([c, r]) => hexCenter(c, r));
+    pts[0] = [pts[0][0], pts[0][1] - HEX * 0.55];
+    const path = new Path2D(smoothPath(pts));
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(16, 28, 34, .55)'; ctx.lineWidth = 9; ctx.stroke(path);
+    ctx.strokeStyle = '#3f8db0'; ctx.lineWidth = 5.5; ctx.stroke(path);
+    ctx.strokeStyle = '#6fb8d4'; ctx.lineWidth = 2.4; ctx.stroke(path);
+    ctx.strokeStyle = 'rgba(235, 250, 255, .55)'; ctx.lineWidth = 1; ctx.setLineDash([2, 9]); ctx.stroke(path); ctx.setLineDash([]);
+  });
+  ctx.restore();
+
+  // warm lamplight from the upper left, then the grain of the paint
+  const light = ctx.createRadialGradient(W * 0.28, H * 0.18, 0, W * 0.28, H * 0.18, Math.max(W, H) * 0.85);
+  light.addColorStop(0, 'rgba(255, 226, 160, .16)'); light.addColorStop(1, 'rgba(255, 226, 160, 0)');
+  ctx.fillStyle = light;
+  ctx.fillRect(0, 0, W, H);
+  grainOver(ctx, W, H, 0.14);
+}
+
+// Event banners: a small landscape painted for the mood of each card
+const MOODS = {
+  dawn:  { sky: ['#e9a46a', '#f7dca6'], sun: '#fff1c9', far: '#a7775c', near: '#5c4636', ground: '#3b3024' },
+  day:   { sky: ['#7eb0d6', '#eadcb5'], sun: '#fff7da', far: '#8c9fa4', near: '#6e7d4c', ground: '#4f5b35' },
+  dusk:  { sky: ['#4e2b5c', '#e0794f'], sun: '#ffcd88', far: '#6a3a4f', near: '#3a2233', ground: '#22141e' },
+  night: { sky: ['#0a1135', '#2c3d7c'], sun: '#eef0ff', far: '#1f2c5d', near: '#131b3f', ground: '#0b1029' },
+  storm: { sky: ['#283140', '#6e7783'], sun: null, far: '#3a434f', near: '#262d36', ground: '#1a1f26' },
+  war:   { sky: ['#37111a', '#c4542f'], sun: '#ffb070', far: '#5b2420', near: '#2e1414', ground: '#1b0c0c' },
+  sea:   { sky: ['#5b8dbf', '#f2d8a4'], sun: '#fff3cf', far: '#5c80a4', near: '#2f5d87', ground: '#1f4a74' },
+  forge: { sky: ['#140b08', '#5c2b12'], sun: '#ff9a3c', far: '#2b170d', near: '#1a0f0a', ground: '#0f0906' },
+};
+const SIGN_MOOD = {
+  food: 'day', water: 'day', land: 'day', materials: 'day', wedge: 'day', people: 'dawn', house: 'dawn', silver: 'dawn',
+  stability: 'dawn', king: 'dawn', god: 'dawn', city: 'dawn', palace: 'dawn', copper: 'forge', tin: 'forge', bronze: 'forge',
+  army: 'war', foreign: 'dusk', road: 'dusk', knowledge: 'night', star: 'night', ship: 'sea', storm: 'storm',
+};
+function ridge(ctx, W, base, amp, r, color) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(0, ctx.canvas.height);
+  let y = base;
+  for (let x = 0; x <= W; x += W / 24) {
+    y = clamp(y + (r() - 0.5) * amp, base - amp * 1.4, base + amp * 0.6);
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(W, y);
+  ctx.lineTo(W, ctx.canvas.height);
+  ctx.closePath();
+  ctx.fill();
+}
+function paintBanner(cv, sign, seedText) {
+  const dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round((cv.clientWidth || 580) * dpr), H = Math.round((cv.clientHeight || 150) * dpr);
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d'), m = MOODS[SIGN_MOOD[sign] || 'dawn'], r = hashRand(hashStr(seedText));
+  const sky = ctx.createLinearGradient(0, 0, 0, H * 0.75);
+  sky.addColorStop(0, m.sky[0]); sky.addColorStop(1, m.sky[1]);
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, H);
+  if (m === MOODS.night) {
+    ctx.fillStyle = '#fff';
+    for (let k = 0; k < 70; k++) { ctx.globalAlpha = 0.3 + r() * 0.7; ctx.fillRect(r() * W, r() * H * 0.6, dpr * (r() < 0.9 ? 1 : 2), dpr * (r() < 0.9 ? 1 : 2)); }
+    ctx.globalAlpha = 1;
+  }
+  if (m.sun) {
+    const sx = W * (0.2 + r() * 0.6), sy = H * (0.25 + r() * 0.2), sr = H * 0.11;
+    const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr * 5);
+    glow.addColorStop(0, m.sun); glow.addColorStop(0.2, `${m.sun}aa`); glow.addColorStop(1, `${m.sun}00`);
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = m.sun;
+    ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fill();
+  }
+  if (sign === 'star') {
+    const cx = W * (0.55 + r() * 0.3), cy = H * 0.22;
+    const tail = ctx.createLinearGradient(cx, cy, cx - W * 0.35, cy + H * 0.25);
+    tail.addColorStop(0, 'rgba(255,255,255,.95)'); tail.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.strokeStyle = tail; ctx.lineWidth = 3 * dpr; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx - W * 0.35, cy + H * 0.25); ctx.stroke();
+  }
+  ridge(ctx, W, H * 0.58, H * 0.12, r, m.far);
+  // a ziggurat on the horizon for kings, gods and cities
+  if (['king', 'god', 'city', 'palace', 'stability', 'house'].includes(sign)) {
+    const zx = W * (0.25 + r() * 0.5), zb = H * 0.66, step = H * 0.07;
+    ctx.fillStyle = m.near;
+    for (let k = 0; k < 4; k++) ctx.fillRect(zx - (4 - k) * step * 1.4, zb - (k + 1) * step, (4 - k) * step * 2.8, step + 1);
+  }
+  ridge(ctx, W, H * 0.74, H * 0.07, r, m.near);
+  if (sign === 'ship' || sign === 'water') {
+    ctx.fillStyle = m.ground;
+    ctx.fillRect(0, H * 0.78, W, H * 0.22);
+    ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = dpr;
+    for (let k = 0; k < 14; k++) { const wx = r() * W, wy = H * (0.82 + r() * 0.15); ctx.beginPath(); ctx.moveTo(wx, wy); ctx.lineTo(wx + 12 * dpr, wy); ctx.stroke(); }
+    if (sign === 'ship') {
+      const bx = W * (0.3 + r() * 0.4), by = H * 0.83;
+      ctx.fillStyle = '#1a1410';
+      ctx.beginPath(); ctx.moveTo(bx - 34 * dpr, by); ctx.quadraticCurveTo(bx, by + 12 * dpr, bx + 34 * dpr, by - 6 * dpr); ctx.lineTo(bx + 30 * dpr, by + 2 * dpr); ctx.lineTo(bx - 30 * dpr, by + 2 * dpr); ctx.fill();
+      ctx.fillRect(bx - dpr, by - 34 * dpr, 2 * dpr, 34 * dpr);
+      ctx.fillStyle = '#e9dcc0';
+      ctx.beginPath(); ctx.moveTo(bx + dpr, by - 32 * dpr); ctx.lineTo(bx + 22 * dpr, by - 10 * dpr); ctx.lineTo(bx + dpr, by - 8 * dpr); ctx.fill();
+    }
+  } else {
+    ctx.fillStyle = m.ground;
+    ctx.fillRect(0, H * 0.84, W, H * 0.16);
+  }
+  if (['food', 'land', 'people', 'materials', 'road'].includes(sign)) {
+    // date palms along the river bank
+    for (let k = 0; k < 4; k++) {
+      const px = W * (0.08 + r() * 0.84), pb = H * 0.86, ph = H * (0.22 + r() * 0.1);
+      ctx.strokeStyle = m.near; ctx.lineWidth = 3 * dpr;
+      ctx.beginPath(); ctx.moveTo(px, pb); ctx.quadraticCurveTo(px + 6 * dpr, pb - ph / 2, px + 3 * dpr, pb - ph); ctx.stroke();
+      ctx.lineWidth = 2 * dpr;
+      for (let a = 0; a < 6; a++) {
+        const ang = Math.PI * (0.15 + a * 0.14);
+        ctx.beginPath(); ctx.moveTo(px + 3 * dpr, pb - ph);
+        ctx.quadraticCurveTo(px + 3 * dpr - Math.cos(ang) * 14 * dpr, pb - ph - 8 * dpr, px + 3 * dpr - Math.cos(ang) * 24 * dpr, pb - ph + Math.sin(ang) * 6 * dpr); ctx.stroke();
+      }
+    }
+  }
+  if (sign === 'road') {
+    ctx.fillStyle = '#20140c';
+    for (let k = 0; k < 5; k++) {
+      const dx = W * 0.2 + k * 26 * dpr, dy = H * 0.83;
+      ctx.fillRect(dx, dy - 8 * dpr, 14 * dpr, 6 * dpr);
+      ctx.fillRect(dx + 1 * dpr, dy - 2 * dpr, 2 * dpr, 6 * dpr); ctx.fillRect(dx + 11 * dpr, dy - 2 * dpr, 2 * dpr, 6 * dpr);
+      ctx.fillRect(dx + 12 * dpr, dy - 13 * dpr, 4 * dpr, 7 * dpr);
+    }
+  }
+  if (['army', 'foreign', 'copper', 'tin', 'bronze'].includes(sign)) {
+    // smoke rising from fires or forges
+    for (let k = 0; k < 3; k++) {
+      let sx = W * (0.15 + r() * 0.7), sy = H * 0.8;
+      for (let p = 0; p < 9; p++) {
+        ctx.fillStyle = `rgba(30, 24, 22, ${0.32 - p * 0.03})`;
+        ctx.beginPath(); ctx.arc(sx, sy, (6 + p * 3) * dpr, 0, Math.PI * 2); ctx.fill();
+        sx += (4 + r() * 6) * dpr; sy -= 9 * dpr;
+      }
+    }
+  }
+  if (sign === 'army') {
+    ctx.strokeStyle = '#120808'; ctx.lineWidth = 2 * dpr;
+    for (let k = 0; k < 22; k++) {
+      const sx = W * 0.05 + k * W * 0.042 + r() * 6, sb = H * (0.86 + r() * 0.04);
+      ctx.beginPath(); ctx.moveTo(sx, sb); ctx.lineTo(sx + 4 * dpr, sb - H * 0.3); ctx.stroke();
+    }
+  }
+  if (sign === 'storm') {
+    ctx.strokeStyle = 'rgba(210, 225, 240, .35)'; ctx.lineWidth = dpr;
+    for (let k = 0; k < 90; k++) { const rx = r() * W, ry = r() * H; ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx - 6 * dpr, ry + 16 * dpr); ctx.stroke(); }
+  }
+  const vig = ctx.createLinearGradient(0, 0, 0, H);
+  vig.addColorStop(0.6, 'rgba(18, 27, 66, 0)'); vig.addColorStop(1, 'rgba(18, 27, 66, .85)');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, W, H);
+  grainOver(ctx, W, H, 0.18);
+}
+
+/* ---------- 10b. Rendering ---------- */
 const ZIGGURAT = 'M-10 5 h20 v-3.5 h-3 v-3.5 h-3 v-3.5 h-8 v3.5 h-3 v3.5 h-3 z';
+const $ = sel => document.querySelector(sel);
+
+function renderAll() {
+  if (!S) return;
+  const c = calc();
+  renderHeader(c);
+  renderRes(c);
+  paintTerrain();
+  renderMap();
+  renderTile(c);
+  renderTabs(c);
+  renderPane(c);
+  renderTicker(c);
+  renderBar();
+  renderSoundBtn();
+}
+
+function renderHeader(c) {
+  $('#realmName').textContent = `The ${S.name}`;
+  const bits = [`<b>${S.title}</b>`, S.era];
+  if (S.deity) bits.push(`Patron <b>${GODS[S.deity].name}</b>`);
+  bits.push(D().name);
+  $('#era').innerHTML = bits.join(' · ');
+  $('#era').title = $('#era').textContent;
+}
+
+// The map overlay: hit areas, ownership, borders, towns and markers over the painted terrain
+function townSVG(x, y, owner) {
+  return `<g class="town" style="--oc: var(--o-${owner})" transform="translate(${x.toFixed(1)} ${(y - 4).toFixed(1)})"><ellipse class="plinth" cx="0" cy="7" rx="19" ry="6"/><path class="hut" d="M-17 7v-6h7v6zM10 7v-5h7v5z"/><path class="zig" d="${ZIGGURAT}" transform="translate(0 -1) scale(1.3)"/></g>`;
+}
+function renderMap() {
+  const svg = $('#map');
+  svg.setAttribute('viewBox', `0 0 ${VB.w.toFixed(1)} ${VB.h.toFixed(1)}`);
+  const claimable = new Set(S.over ? [] : frontier('player').filter(i => !S.tiles[i].owner && S.tiles[i].t !== 'S'));
+  const centers = S.tiles.map((t, i) => hexCenter(i % COLS, Math.floor(i / COLS)));
+  let tilesOut = '', overlay = '';
+  S.tiles.forEach((t, i) => {
+    const [x, y] = centers[i];
+    const label = `${TERRAIN[t.t].name}, ${t.owner ? ownerName(t.owner) : t.t === 'S' ? 'open water' : 'unclaimed'}${t.capital ? ', capital' : ''}${t.imp ? `, ${IMPROVEMENTS[t.imp].name.toLowerCase()}` : ''}${claimable.has(i) ? ', can be settled' : ''}`;
+    tilesOut += `<g class="tile" data-act="select" data-arg="${i}" tabindex="0" role="button" aria-label="${escapeHTML(label)}"><title>${escapeHTML(label)}</title><polygon class="hex" points="${hexPoints(x, y, HEX)}"/></g>`;
+  });
+  // ownership: a light wash and a border only where the owner changes
+  S.tiles.forEach((t, i) => {
+    if (!t.owner) return;
+    const [x, y] = centers[i], oc = `--oc: var(--o-${t.owner})`;
+    overlay += `<polygon class="ownfill${ui.fresh.has(i) ? ' fresh' : ''}" style="${oc}" points="${hexPoints(x, y, HEX)}"/>`;
+    const enemy = t.owner !== 'player' && aiById(t.owner)?.war;
+    let d = '';
+    for (let k = 0; k < 6; k++) {
+      const n = nbDir(i, k);
+      if (n >= 0 && S.tiles[n].owner === t.owner) continue;
+      const a = hexCorner(x, y, HEX - 2.6, k), b = hexCorner(x, y, HEX - 2.6, (k + 1) % 6);
+      d += `M${a[0].toFixed(1)} ${a[1].toFixed(1)}L${b[0].toFixed(1)} ${b[1].toFixed(1)}`;
+    }
+    if (d) overlay += `<path class="border${enemy ? ' war' : ''}" style="${oc}" d="${d}"/>`;
+  });
+  S.tiles.forEach((t, i) => {
+    const [x, y] = centers[i];
+    if (claimable.has(i)) overlay += `<polygon class="claim" points="${hexPoints(x, y, HEX - 5)}"/>`;
+    if (t.capital) overlay += townSVG(x, y, t.owner);
+    if (t.imp) {
+      const [d, col] = IMP_ICON[t.imp];
+      overlay += `<circle class="impi-bg" cx="${x.toFixed(1)}" cy="${(y + 19).toFixed(1)}" r="8"/><path class="impi" style="stroke:${col};fill:none;stroke-width:1.6" transform="translate(${x.toFixed(1)} ${(y + 19).toFixed(1)})" d="${d}"/>`;
+    }
+    if (t.owner && t.owner !== 'player' && aiById(t.owner)?.war && isFrontier(i)) {
+      overlay += `<path class="swords" transform="translate(${(x + 14).toFixed(1)} ${(y - 12).toFixed(1)})" d="${SWORDS}"/>`;
+    }
+    if (ui.sel === i) overlay += `<polygon class="sel" points="${hexPoints(x, y, HEX - 1.5)}"/>`;
+  });
+  svg.innerHTML = tilesOut + overlay;
+  $('#legend').innerHTML = [['player', `The ${escapeHTML(S.name)}`], ...S.ais.filter(a => a.alive).map(a => [a.id, `${a.name}${a.war ? ' (war)' : a.ally ? ' (ally)' : ''}`])]
+    .map(([id, n]) => `<span style="--oc: var(--o-${id})"><i></i>${n}</span>`).join('') + '<span><svg width="14" height="10" aria-hidden="true"><rect x="1" y="1" width="12" height="8" fill="none" stroke="var(--gold)" stroke-dasharray="3 2"/></svg>Can settle</span>';
+}
+
+// The land card opens beside the selected hex (or as a sheet at the bottom on narrow screens)
+function renderTile(c) {
+  const el = $('#tileinfo'), i = ui.sel;
+  if (i == null) { el.hidden = true; return; }
+  const t = S.tiles[i], T = TERRAIN[t.t];
+  const pill = t.owner ? `<span class="pill own" style="--oc: var(--o-${t.owner})">${escapeHTML(ownerName(t.owner))}</span>` : `<span class="pill">${t.t === 'S' ? 'Open water' : 'Unclaimed'}</span>`;
+  let h = `<button class="close" data-act="closetile" aria-label="Close">×</button><div class="ti-head"><h3>${T.name}${t.capital ? ' · capital' : ''}</h3>${pill}</div>`;
+  if (t.t !== 'S') h += `<div class="ti-stats">${tileYield(i)}</div>`;
+  h += `<p class="muted small">${T.note}</p>`;
+  if (!S.over) {
+    if (t.owner === 'player') {
+      if (t.imp) {
+        const m = IMPROVEMENTS[t.imp];
+        h += `<div class="item"><div><h4>${m.name}</h4><p class="meta">${m.desc}</p></div><button class="btn ghost" data-act="dismantle">Dismantle</button></div>`;
+      } else {
+        const opts = Object.keys(IMPROVEMENTS).filter(k => fitsTile(k, i));
+        if (!opts.length) h += '<p class="muted small">Nothing can be built on this land.</p>';
+        opts.forEach(k => {
+          const m = IMPROVEMENTS[k], why = improveCheck(k, i);
+          h += `<div class="item${m.tech && !has(m.tech) ? ' locked' : ''}"><div><h4>${m.name}</h4><p class="meta">${m.desc} · ${impCost(k)} materials</p>${why ? `<p class="why">${why}</p>` : ''}</div><button class="btn" data-act="improve" data-arg="${k}" ${why ? 'disabled' : ''}>Build</button></div>`;
+        });
+      }
+    } else if (!t.owner && t.t !== 'S') {
+      const why = settleCheck(i, c), s = c.settle;
+      const over = !why && c.tiles + 1 > c.landLimit ? `<p class="why">We can govern ${c.landLimit} lands. Each land beyond that costs 3 stability.</p>` : '';
+      h += `<div class="item"><div><h4>Settle this land</h4><p class="meta">${s.pop} people, ${s.food} food, ${s.materials} materials</p>${why ? `<p class="why">${why}</p>` : over}</div><button class="btn" data-act="settle" ${why ? 'disabled' : ''}>Settle</button></div>`;
+    } else if (t.owner && t.owner !== 'player') {
+      const ai = aiById(t.owner), def = defenders(i);
+      let why = '';
+      if (!isFrontier(i)) why = 'Too far away. We can only attack land on our border.';
+      else if (S.attacked) why = 'Our army has already marched this turn.';
+      else if (!S.jobs.soldiers) why = 'We have no soldiers.';
+      const warn = ai.ally ? `This would betray our ally ${ai.name}.` : ai.war ? '' : `This starts a war with ${ai.name}.`;
+      h += `<div class="item"><div><h4>Attack ${ai.name}</h4><p class="meta">Defenders about ${R10(def)} · our army ${c.strength} · ${outlook(c.strength / Math.max(1, def))}</p>${why ? `<p class="why">${why}</p>` : warn ? `<p class="why">${warn}</p>` : ''}</div><button class="btn danger" data-act="attack" ${why ? 'disabled' : ''}>Attack</button></div>`;
+    }
+  }
+  el.innerHTML = h;
+  el.hidden = false;
+  placeTileCard();
+}
+function boardTransform() {
+  const b = $('#board').getBoundingClientRect(), s = Math.min(b.width / VB.w, b.height / VB.h);
+  return { s, ox: (b.width - VB.w * s) / 2, oy: (b.height - VB.h * s) / 2, w: b.width, h: b.height };
+}
+function placeTileCard() {
+  const el = $('#tileinfo');
+  if (el.hidden || ui.sel == null || window.matchMedia('(max-width: 860px)').matches) { el.style.left = ''; el.style.top = ''; return; }
+  const T = boardTransform(), [x, y] = hexCenter(ui.sel % COLS, Math.floor(ui.sel / COLS));
+  const px = T.ox + x * T.s, py = T.oy + y * T.s, r = HEX * T.s, w = el.offsetWidth, h = el.offsetHeight;
+  let left = px + r + 14;
+  if (left + w > T.w - 12) left = px - r - 14 - w;
+  el.style.left = `${clamp(left, 12, Math.max(12, T.w - w - 12))}px`;
+  el.style.top = `${clamp(py - h / 2, 12, Math.max(12, T.h - h - 12))}px`;
+}
+
+// The drawer: a rail of tabs, each with its cuneiform sign
+const TABS = [['council', 'Council', 'king'], ['people', 'People', 'people'], ['build', 'Build', 'house'], ['research', 'Research', 'knowledge'], ['neighbors', 'Neighbors', 'foreign'], ['trade', 'Trade', 'silver'], ['chronicle', 'Chronicle', 'star']];
+function renderTabs(c) {
+  const urgent = tips(c).some(t => t[0] === 'bad');
+  const dots = {
+    council: urgent && ui.tab !== 'council',
+    research: !S.research && !S.over && Object.keys(TECHS).some(id => !has(id) && TECHS[id].req.every(has)),
+    build: has('rituals') && !S.deity && !S.over,
+    neighbors: S.ais.some(a => a.alive && a.war) || S.threats.length > 0,
+  };
+  $('#tabs').innerHTML = TABS.map(([id, label, sign], k) => `<button class="tab" role="tab" id="tab-${id}" aria-selected="${ui.tab === id && ui.drawer}" data-act="tab" data-arg="${id}" title="${label} (${k + 1})">${cu(sign)}<span class="lbl">${label}</span>${dots[id] ? '<span class="dot" aria-label="needs attention"></span>' : ''}</button>`).join('');
+  $('#drawer').classList.toggle('closed', !ui.drawer);
+  $('#pane').setAttribute('aria-labelledby', `tab-${ui.tab}`);
+}
+function renderPane(c) {
+  const fn = { council: paneCouncil, people: paneP, build: paneBuild, research: paneResearch, neighbors: paneNeighbors, trade: paneTrade, chronicle: paneChronicle }[ui.tab];
+  $('#paneTitle').textContent = TABS.find(t => t[0] === ui.tab)[1];
+  $('#pane').innerHTML = fn(c);
+}
+function paneCouncil(c) {
+  if (S.over) return `<p class="tip good">${cu('wedge')}<span>The game is over. Start a new one from the Game menu.</span></p>`;
+  const study = S.research ? (S.research === 'lore' ? LORE.name : TECHS[S.research].name) : 'nothing yet';
+  const nextH = HISTORY.find(x => x.turn > S.turn);
+  let h = `<div class="glance"><div><span class="h">Rank</span><b>${S.title}</b></div><div><span class="h">Lands</span><b>${c.tiles} <span class="muted small">of ${c.landLimit} we can govern</span></b></div><div><span class="h">Studying</span><b>${study}</b></div><div><span class="h">Next turning point</span><b>${nextH ? `${fmtYear(nextH.turn)}` : 'The Collapse'} <span class="muted small">${nextH ? `in ${plural(nextH.turn - S.turn, 'turn')}` : ''}</span></b></div></div>`;
+  h += `<p class="h">Advisors</p>${tips(c, 8).map(([k, text]) => `<p class="tip ${k}">${cu('wedge')}<span>${text}</span></p>`).join('')}`;
+  if (S.buffs.length) h += `<p class="h">In effect</p><div class="buffs">${groupBuffs().map(b => `<span class="pill${b.stab < 0 || b.food < 0 || b.caravan < 0 ? ' bad' : ''}">${buffText(b)}</span>`).join('')}</div>`;
+  const next = GOALS.filter(g => !S.goals.includes(g.id)).slice(0, 4);
+  if (next.length) h += `<p class="h">Goals <span class="count">${S.goals.length} of ${GOALS.length} reached</span></p>${goalsHTML(next)}`;
+  h += '<p class="muted small">The marks on the year-line are the turning points of the age: great kings, invasions and omens arrive on their real dates.</p>';
+  return h;
+}
+function renderTicker(c) {
+  const all = tips(c, 8), [kind, text] = all[0];
+  const el = $('#ticker');
+  el.className = `ticker${kind === 'bad' ? ' bad' : ''}`;
+  el.innerHTML = `${cu('wedge')}<span class="txt">${text}</span>${all.length > 1 ? `<span class="more">+${all.length - 1} more</span>` : ''}`;
+  el.title = 'Open the council';
+}
+
 // Small glyphs for tile improvements, drawn on a dark disc. [path, stroke colour]
 const IMP_ICON = {
   lumber:     ['M0 -5 L4 2 H-4 Z M0 2 V5', '#8fd19e'],
@@ -2561,33 +3227,17 @@ const IMP_ICON = {
 };
 const SWORDS = 'M-5 -5 L5 5 M5 -5 L-5 5 M-6 -2 l3 -3 M6 -2 l-3 -3';
 const CHART_LINE = '#bd8640'; // checked against the panel colour for lightness, chroma and contrast
-const $ = sel => document.querySelector(sel);
-
-function renderAll() {
-  if (!S) return;
-  const c = calc();
-  renderHeader(c);
-  renderRes(c);
-  renderMap();
-  renderTile(c);
-  renderAdvice(c);
-  renderTabs(c);
-  renderPane(c);
-  renderBar();
-  renderSoundBtn();
-}
-
-function renderHeader(c) {
-  $('#era').textContent = `${S.era} · ${D().name}`;
-  $('#realmName').textContent = `The ${S.name}`;
-  const stats = [['Rank', S.title], ['Year', fmtYear(S.turn)], ['Lands', `${c.tiles}<span class="muted small"> / ${c.landLimit}</span>`]];
-  if (S.deity) stats.push(['Patron', GODS[S.deity].name]);
-  $('#realm').innerHTML = stats.map(([k, v]) => `<div class="stat"><span class="h">${k}</span><span class="v">${v}</span></div>`).join('');
-}
 
 function chip(sign, label, value, delta, warn, tip) {
   const d = delta == null ? '' : ` <span class="d ${delta < 0 ? 'neg' : 'pos'}">${signed(delta)}</span>`;
   return `<div class="chip${warn ? ' warn' : ''}" title="${escapeHTML(tip)}" tabindex="0" role="button" aria-label="${escapeHTML(`${label}: ${tip}`)}"><span class="cu" aria-hidden="true">${SIGN[sign]}</span><span class="lab">${label}</span><span class="val">${value}${d}</span></div>`;
+}
+// Copper, tin and bronze share one chip: they only matter together
+function metalChip(c) {
+  const r = S.res;
+  const part = (sign, v, d) => `<span class="mv"><span class="cu" aria-hidden="true">${SIGN[sign]}</span>${v}${d ? ` <span class="d ${d < 0 ? 'neg' : 'pos'}">${signed(d)}</span>` : ''}</span>`;
+  const tip = `Copper ${r.copper} (mines dig ${c.copperIn} a turn), tin ${r.tin} (mines dig ${c.tinIn}; tin is found only in the mountains, or bought), bronze ${r.bronze}. Forges cast ${c.bronzeIn} bronze a turn, each from 2 copper and 1 tin${c.armsUpkeep ? `. The army's bronze arms use ${c.armsUpkeep} a turn` : ''}.`;
+  return `<div class="chip metals${!c.armed ? ' warn' : ''}" title="${escapeHTML(tip)}" tabindex="0" role="button" aria-label="${escapeHTML(`Metals: ${tip}`)}"><span class="lab">Copper · Tin · Bronze</span><span class="val">${part('copper', r.copper, c.copperIn - c.bronzeIn * 2)}${part('tin', r.tin, c.tinIn - c.bronzeIn)}${part('bronze', r.bronze, c.bronzeIn - c.armsUpkeep)}</span></div>`;
 }
 function renderRes(c) {
   const r = S.res;
@@ -2598,10 +3248,7 @@ function renderRes(c) {
     chip('food', 'Food', `${r.food}<span class="muted small">/${c.storage}</span>`, c.foodNet, c.foodNet < 0,
       `We grow ${c.foodIn} and eat ${c.foodOut} a turn. Storage holds ${c.storage}; the rest spoils.`),
     chip('materials', 'Materials', r.materials, c.matIn, false, `Laborers and land bring in ${c.matIn} a turn.`),
-    chip('copper', 'Copper', r.copper, c.copperIn - c.bronzeIn * 2 || null, false, `Mines dig ${c.copperIn} a turn. Each bronze uses 2 copper.`),
-    chip('tin', 'Tin', r.tin, c.tinIn - c.bronzeIn || null, false, `Mines dig ${c.tinIn} a turn. Each bronze uses 1 tin. Tin is found only in the mountains, or bought.`),
-    chip('bronze', 'Bronze', r.bronze, (c.bronzeIn - c.armsUpkeep) || null, !c.armed,
-      `Forges cast ${c.bronzeIn} a turn (room for ${c.forgeCap}).${c.armsUpkeep ? ` The army's bronze arms use ${c.armsUpkeep} a turn.` : ''}`),
+    metalChip(c),
     chip('silver', 'Silver', r.silver, c.silverIn || null, c.silverIn < 0,
       c.silverParts.length ? c.silverParts.map(([k, v]) => `${k} ${signed(v)}`).join(', ') : 'No steady silver income yet. Weaving, markets, taxes and trade pacts bring it in.'),
     chip('knowledge', 'Knowledge', `+${fmt1(c.know)}`, null, false, `Scholars and the people's curiosity bring ${fmt1(c.know)} knowledge a turn. Studying: ${study}.`),
@@ -2623,106 +3270,12 @@ function smoothPath(pts) {
   }
   return d;
 }
-function renderMap() {
-  const svg = $('#map');
-  const w = PAD * 2 + HEX * SQ3 * (COLS + 0.5), h = PAD * 2 + HEX * 2 + HEX * 1.5 * (ROWS - 1);
-  svg.setAttribute('viewBox', `0 0 ${w.toFixed(0)} ${h.toFixed(0)}`);
-  const claimable = new Set(S.over ? [] : frontier('player').filter(i => !S.tiles[i].owner && S.tiles[i].t !== 'S'));
-  const centers = S.tiles.map((t, i) => hexCenter(i % COLS, Math.floor(i / COLS)));
-  let tilesOut = '', overlay = '';
-  S.tiles.forEach((t, i) => {
-    const [x, y] = centers[i];
-    const label = `${TERRAIN[t.t].name}, ${t.owner ? ownerName(t.owner) : t.t === 'S' ? 'open water' : 'unclaimed'}${t.capital ? ', capital' : ''}${t.imp ? `, ${IMPROVEMENTS[t.imp].name.toLowerCase()}` : ''}${claimable.has(i) ? ', can be settled' : ''}`;
-    tilesOut += `<g class="tile" data-act="select" data-arg="${i}" tabindex="0" role="button" aria-label="${escapeHTML(label)}"><title>${escapeHTML(label)}</title>`;
-    tilesOut += `<polygon class="hex t-${t.t}" points="${hexPoints(x, y, HEX)}"/>`;
-    tilesOut += `<path class="deco deco-${t.t}" transform="translate(${x.toFixed(1)} ${(y + (t.capital ? 6 : 0)).toFixed(1)})" d="${DECO[t.t]}"/>`;
-    tilesOut += '</g>';
-  });
-  // rivers flow over the land but under borders and markers
-  let rivers = '';
-  RIVERS.forEach(course => {
-    const pts = course.map(([c, r]) => hexCenter(c, r));
-    pts[0] = [pts[0][0], pts[0][1] - HEX * 0.55];
-    const d = smoothPath(pts);
-    rivers += `<path class="river-bank" d="${d}"/><path class="river" d="${d}"/><path class="river-glint" d="${d}"/>`;
-  });
-  // ownership: a light wash and a border only where the owner changes
-  S.tiles.forEach((t, i) => {
-    if (!t.owner) return;
-    const [x, y] = centers[i], oc = `--oc: var(--o-${t.owner})`;
-    overlay += `<polygon class="ownfill${ui.fresh.has(i) ? ' fresh' : ''}" style="${oc}" points="${hexPoints(x, y, HEX)}"/>`;
-    const enemy = t.owner !== 'player' && aiById(t.owner)?.war;
-    let d = '';
-    for (let k = 0; k < 6; k++) {
-      const n = nbDir(i, k);
-      if (n >= 0 && S.tiles[n].owner === t.owner) continue;
-      const a = hexCorner(x, y, HEX - 2.6, k), b = hexCorner(x, y, HEX - 2.6, (k + 1) % 6);
-      d += `M${a[0].toFixed(1)} ${a[1].toFixed(1)}L${b[0].toFixed(1)} ${b[1].toFixed(1)}`;
-    }
-    if (d) overlay += `<path class="border${enemy ? ' war' : ''}" style="${oc}" d="${d}"/>`;
-  });
-  S.tiles.forEach((t, i) => {
-    const [x, y] = centers[i], oc = t.owner ? `--oc: var(--o-${t.owner})` : '';
-    if (claimable.has(i)) overlay += `<polygon class="claim" points="${hexPoints(x, y, HEX - 5)}"/>`;
-    if (t.capital) overlay += `<path class="cap" style="${oc}" transform="translate(${x.toFixed(1)} ${(y - 13).toFixed(1)})" d="${ZIGGURAT}"/>`;
-    if (t.imp) {
-      const [d, col] = IMP_ICON[t.imp];
-      overlay += `<circle class="impi-bg" cx="${x.toFixed(1)}" cy="${(y + 19).toFixed(1)}" r="7.5"/><path class="impi" style="stroke:${col};fill:none;stroke-width:1.5" transform="translate(${x.toFixed(1)} ${(y + 19).toFixed(1)})" d="${d}"/>`;
-    }
-    if (t.owner && t.owner !== 'player' && aiById(t.owner)?.war && isFrontier(i)) {
-      overlay += `<path class="swords" transform="translate(${(x + 14).toFixed(1)} ${(y - 12).toFixed(1)})" d="${SWORDS}"/>`;
-    }
-    if (ui.sel === i) overlay += `<polygon class="sel" points="${hexPoints(x, y, HEX - 1.5)}"/>`;
-  });
-  svg.innerHTML = tilesOut + rivers + overlay;
-  $('#legend').innerHTML = [['player', `The ${escapeHTML(S.name)}`], ...S.ais.filter(a => a.alive).map(a => [a.id, `${a.name}${a.war ? ' (war)' : a.ally ? ' (ally)' : ''}`])]
-    .map(([id, n]) => `<span style="--oc: var(--o-${id})"><i></i>${n}</span>`).join('') + '<span><svg width="14" height="10" aria-hidden="true"><rect x="1" y="1" width="12" height="8" fill="none" stroke="var(--gold)" stroke-dasharray="3 2"/></svg>Can settle</span>';
-}
-
 function tileYield(i) {
   const t = S.tiles[i], T = TERRAIN[t.t];
   const farm = T.farm + (has('plough') && (t.t === 'R' || t.t === 'P') ? 10 : 0);
   return `<span>Farmland <b>${farm}</b></span><span>Housing <b>${T.house + (t.capital ? 40 : 0)}</b></span><span>Materials <b>+${T.mat}</b></span><span>Defence <b>×${T.def}</b></span>${isCoast(i) ? '<span>Coast</span>' : ''}${RIVERS.some(rv => rv.some(([c, r]) => tileIdx(c, r) === i)) ? '<span>River</span>' : ''}`;
 }
-function renderTile(c) {
-  const el = $('#tileinfo'), i = ui.sel;
-  if (i == null) { el.innerHTML = '<p class="muted">Select a tile on the map.</p>'; return; }
-  const t = S.tiles[i], T = TERRAIN[t.t];
-  const pill = t.owner ? `<span class="pill own" style="--oc: var(--o-${t.owner})">${escapeHTML(ownerName(t.owner))}</span>` : `<span class="pill">${t.t === 'S' ? 'Open water' : 'Unclaimed'}</span>`;
-  let h = `<div class="ti-head"><h3>${T.name}${t.capital ? ' · capital' : ''}</h3>${pill}</div>`;
-  if (t.t !== 'S') h += `<div class="ti-stats">${tileYield(i)}</div>`;
-  h += `<p class="muted small">${T.note}</p>`;
-
-  if (S.over) { el.innerHTML = h; return; }
-  if (t.owner === 'player') {
-    if (t.imp) {
-      const m = IMPROVEMENTS[t.imp];
-      h += `<div class="item"><div><h4>${m.name}</h4><p class="meta">${m.desc}</p></div><button class="btn ghost" data-act="dismantle">Dismantle</button></div>`;
-    } else {
-      const opts = Object.keys(IMPROVEMENTS).filter(k => fitsTile(k, i));
-      if (!opts.length) h += '<p class="muted small">Nothing can be built on this land.</p>';
-      opts.forEach(k => {
-        const m = IMPROVEMENTS[k], why = improveCheck(k, i);
-        h += `<div class="item${m.tech && !has(m.tech) ? ' locked' : ''}"><div><h4>${m.name}</h4><p class="meta">${m.desc} · ${impCost(k)} materials</p>${why ? `<p class="why">${why}</p>` : ''}</div><button class="btn" data-act="improve" data-arg="${k}" ${why ? 'disabled' : ''}>Build</button></div>`;
-      });
-    }
-  } else if (!t.owner && t.t !== 'S') {
-    const why = settleCheck(i, c), s = c.settle;
-    const over = !why && c.tiles + 1 > c.landLimit ? `<p class="why">We can govern ${c.landLimit} lands. Each land beyond that costs 3 stability.</p>` : '';
-    h += `<div class="item"><div><h4>Settle this land</h4><p class="meta">${s.pop} people, ${s.food} food, ${s.materials} materials</p>${why ? `<p class="why">${why}</p>` : over}</div><button class="btn" data-act="settle" ${why ? 'disabled' : ''}>Settle</button></div>`;
-  } else if (t.owner && t.owner !== 'player') {
-    const ai = aiById(t.owner), def = defenders(i);
-    let why = '';
-    if (!isFrontier(i)) why = 'Too far away. We can only attack land on our border.';
-    else if (S.attacked) why = 'Our army has already marched this turn.';
-    else if (!S.jobs.soldiers) why = 'We have no soldiers.';
-    const warn = ai.ally ? `This would betray our ally ${ai.name}.` : ai.war ? '' : `This starts a war with ${ai.name}.`;
-    h += `<div class="item"><div><h4>Attack ${ai.name}</h4><p class="meta">Defenders about ${R10(def)} · our army ${c.strength} · ${outlook(c.strength / Math.max(1, def))}</p>${why ? `<p class="why">${why}</p>` : warn ? `<p class="why">${warn}</p>` : ''}</div><button class="btn danger" data-act="attack" ${why ? 'disabled' : ''}>Attack</button></div>`;
-  }
-  el.innerHTML = h;
-}
-
-function tips(c) {
+function tips(c, max = 4) {
   const t = [];
   if (c.foodAfter < 0) t.push(['bad', 'Famine next turn: the grain will run out. Move people into farming (try Balance farmers).']);
   else if (c.foodNet < 0) t.push(['bad', `We eat ${-c.foodNet} more grain than we grow each turn. The stores last about ${Math.floor(S.res.food / -c.foodNet)} turns.`]);
@@ -2746,7 +3299,7 @@ function tips(c) {
   const left = LAST_TURN - S.turn;
   if (left <= 15 && !S.over) t.push(['bad', `The Collapse comes in ${left * YEARS_PER_TURN} years. Prepare strong walls, full granaries and a loyal people.`]);
   t.sort((a, b) => (b[0] === 'bad') - (a[0] === 'bad'));
-  return t.length ? t.slice(0, 4) : [['good', 'All is well. End the turn when you are ready.']];
+  return t.length ? t.slice(0, max) : [['good', 'All is well. End the turn when you are ready.']];
 }
 function buffText(b) {
   const fx = [b.food ? `food ${pct(b.food)}` : '', b.stab ? `stability ${signed(b.stab)}` : '', b.army ? `army +${b.army}` : '', b.caravan ? `caravans ${signed(b.caravan)}` : ''].filter(Boolean).join(', ');
@@ -2755,29 +3308,13 @@ function buffText(b) {
 function goalsHTML(list) {
   return `<ul class="goals">${list.map(g => `<li class="${S.goals.includes(g.id) ? 'done' : ''}"><span>${g.text}</span><span class="rw">${describe(null, g.reward)}</span></li>`).join('')}</ul>`;
 }
-function renderAdvice(c) {
-  if (S.over) { $('#advice').innerHTML = `<p class="tip good">${cu('wedge')}<span>The game is over. Start a new one from the Game menu.</span></p>`; return; }
-  const buffs = S.buffs.length ? `<div class="buffs">${groupBuffs().map(b => `<span class="pill${b.stab < 0 || b.food < 0 || b.caravan < 0 ? ' bad' : ''}">${buffText(b)}</span>`).join('')}</div>` : '';
-  const next = GOALS.filter(g => !S.goals.includes(g.id)).slice(0, 2);
-  const goals = next.length ? `<p class="h">Goals</p>${goalsHTML(next)}` : '';
-  $('#advice').innerHTML = `<p class="h">Advisors</p>` + tips(c).map(([k, text]) => `<p class="tip ${k}">${cu('wedge')}<span>${text}</span></p>`).join('') + buffs + goals;
+function moodOf(att) {
+  if (att < -40) return 'Hostile';
+  if (att < -10) return 'Wary';
+  if (att < 20) return 'Neutral';
+  if (att < 50) return 'Friendly';
+  return 'Kin';
 }
-
-const TABS = [['people', 'People'], ['build', 'Build'], ['research', 'Research'], ['neighbors', 'Neighbors'], ['trade', 'Trade'], ['chronicle', 'Chronicle']];
-function renderTabs() {
-  const dots = {
-    research: !S.research && !S.over && Object.keys(TECHS).some(id => !has(id) && TECHS[id].req.every(has)),
-    build: has('rituals') && !S.deity && !S.over,
-    neighbors: S.ais.some(a => a.alive && a.war) || S.threats.length > 0,
-  };
-  $('#tabs').innerHTML = TABS.map(([id, label], k) => `<button class="tab" role="tab" id="tab-${id}" aria-selected="${ui.tab === id}" data-act="tab" data-arg="${id}" title="${label} (${k + 1})">${label}${dots[id] ? '<span class="dot" aria-label="needs attention"></span>' : ''}</button>`).join('');
-  $('#pane').setAttribute('aria-labelledby', `tab-${ui.tab}`);
-}
-function renderPane(c) {
-  const fn = { people: paneP, build: paneBuild, research: paneResearch, neighbors: paneNeighbors, trade: paneTrade, chronicle: paneChronicle }[ui.tab];
-  $('#pane').innerHTML = fn(c);
-}
-
 function paneP(c) {
   const j = S.jobs;
   const outs = {
@@ -2860,13 +3397,6 @@ function paneResearch(c) {
   return h;
 }
 
-function moodOf(att) {
-  if (att < -40) return 'Hostile';
-  if (att < -10) return 'Wary';
-  if (att < 20) return 'Neutral';
-  if (att < 50) return 'Friendly';
-  return 'Kin';
-}
 function paneNeighbors(c) {
   const off = S.over ? 'disabled' : '';
   let h = `<p class="muted small">Our army: strength <b>${c.strength}</b>, defence <b>${c.defense}</b>${c.allyHelp ? ` (allies add ${c.allyHelp})` : ''}. Their armies are estimates. A hostile neighbor on our border may declare war when its army outmatches our defence.</p>`;
@@ -3012,12 +3542,6 @@ function renderBar() {
   btn.disabled = S.over;
   btn.innerHTML = S.over ? 'Game over' : `End turn<small>to ${fmtYear(S.turn + 1)}</small>`;
 }
-function renderSoundBtn() {
-  const b = $('#soundBtn');
-  b.setAttribute('aria-pressed', String(Sound.set.sound));
-  b.textContent = Sound.set.sound ? 'Sound on' : 'Sound off';
-}
-
 function toast(text, kind = '') {
   const el = $('#toast');
   el.textContent = text;
@@ -3025,6 +3549,13 @@ function toast(text, kind = '') {
   el.hidden = false;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { el.hidden = true; }, 3200);
+}
+
+
+function renderSoundBtn() {
+  const b = $('#soundBtn');
+  b.setAttribute('aria-pressed', String(Sound.set.sound));
+  b.title = `Sound is ${Sound.set.sound ? 'on' : 'off'} (M)`;
 }
 
 /* ---------- 11. Modals ---------- */
@@ -3050,7 +3581,7 @@ function nextModal() {
   box.hidden = false;
   if (currentModal.sfx) Sound.play(currentModal.sfx);
   const focusEl = $('#mCard input') || $('#mCard .choice:not(:disabled)');
-  if (focusEl) focusEl.focus();
+  if (focusEl) focusEl.focus({ preventScroll: true });
 }
 function drawModal(m) {
   const choices = m.choices.map((ch, k) => {
@@ -3060,7 +3591,9 @@ function drawModal(m) {
     return `<button class="btn choice${ch.ghost ? ' ghost' : ''}${ch.danger ? ' danger' : ''}" data-act="choose" data-arg="${k}" ${ok ? '' : 'disabled'}><span>${ch.label}</span>${hint ? `<span class="hint">${hint}</span>` : ''}</button>`;
   }).join('');
   const html = typeof m.html === 'function' ? m.html() : (m.html || '');
-  $('#mCard').innerHTML = `${m.sign ? `<div class="bigcu cu" aria-hidden="true">${SIGN[m.sign]}</div>` : ''}${m.date ? `<p class="date">${m.date}</p>` : ''}<h2 id="mTitle">${m.title}</h2>${m.body ? `<p>${m.body}</p>` : ''}${html}<div class="choices">${choices}</div>`;
+  const sign = m.sign || 'wedge', glyphs = [...SIGN[sign]].length;
+  $('#mCard').innerHTML = `<canvas class="banner" aria-hidden="true"></canvas><div class="medal cu" aria-hidden="true" style="font-size:${glyphs > 2 ? 1 : glyphs > 1 ? 1.35 : 1.9}rem">${SIGN[sign]}</div>${m.date ? `<p class="date">${m.date}</p>` : ''}<h2 id="mTitle">${m.title}</h2>${m.body ? `<p>${m.body}</p>` : ''}${html}<div class="choices">${choices}</div>`;
+  paintBanner($('#mCard .banner'), sign, m.title);
 }
 function choose(k) {
   const m = currentModal, ch = m && m.choices[k];
@@ -3094,14 +3627,14 @@ function restorePending() {
 const HOWTO = `<ul>
   <li>Each turn is 20 years. Everyone eats 1 grain a turn.</li>
   <li>In <b>People</b>, move people between farming, labor, soldiering and study. River farmland feeds the most, and <b>Balance farmers</b> does the sums for you.</li>
-  <li>Click land with a dotted gold edge to <b>settle</b> it. Click your own land to build mines, canals and pastures.</li>
+  <li>Click any land to open its card. Land with a dotted gold edge can be <b>settled</b>; on your own land you can build mines, canals and pastures.</li>
   <li>Study ideas, raise buildings and great works, choose a patron god, and cast bronze from 2 copper and 1 tin. Tin only comes from the mountains or from traders.</li>
   <li>Win neighbors over with gifts, trade pacts and alliances, or take their land by force.</li>
   <li>Great kings rise and fall on fixed dates: Sargon of Akkad, the Gutians, Hammurabi, the chariot warriors. The marks on the timeline show when.</li>
   <li>Keep <b>stability</b> up with temples, festivals, food and peace. At 0 the realm falls apart.</li>
   <li>In 1200 BC the Bronze Age Collapse tests your walls, your granaries and your people's unity.</li>
 </ul>`;
-const KEYS = '<p class="small muted"><kbd>E</kbd> end turn · <kbd>1</kbd>–<kbd>6</kbd> tabs · arrow keys move around the map · <kbd>M</kbd> sound · <kbd>?</kbd> help · <kbd>Esc</kbd> close</p>';
+const KEYS = '<p class="small muted"><kbd>E</kbd> end turn · <kbd>1</kbd>–<kbd>7</kbd> drawer tabs · arrow keys move around the map · <kbd>M</kbd> sound · <kbd>?</kbd> help · <kbd>Esc</kbd> close</p>';
 const cleanName = v => String(v || '').replace(/[<>&"'`]/g, '').trim().slice(0, 24);
 
 function showIntro() {
@@ -3151,7 +3684,7 @@ function importSave(text) {
   if (!S.hist.length) recordHistory();
   modalQueue = [];
   nextModal();
-  ui.sel = tilesOwnedBy('player').find(i => S.tiles[i].capital) ?? tilesOwnedBy('player')[0] ?? null;
+  ui.sel = null;
   ui.fresh = new Set();
   save();
   renderAll();
@@ -3357,7 +3890,15 @@ const ACTIONS = {
     renderAll();
     if (viaKey) document.querySelector(`.tile[data-arg="${i}"]`)?.focus();
   },
-  tab: id => { ui.tab = id; Sound.play('tap'); },
+  tab: id => {
+    // the active tab folds the drawer away; any other tab opens it
+    if (ui.tab === id && ui.drawer && !window.matchMedia('(max-width: 860px)').matches) ui.drawer = false;
+    else { ui.tab = id; ui.drawer = true; }
+    Sound.play('tap');
+  },
+  council: () => { ui.tab = 'council'; ui.drawer = true; },
+  fold: () => { ui.drawer = false; },
+  closetile: () => { ui.sel = null; },
   step: n => { ui.step = +n; },
   job: arg => { const [k, d] = arg.split(':'); changeJob(k, d); },
   autofarm: autoFarm,
@@ -3407,6 +3948,8 @@ function bindEvents() {
     // tapping a resource explains it, for screens without hover
     const chipEl = e.target.closest('.chip');
     if (chipEl && !modalOpen) { toast(chipEl.title); return; }
+    // a click on the map away from any land closes the land card
+    if (!modalOpen && ui.sel != null && e.target.closest('#board') && !e.target.closest('.tile, .tilecard')) { ui.sel = null; renderAll(); return; }
     const el = e.target.closest('[data-act]');
     if (!el || el.disabled || !S) return;
     const act = el.dataset.act;
@@ -3427,6 +3970,7 @@ function bindEvents() {
       if (k >= 0) { e.preventDefault(); choose(k); }
       return;
     }
+    if (e.key === 'Escape' && ui.sel != null) { ui.sel = null; renderAll(); return; }
     if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.ctrlKey || e.metaKey || e.altKey) return;
     const chart = e.target.closest && e.target.closest('svg[data-chart]');
     if (chart && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
@@ -3450,7 +3994,7 @@ function bindEvents() {
     }
     if (modalOpen) return;
     if (e.key === 'e' || e.key === 'E') endTurn();
-    else if (/^[1-6]$/.test(e.key)) { ui.tab = TABS[+e.key - 1][0]; renderAll(); }
+    else if (/^[1-7]$/.test(e.key)) { ui.tab = TABS[+e.key - 1][0]; ui.drawer = true; renderAll(); }
     else if (e.key === '?') showHelp();
     else if (e.key === 'm' || e.key === 'M') toggleSound();
   });
@@ -3469,14 +4013,19 @@ function bindEvents() {
 
 function start(data) {
   Sound.set = loadSettings();
+  document.documentElement.style.setProperty('--grain', `url(${grain().toDataURL()})`);
   bindEvents();
+  // repaint the terrain and move the land card whenever the map changes size
+  const relayout = () => { if (S) { paintTerrain(); placeTileCard(); } };
+  if (window.ResizeObserver) new ResizeObserver(relayout).observe($('#board'));
+  else window.addEventListener('resize', relayout);
   const saved = (data && data.save && migrate(data.save)) || loadSave();
   if (saved && !saved.over) {
     S = saved;
     S.era = eraOf();
     S.title = TITLES.includes(S.title) ? S.title : titleOf();
     if (!S.hist.length) recordHistory();
-    ui.sel = tilesOwnedBy('player').find(i => S.tiles[i].capital) ?? tilesOwnedBy('player')[0] ?? null;
+    ui.sel = null;
     renderAll();
     restorePending();
   } else {
