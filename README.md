@@ -1,10 +1,31 @@
 # Bronze Dawn
 
-A turn-based strategy game in a single HTML file, inspired by *Pre-Civilization: Bronze Age*. Lead a river tribe from 3000 BC to the Bronze Age Collapse of 1200 BC.
+Turn-based strategy games about the Bronze Age, inspired by *Pre-Civilization: Bronze Age*. Each version is a single HTML file.
+
+| File | Version | In short |
+| --- | --- | --- |
+| `index.html` | **Bronze Dawn** | A painted hex map to settle and conquer, ten resources, neighbors on the map. 3000 BC to 1200 BC. |
+| `valley.html` | **Bronze Dawn Valley** | Closer to Pre-Civ: no map, four core resources, lands won by expedition, and one settlement that grows on screen. 6000 BC to 1200 BC. |
 
 ## Play
 
-Open `index.html` in a browser. There is no build step and nothing to install. The game saves itself in the browser's localStorage after every action. Fonts come from Google Fonts when you are online; the game still works offline.
+Open either file in a browser. There is no build step and nothing to install. Each game saves itself in the browser's localStorage after every action, and each links to the other from its intro and Game menu. Fonts come from Google Fonts when you are online; the games still work offline.
+
+Both are designed for a desktop or laptop screen first: the scene fills the window, a drawer with a rail of tabs sits at the right, and the year-line with the End turn button runs along the bottom. On a phone the same pieces stack.
+
+## Bronze Dawn Valley
+
+- 80 turns of 60 years, from the first villages of 6000 BC to the Collapse.
+- **Resources:** food, wood, stone and bronze, plus people, knowledge, mood and defence.
+- **Trades:** farmers, woodcutters, masons, smiths, scholars and warriors. Each land keeps only so many of each trade busy at full yield.
+- **Lands:** send expeditions to claim river bends, plains, marsh, forest, hills and mountains. There is no map: your lands are a list, and the valley painting shows them.
+- **Bronze:** needs the Bronze idea, a forge, copper from hills or mountains, and tin from mountains or ships. Smiths burn wood as charcoal.
+- **Ideas and buildings:** 28 ideas from Pottery to Iron working; houses, granaries, storehouses, temples, workshops, forges, walls, tablet houses and a market; four great works.
+- **Neighbors:** Eridu, the Zagros clans and the Steppe riders trade, marry, demand and raid. You can barter, send gifts, or raid them back.
+- **History:** the canals of the south, the first copper, Uruk, writing, Gilgamesh, Sargon, the Gutians, Hammurabi, Thera, the Amarna letters and the closing of the tin roads.
+- **The valley:** huts become mud-brick houses, fields spread along the river, and temples, granaries, forges, walls, a palace and a ziggurat appear as you build. People walk to the fields, boats drift on the river and smoke rises from the forges.
+
+## Bronze Dawn (map version)
 
 ## How it works
 
@@ -32,16 +53,16 @@ Resource icons are Sumerian cuneiform signs. The Chronicle tab lists what each o
 
 ## Controls
 
-Click or tap everything. Hover over a resource (or tap it) to see where it comes from. On a keyboard:
+Click or tap everything. Hover over a resource (or tap it) to see where it comes from. In the map version, clicking a land opens its card beside it. On a keyboard:
 
 | Key | Action |
 | --- | --- |
 | `E` | End the turn |
-| `1`–`6` | Switch tabs |
+| `1`–`7` | Open a drawer tab (clicking the open tab folds the drawer away) |
 | Arrow keys | Move around the map once a tile has focus |
 | `M` | Sound on or off |
 | `?` | How to play |
-| `Esc` | Close a dialog that can be closed |
+| `Esc` | Close a dialog that can be closed, or the land card |
 
 The **Game** menu turns music on or off. It also gives a save code you can copy or download to move a game to another browser, loads a code or save file, shows the hall of records and starts a new game.
 
@@ -51,7 +72,7 @@ Games are saved as version 2. Version 1 saves from the first release load and ca
 
 ## Code layout
 
-Everything is in `index.html`, in numbered sections:
+Each game is one file in numbered sections. In `index.html`:
 
 1. Data
 2. State and saves
@@ -67,16 +88,17 @@ Everything is in `index.html`, in numbered sections:
 12. Sound
 13. Startup
 
-Game balance lives in the data tables at the top and in `calc()`. All sound is synthesised with the Web Audio API, so there are no asset files.
+Game balance lives in the data tables at the top and in `calc()`. The terrain, the valley and the event banners are painted on canvas with seeded noise (never the game's own dice), and all sound is synthesised with the Web Audio API, so there are no asset files. `valley.html` follows the same layout and shares the look, the banners, the sound and the save handling.
 
 ## Balance testing
 
-`tools/playtest.mjs` plays whole games in headless Chromium with a simple scripted ruler and prints scores, ranks and the Collapse tests. It needs Playwright (`npm install playwright`):
+`tools/playtest.mjs` (map version) and `tools/playtest-valley.mjs` play whole games in headless Chromium with a simple scripted ruler and print scores, ranks and the Collapse tests. They need Playwright (`npm install playwright`):
 
 ```sh
 node tools/playtest.mjs 10
 node tools/playtest.mjs 6 '{"aggressive":true}'
 node tools/playtest.mjs 6 '{"diff":"hard","sargon":"refuse","verbose":true}'
+node tools/playtest-valley.mjs 6 '{"raid":true}'
 ```
 
-The game itself does not depend on it.
+The games themselves do not depend on them.
