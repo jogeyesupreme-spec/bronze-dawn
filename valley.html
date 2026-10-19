@@ -1,0 +1,2723 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Bronze Dawn Valley: grow a river settlement from 6000 BC to the Bronze Age Collapse of 1200 BC.">
+<title>Bronze Dawn Valley</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Eczar:wght@500;600;700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400&family=Noto+Sans+Cuneiform&display=swap">
+<style>
+:root {
+  /* Layout: a window onto the valley. The painted settlement fills the room; the same inlaid
+     lapis-and-gold frame as Bronze Dawn holds the resource frieze, the drawer of tabs and the year-line. */
+  color-scheme: dark;
+  --ink: #080c1d;          /* bitumen: frame and deepest ground */
+  --lapis: #121b42;        /* drawer and cards */
+  --lapis-2: #1a285b;      /* raised surfaces */
+  --line: #2e4083;         /* inlay seams */
+  --shell: #f3ead7;        /* text, shell inlay */
+  --muted: #a7aed0;
+  --gold: #ecc061;         /* gold leaf: the one accent */
+  --bronze: #c48a43;
+  --carnelian: #e66a4c;    /* danger */
+  --verdigris: #6cc6a7;    /* good */
+  --glass: rgba(9, 14, 34, .9);
+  --o-player: #ecc061; --o-kesh: #f3ead7; --o-hattu: #e66a4c;
+  --o-amurru: #b693e8; --o-dilmun: #56d4c9;
+  --font-display: "Eczar", Georgia, "Times New Roman", serif;
+  --font-body: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --font-cu: "Noto Sans Cuneiform", "Segoe UI Historic", sans-serif;
+  --radius: 8px;
+  --pane: 400px;
+  --grain: none;           /* a painted grain tile, generated at start-up */
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  color: var(--shell);
+  background: var(--ink);
+  font: 16px/1.45 var(--font-body);
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--shell); outline-offset: 2px; }
+.cu { font-family: var(--font-cu); line-height: 1; font-weight: 400; }
+.muted { color: var(--muted); }
+.small { font-size: .86rem; }
+.pos { color: var(--verdigris); }
+.neg { color: var(--carnelian); }
+.h {
+  margin: 0;
+  font: 700 .72rem/1.2 var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  color: var(--muted);
+}
+kbd {
+  font: 700 .78rem/1 var(--font-body);
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--ink);
+  color: var(--shell);
+}
+.grainy { position: relative; isolation: isolate; }
+.grainy::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: var(--grain);
+  opacity: .07;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* ---------- the frame ---------- */
+.game { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+
+/* frieze: crest, resources, buttons */
+.topbar {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px 22px;
+  padding-block: 8px 12px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: linear-gradient(#18234f, #0e1636);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .45);
+}
+.topbar::after {
+  /* shell-and-carnelian triangles, after the Standard of Ur */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5px;
+  background-color: var(--shell);
+  background-image:
+    linear-gradient(to bottom right, transparent 50%, var(--carnelian) 50%),
+    linear-gradient(to bottom left, transparent 50%, var(--carnelian) 50%);
+  background-size: 10px 5px;
+  opacity: .9;
+}
+.crest { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 0 1 auto; }
+.seal {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.15rem;
+  letter-spacing: -.1em;
+  color: var(--gold);
+  background: radial-gradient(circle at 35% 30%, #23336f, var(--ink) 75%);
+  box-shadow: 0 0 0 2px var(--gold), 0 0 0 4px var(--ink), 0 4px 14px rgba(0, 0, 0, .6);
+}
+.crest h1 {
+  margin: 0;
+  font: 700 clamp(1.25rem, 2vw, 1.6rem)/1.05 var(--font-display);
+  color: var(--gold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.crest .sub { margin: 2px 0 0; font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.crest .sub b { color: var(--shell); font-weight: 700; }
+.res { flex: 1 1 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 4px; min-width: 0; }
+.chip {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  column-gap: 7px;
+  padding: 3px 9px 3px 7px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: help;
+  font-variant-numeric: tabular-nums;
+}
+.chip:hover, .chip:focus-visible { border-color: rgba(236, 192, 97, .45); background: rgba(255, 255, 255, .04); }
+.chip .cu { grid-row: span 2; font-size: 1.05rem; letter-spacing: -.12em; color: var(--gold); text-align: center; min-width: 1.3rem; }
+.chip .lab { font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); line-height: 1.1; white-space: nowrap; }
+.chip .val { font-size: 1.02rem; font-weight: 800; line-height: 1.15; white-space: nowrap; }
+.chip .val .muted { font-weight: 500; font-size: .8rem; }
+.chip .d { font-size: .76rem; font-weight: 700; }
+.chip.warn .lab { color: var(--carnelian); }
+.chip.warn { background: rgba(230, 106, 76, .1); }
+.chip.metals { grid-template-columns: auto; }
+.chip .mv { display: inline-flex; align-items: baseline; gap: 3px; }
+.chip .mv + .mv { margin-left: 9px; }
+.chip .mv .cu { font-size: .85rem; color: var(--gold); letter-spacing: -.12em; }
+.hdr-btns { display: flex; gap: 6px; flex: none; }
+.iconbtn[aria-pressed="false"] .wave { opacity: .15; }
+.iconbtn {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .03);
+  color: var(--shell);
+  cursor: pointer;
+}
+.iconbtn:hover { border-color: var(--gold); color: var(--gold); }
+.iconbtn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.iconbtn[aria-pressed="false"] { color: var(--muted); }
+
+/* the room: map and drawer */
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) auto; min-height: 0; }
+.board { position: relative; min-width: 0; min-height: 0; overflow: hidden; background: #0a1028; }
+#terrain, #map { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#map { touch-action: manipulation; }
+.board::after {
+  /* lamplight falling off at the edges of the table */
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 90px 10px rgba(4, 6, 16, .75);
+}
+.legend {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  max-width: calc(100% - 28px);
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(8, 12, 29, .72);
+  font-size: .8rem;
+  color: var(--muted);
+}
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 2px; background: var(--oc); display: inline-block; }
+
+/* map overlay drawn over the painted terrain */
+.hex { fill: transparent; stroke: rgba(8, 12, 29, .28); stroke-width: 1; }
+.tile { cursor: pointer; outline: none; }
+.tile:hover .hex { fill: rgba(255, 244, 214, .12); }
+.tile:focus-visible .hex { stroke: var(--shell); stroke-width: 2.5; }
+.ownfill { fill: var(--oc); fill-opacity: .1; pointer-events: none; }
+.ownfill.fresh { animation: claim 1.4s ease-out 1; }
+@keyframes claim { 0% { fill-opacity: .55; } 100% { fill-opacity: .1; } }
+.border { fill: none; stroke: var(--oc); stroke-width: 3; stroke-linecap: round; pointer-events: none; filter: drop-shadow(0 0 2px rgba(0, 0, 0, .8)); }
+.border.war { stroke-dasharray: 5 4; }
+.claim { fill: none; stroke: var(--gold); stroke-width: 1.5; stroke-dasharray: 3 4; opacity: .85; pointer-events: none; }
+.sel { fill: rgba(255, 244, 214, .1); stroke: var(--gold); stroke-width: 3; pointer-events: none; filter: drop-shadow(0 0 5px rgba(236, 192, 97, .9)); }
+.town { pointer-events: none; }
+.town .plinth { fill: rgba(5, 8, 18, .55); }
+.town .zig { fill: var(--oc); stroke: var(--ink); stroke-width: 1.2; }
+.town .hut { fill: #e9d9b5; stroke: var(--ink); stroke-width: .9; }
+.impi { stroke-linejoin: round; stroke-linecap: round; pointer-events: none; }
+.impi-bg { fill: rgba(8, 12, 29, .82); stroke: var(--bronze); stroke-width: 1.2; pointer-events: none; }
+.swords { fill: none; stroke: var(--carnelian); stroke-width: 2.4; stroke-linecap: round; pointer-events: none; filter: drop-shadow(0 0 2px #000); }
+
+/* the land card that opens beside a selected hex */
+.tilecard {
+  position: absolute;
+  z-index: 4;
+  width: 300px;
+  max-height: calc(100% - 24px);
+  overflow: auto;
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--glass);
+  border: 1px solid rgba(236, 192, 97, .5);
+  border-radius: 10px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .6);
+  animation: pop .14s ease-out;
+}
+@keyframes pop { from { transform: scale(.97); opacity: 0; } }
+.tilecard p { margin: 0; }
+.ti-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; padding-right: 26px; }
+.ti-head h3 { margin: 0; font: 600 1.15rem/1.15 var(--font-display); }
+.ti-stats { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: .85rem; color: var(--muted); }
+.ti-stats b { color: var(--shell); font-variant-numeric: tabular-nums; }
+.close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  line-height: 1;
+}
+.close:hover { color: var(--shell); border-color: var(--gold); }
+.tilecard .item { padding: 8px 0; }
+.tilecard .item:last-child { border-bottom: 0; }
+
+/* drawer: pane plus a rail of tabs */
+.drawer { display: grid; grid-template-columns: minmax(0, 1fr) 68px; min-height: 0; background: var(--lapis); box-shadow: -8px 0 24px rgba(0, 0, 0, .4); }
+.drawer.closed { grid-template-columns: 68px; }
+.drawer.closed .panewrap { display: none; }
+.panewrap { width: var(--pane); display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0; border-right: 1px solid var(--line); }
+.panehead { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px 10px; border-bottom: 1px solid var(--line); }
+.panehead h2 { margin: 0; font: 700 1.3rem/1.1 var(--font-display); color: var(--gold); }
+.pane { display: grid; align-content: start; gap: 12px; padding: 14px 16px 24px; overflow-y: auto; overscroll-behavior: contain; }
+.pane p { margin: 0; }
+.rail { display: flex; flex-direction: column; gap: 2px; padding: 8px 6px; background: linear-gradient(90deg, #0e1636, var(--ink)); overflow-y: auto; }
+.tab {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding: 9px 2px 7px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.tab .cu { font-size: 1.15rem; letter-spacing: -.12em; max-width: 54px; overflow: hidden; white-space: nowrap; }
+.tab .lbl { font-size: .62rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.tab:hover { color: var(--shell); background: rgba(255, 255, 255, .04); }
+.tab[aria-selected="true"] { color: var(--gold); border-color: rgba(236, 192, 97, .4); background: rgba(236, 192, 97, .08); }
+.tab .dot { position: absolute; top: 6px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--carnelian); box-shadow: 0 0 0 2px var(--ink); }
+
+/* ---------- controls ---------- */
+.btn {
+  font-weight: 800;
+  font-size: .9rem;
+  color: var(--ink);
+  background: linear-gradient(#f3d27f, var(--gold) 45%, var(--bronze));
+  border: 1px solid #5a3c14;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 2px 0 rgba(0, 0, 0, .35);
+}
+.btn:hover:not(:disabled) { filter: brightness(1.08); }
+.btn:active:not(:disabled) { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3); }
+.btn:disabled { background: var(--lapis-2); color: var(--muted); border-color: var(--line); cursor: not-allowed; box-shadow: none; }
+.btn.ghost { background: transparent; color: var(--shell); border-color: var(--line); box-shadow: none; }
+.btn.ghost:hover:not(:disabled) { border-color: var(--gold); }
+.btn.ghost:disabled { background: transparent; color: var(--muted); border-color: var(--line); opacity: .55; }
+.btn.danger { background: linear-gradient(#f3a088, var(--carnelian)); border-color: #5a1d10; }
+.btn.sq { width: 32px; height: 32px; padding: 0; font-size: 1.15rem; line-height: 1; }
+.chipbtn {
+  font-weight: 800;
+  font-size: .82rem;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+.chipbtn[aria-pressed="true"] { background: var(--gold); color: var(--ink); border-color: var(--gold); }
+.steps, .row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: .74rem;
+  font-weight: 800;
+  letter-spacing: .03em;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+.pill.war { background: var(--carnelian); border-color: var(--carnelian); color: var(--ink); }
+.pill.peace { border-color: var(--verdigris); color: var(--verdigris); }
+.pill.own { border-color: var(--oc); color: var(--oc); }
+.pill.gold { border-color: var(--gold); color: var(--gold); }
+.pill.bad { border-color: var(--carnelian); color: var(--carnelian); }
+
+/* ---------- council ---------- */
+.glance { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; padding: 12px; background: var(--lapis-2); border-radius: var(--radius); }
+.glance div { display: grid; gap: 2px; min-width: 0; }
+.glance b { font-size: .98rem; }
+.tip { margin: 0; display: grid; grid-template-columns: 1.2rem minmax(0, 1fr); gap: 6px; font-size: .95rem; }
+.tip .cu { color: var(--bronze); font-size: .95rem; padding-top: .25em; }
+.tip.bad .cu, .tip.bad { color: var(--carnelian); }
+.tip.good .cu { color: var(--verdigris); }
+.buffs { display: flex; flex-wrap: wrap; gap: 6px; }
+.goals { display: grid; gap: 4px; margin: 0; padding: 8px 10px; list-style: none; background: var(--ink); border-radius: 6px; }
+.goals li { display: grid; grid-template-columns: 1.1rem minmax(0, 1fr) auto; gap: 6px; font-size: .9rem; align-items: baseline; }
+.goals li::before { content: ""; width: 9px; height: 9px; border: 1.5px solid var(--gold); transform: rotate(45deg); align-self: center; justify-self: center; }
+.goals li.done::before { background: var(--gold); }
+.goals li.done { color: var(--muted); }
+.goals .rw { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+
+/* ---------- people ---------- */
+.jobs { display: grid; }
+.job {
+  display: grid;
+  grid-template-columns: 2.6rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.job > .cu { font-size: 1.05rem; letter-spacing: -.12em; color: var(--gold); text-align: center; overflow: hidden; white-space: nowrap; }
+.job-txt { display: grid; gap: 1px; min-width: 0; }
+.job-txt b { font-size: 1rem; }
+.out { font-size: .86rem; font-variant-numeric: tabular-nums; }
+.stepper { display: flex; align-items: center; gap: 4px; }
+.stepper .n { min-width: 3.4ch; text-align: center; font-size: 1.05rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.ledger { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 14px; font-size: .92rem; font-variant-numeric: tabular-nums; }
+.ledger span:nth-child(even) { text-align: right; }
+.ledger .tot { border-top: 1px solid var(--line); padding-top: 4px; font-weight: 800; }
+
+/* ---------- lists ---------- */
+.item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.item h4 { margin: 0; font: 600 1.02rem/1.2 var(--font-display); }
+.item .meta { color: var(--muted); font-size: .88rem; }
+.item .note { color: var(--muted); font-size: .84rem; font-style: italic; }
+.item .why { color: var(--carnelian); font-size: .84rem; }
+.item.locked h4 { color: var(--muted); }
+.item.wonder h4 { color: var(--gold); }
+.item.built h4::after { content: " ✓"; color: var(--verdigris); }
+.count { font-family: var(--font-body); font-size: .84rem; color: var(--muted); font-weight: 500; }
+.bar { height: 8px; background: var(--ink); border-radius: 4px; overflow: hidden; }
+.bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--bronze), var(--gold)); }
+.current, .godbox { display: grid; gap: 6px; padding: 12px; background: var(--lapis-2); border-radius: var(--radius); }
+.current h4, .godbox h4 { margin: 0; font: 600 1.15rem/1.2 var(--font-display); }
+.godbox { border: 1px solid var(--bronze); }
+.godbox h4 { color: var(--gold); }
+
+/* ---------- neighbors and trade ---------- */
+.nb { display: grid; gap: 8px; padding: 12px; background: var(--lapis-2); border: 1px solid var(--line); border-radius: var(--radius); }
+.nb.gone { opacity: .6; }
+.nb.threat { border-color: var(--carnelian); }
+.nb-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.nb-head h4 { margin: 0; font: 600 1.1rem/1.2 var(--font-display); }
+.sw { width: 12px; height: 12px; border-radius: 3px; background: var(--oc); }
+.nb-stats { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .88rem; color: var(--muted); }
+.nb-stats b { color: var(--shell); }
+.meter { position: relative; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--carnelian), var(--ink) 50%, var(--verdigris)); }
+.meter i { position: absolute; top: -4px; width: 4px; height: 14px; margin-left: -2px; background: var(--shell); border-radius: 2px; }
+.nb-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.scroll { overflow-x: auto; }
+.trade { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.trade th { text-align: left; font-size: .68rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); padding: 6px 4px; }
+.trade td { padding: 7px 4px; border-top: 1px solid var(--line); vertical-align: middle; }
+.trade td .cu { color: var(--gold); margin-right: 4px; }
+.trade .acts { display: flex; justify-content: flex-end; gap: 4px; }
+
+/* ---------- chronicle ---------- */
+.chron { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.chron li { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr); gap: 8px; font-size: .92rem; }
+.chron .yr { color: var(--muted); font-variant-numeric: tabular-nums; }
+.chron li.bad { color: var(--carnelian); }
+.chron li.good { color: var(--verdigris); }
+.chron li.big { color: var(--gold); }
+.gloss { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px 14px; }
+.gloss div { display: flex; align-items: center; gap: 10px; font-size: .88rem; }
+.gloss .cu { font-size: 1.3rem; color: var(--gold); min-width: 2.6rem; }
+.minis { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px 16px; }
+.mini { position: relative; margin: 0; max-width: 360px; }
+.mini figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ctip { position: absolute; top: 22px; padding: 4px 8px; border-radius: 6px; background: var(--ink); border: 1px solid var(--line); font-size: .8rem; pointer-events: none; white-space: nowrap; }
+details summary { cursor: pointer; }
+.chart { display: block; width: 100%; height: auto; overflow: visible; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .axis { fill: var(--muted); font: 500 11px var(--font-body); }
+.chart .ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.ach { display: grid; gap: 6px; }
+.ach div { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr); gap: 8px; font-size: .9rem; }
+.ach div.locked { color: var(--muted); }
+.ach .cu { color: var(--gold); font-size: 1.05rem; }
+.ach div.locked .cu { color: var(--line); }
+.best { width: 100%; border-collapse: collapse; font-size: .88rem; font-variant-numeric: tabular-nums; }
+.best td, .best th { text-align: left; padding: 5px 6px; border-top: 1px solid var(--line); }
+.best th { font-size: .68rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); border-top: 0; }
+.best td:last-child, .best th:last-child { text-align: right; }
+
+/* ---------- year-line ---------- */
+.turnbar {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding-block: 10px calc(10px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: linear-gradient(#0f1838, var(--ink));
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -6px 18px rgba(0, 0, 0, .45);
+}
+.ticker {
+  display: grid;
+  grid-template-columns: 1.2rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .03);
+  border: 1px solid var(--line);
+  font-size: .92rem;
+  text-align: left;
+  cursor: pointer;
+}
+.ticker:hover { border-color: var(--gold); }
+.ticker .cu { color: var(--bronze); }
+.ticker.bad .cu, .ticker.bad .txt { color: var(--carnelian); }
+.ticker .txt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ticker .more { font-size: .76rem; color: var(--muted); white-space: nowrap; }
+.timeline { min-width: 0; display: grid; gap: 6px; }
+.tl-labels { display: flex; justify-content: space-between; gap: 10px; font-size: .82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tl-labels b { color: var(--shell); }
+.tl-labels .col { color: var(--carnelian); }
+.tl-track { position: relative; height: 6px; background: var(--lapis-2); border-radius: 3px; }
+.tl-track > i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--bronze), var(--gold)); transition: width .6s ease; }
+.tl-track b { position: absolute; top: -3px; width: 2px; height: 12px; margin-left: -1px; background: var(--muted); border-radius: 1px; }
+.tl-track b.next { background: var(--carnelian); }
+.endturn {
+  display: grid;
+  line-height: 1.05;
+  text-align: center;
+  font: 700 1.15rem/1.05 var(--font-display);
+  padding: 10px 26px;
+  border-radius: 10px;
+}
+.endturn small { font: 600 .74rem/1.2 var(--font-body); }
+
+/* ---------- dialogs and toast ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  background: rgba(5, 8, 20, .78);
+}
+.card {
+  width: min(580px, 100%);
+  max-height: calc(100% - 16px);
+  overflow: auto;
+  display: grid;
+  gap: 14px;
+  padding: 0 24px 22px;
+  background: var(--lapis);
+  border: 1px solid var(--bronze);
+  border-radius: 14px;
+  box-shadow: 0 0 0 4px var(--ink), 0 0 0 5px rgba(236, 192, 97, .35), 0 24px 70px rgba(0, 0, 0, .65);
+  animation: rise .2s ease-out;
+}
+.card p { margin: 0; }
+.banner { display: block; width: calc(100% + 48px); height: 150px; margin: 0 -24px; border-radius: 13px 13px 0 0; }
+.medal {
+  width: 66px;
+  height: 66px;
+  margin-top: -47px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.8rem;
+  letter-spacing: -.1em;
+  color: var(--gold);
+  background: radial-gradient(circle at 35% 30%, #23336f, var(--ink) 75%);
+  box-shadow: 0 0 0 2px var(--gold), 0 0 0 5px var(--ink), 0 6px 18px rgba(0, 0, 0, .6);
+  overflow: hidden;
+}
+.card .date { margin: -6px 0 -8px; font: 800 .74rem/1.2 var(--font-body); text-transform: uppercase; letter-spacing: .16em; color: var(--bronze); }
+.card h2 { margin: 0; font: 700 1.65rem/1.1 var(--font-display); text-wrap: balance; }
+.card h3 { margin: 0; font: 800 .72rem/1.2 var(--font-body); text-transform: uppercase; letter-spacing: .16em; color: var(--muted); }
+.card ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 5px; }
+.card label { font-weight: 800; }
+.card input, .card textarea {
+  width: 100%;
+  font: inherit;
+  color: var(--shell);
+  background: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+.card textarea { font: 500 .78rem/1.35 ui-monospace, Menlo, Consolas, monospace; min-height: 80px; resize: vertical; word-break: break-all; }
+.seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px; }
+.seg .btn { display: grid; gap: 1px; text-align: left; white-space: normal; padding: 8px 12px; }
+.seg .btn[aria-pressed="true"] { outline: 2px solid var(--gold); outline-offset: 1px; color: var(--gold); }
+.seg .btn small { font-weight: 500; font-size: .8rem; opacity: .85; }
+.choices { display: grid; gap: 8px; }
+.choice { display: grid; gap: 2px; text-align: left; padding: 10px 14px; white-space: normal; }
+.choice .hint { font-weight: 500; font-size: .85rem; opacity: .85; }
+.tests { display: grid; gap: 6px; }
+.tests div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 8px 10px; background: var(--ink); border-radius: 6px; }
+.rank { font: 600 1.3rem/1.2 var(--font-display); color: var(--gold); }
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 60;
+  max-width: calc(100% - 32px);
+  padding: 9px 18px;
+  background: var(--shell);
+  color: var(--ink);
+  border-radius: 8px;
+  font-weight: 800;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
+  pointer-events: none;
+  animation: toastIn .2s ease-out;
+}
+.toast.gold { background: var(--gold); }
+@keyframes rise { from { transform: translateY(8px); opacity: 0; } }
+@keyframes toastIn { from { transform: translate(-50%, 8px); opacity: 0; } }
+
+/* ---------- narrower screens ---------- */
+@media (max-width: 1600px) {
+  .chip .lab { display: none; }
+  .chip .cu { grid-row: auto; }
+}
+@media (max-width: 1180px) {
+  :root { --pane: 360px; }
+  .turnbar { grid-template-columns: minmax(0, 1fr) auto; }
+  .ticker { display: none; }
+}
+@media (max-width: 860px) {
+  html, body { height: auto; }
+  .game { display: block; height: auto; padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+  .topbar { flex-wrap: wrap; }
+  .crest { flex: 1 1 100%; }
+  .hdr-btns { position: absolute; top: 12px; right: max(16px, env(safe-area-inset-right, 0px)); }
+  .res { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; }
+  .chip { padding: 3px 4px; column-gap: 4px; }
+  .chip .val { font-size: .9rem; }
+  .chip .val .muted, .chip .d { display: none; }
+  .chip.metals { grid-column: span 2; }
+  .stage { display: block; }
+  .crest { padding-right: 132px; }
+  .drawer, .drawer.closed { display: flex; flex-direction: column; }
+  .rail { order: -1; }
+  [data-act="fold"] { display: none; }
+  .board { aspect-ratio: 571 / 386; width: 100%; }
+  .legend { display: none; }
+  .drawer, .drawer.closed { box-shadow: none; }
+  .drawer.closed .panewrap { display: grid; }
+  .panewrap { width: auto; border-right: 0; }
+  .rail { flex-direction: row; overflow-x: auto; padding: 6px max(16px, env(safe-area-inset-left, 0px)); position: sticky; top: 0; z-index: 2; }
+  .tab { flex: 1 0 auto; padding: 6px 8px; }
+  .pane { overflow: visible; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .panehead { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .tilecard { position: fixed; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); width: auto; top: auto !important; bottom: calc(88px + env(safe-area-inset-bottom, 0px)); max-height: 55vh; }
+  .turnbar { position: fixed; left: 0; right: 0; bottom: 0; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; }
+  .tl-labels .edge { display: none; }
+  .endturn { padding: 8px 16px; }
+  .toast { bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card, .toast, .tilecard { animation: none; }
+  .tl-track > i { transition: none; }
+  .ownfill.fresh { animation: none; }
+}
+
+/* ---------- the valley ---------- */
+#scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.landstrip {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  max-width: calc(100% - 28px);
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: rgba(8, 12, 29, .78);
+  font-size: .86rem;
+}
+.landstrip .land { padding: 1px 8px; border: 1px solid var(--line); border-radius: 999px; }
+.landstrip .land b { color: var(--gold); }
+@media (max-width: 860px) {
+  .board { aspect-ratio: 16 / 10; }
+  .landstrip { position: static; max-width: none; border-radius: 0; }
+}
+</style>
+</head>
+<body>
+<div class="game">
+  <header class="topbar">
+    <div class="crest">
+      <div class="seal cu" aria-hidden="true">&#x1208D;</div>
+      <div style="min-width:0">
+        <h1 id="realmName">The Uruma</h1>
+        <p class="sub" id="era"></p>
+      </div>
+    </div>
+    <section class="res" id="res" aria-label="Resources"></section>
+    <div class="hdr-btns">
+      <button class="iconbtn" id="soundBtn" data-act="sound" aria-pressed="true" title="Sound (M)" aria-label="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="wave" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg></button>
+      <button class="iconbtn" data-act="help" title="How to play (?)" aria-label="How to play"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.4c-.7.3-1 .8-1 1.5v.6"/><path d="M12 17h.01"/></svg></button>
+      <button class="iconbtn" data-act="menu" title="Game menu" aria-label="Game menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </header>
+  <main class="stage">
+    <section class="board" id="board" aria-label="The valley">
+      <canvas id="scene" role="img" aria-label="A painting of our settlement and its lands"></canvas>
+      <div class="landstrip" id="landstrip"></div>
+    </section>
+    <aside class="drawer" id="drawer">
+      <div class="panewrap grainy">
+        <div class="panehead"><h2 id="paneTitle">Council</h2><button class="btn ghost" data-act="fold" title="Fold the drawer away">Fold</button></div>
+        <div class="pane" id="pane" role="tabpanel"></div>
+      </div>
+      <nav class="rail" role="tablist" aria-label="Panels" id="tabs"></nav>
+    </aside>
+  </main>
+  <footer class="turnbar">
+    <button class="ticker" id="ticker" data-act="council"></button>
+    <div class="timeline" id="timeline"></div>
+    <button class="btn endturn" id="endBtn" data-act="end">End turn</button>
+  </footer>
+</div>
+<div class="modal" id="modal" hidden>
+  <div class="card" id="mCard" role="dialog" aria-modal="true" aria-labelledby="mTitle"></div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+<script>
+'use strict';
+/* =====================================================================
+   Bronze Dawn Valley: the settlement game, 6000 BC to 1200 BC.
+   Closer to Pre-Civilization: Bronze Age than the map game: no map to walk,
+   four core resources, lands you gain by expedition, and one valley that
+   grows on screen as your people build it.
+   Sections: 1 data · 2 state · 3 economy · 4 actions · 5 end of turn ·
+   6 neighbors · 7 events and history · 8 end of game · 9 painting ·
+   10 rendering · 11 modals · 12 sound · 13 boot
+   ===================================================================== */
+
+/* ---------- 1. Data ---------- */
+const START_YEAR = 6000, END_YEAR = 1200, YEARS_PER_TURN = 60;
+const LAST_TURN = (START_YEAR - END_YEAR) / YEARS_PER_TURN; // 80 turns
+const SAVE_KEY = 'bronze-dawn-valley-save';
+const SAVE_VERSION = 1;
+const META_KEY = 'bronze-dawn-valley-meta';
+const SET_KEY = 'bronze-dawn-settings';
+
+const SIGN = {
+  people: '\u{12326}', food: '\u{122BA}', wood: '\u{12111}', stone: '\u{1224C}\u{12313}',
+  bronze: '\u{12313}\u{12157}\u{12047}', knowledge: '\u{1207E}', mood: '\u{12072}', army: '\u{1209F}',
+  house: '\u{1208D}', land: '\u{121A0}', foreign: '\u{121B3}', king: '\u{12217}', star: '\u{1202F}',
+  wedge: '\u{12038}', god: '\u{1202D}', city: '\u{12337}', palace: '\u{1208D}\u{120F2}', water: '\u{12000}',
+  ship: '\u{12223}', road: '\u{1219C}', storm: '\u{1214E}', copper: '\u{12350}', silver: '\u{121AC}\u{12313}',
+  stability: '\u{12072}', materials: '\u{12111}', tin: '\u{1202D}\u{1223E}',
+};
+const GLOSSARY = [
+  ['people', 'UN', 'people'], ['food', 'ŠE', 'barley'], ['wood', 'GIŠ', 'wood'], ['stone', 'NA₄', 'stone'],
+  ['bronze', 'ZABAR', 'bronze'], ['knowledge', 'DUB', 'clay tablet'], ['mood', 'SILIM', 'peace, well-being'],
+  ['army', 'ERIN₂', 'troops'], ['land', 'KI', 'place, earth'], ['house', 'É', 'house'], ['city', 'URU', 'city'],
+  ['king', 'LUGAL', 'king'], ['god', 'DINGIR', 'god'], ['foreign', 'KUR', 'mountain, foreign land'],
+];
+
+// Kinds of land. Slots are how many workers of each trade the land keeps busy at full yield.
+const LANDS = {
+  river:    { name: 'River bend', farm: 12, wood: 1, stone: 4, house: 20, food: 0, note: 'Silt for barley, clay for brick, reeds for roofs.' },
+  plain:    { name: 'Open plain', farm: 8, wood: 1, stone: 2, house: 20, food: 0, note: 'Dry farming and grazing.' },
+  marsh:    { name: 'Marsh', farm: 3, wood: 3, stone: 0, house: 10, food: 6, note: 'Fish, fowl and reeds: food without farming.' },
+  forest:   { name: 'Forest', farm: 2, wood: 10, stone: 0, house: 10, food: 2, note: 'Timber for houses and charcoal for forges.' },
+  hills:    { name: 'Hills', farm: 3, wood: 2, stone: 8, house: 10, food: 0, ore: 3, note: 'Building stone, and copper in the rock.' },
+  mountain: { name: 'Mountains', farm: 0, wood: 1, stone: 10, house: 5, food: 0, ore: 4, tin: true, note: 'Hard stone, and the only tin there is.' },
+};
+
+const JOBS = [
+  { key: 'farmers', name: 'Farmers', sign: 'food', desc: 'Grow barley and tend herds.' },
+  { key: 'woodcutters', name: 'Woodcutters', sign: 'wood', desc: 'Fell timber and burn charcoal.' },
+  { key: 'masons', name: 'Masons', sign: 'stone', desc: 'Quarry stone and mould brick.' },
+  { key: 'smiths', name: 'Smiths', sign: 'bronze', desc: 'Smelt ore into bronze. Need a forge.' },
+  { key: 'scholars', name: 'Scholars', sign: 'knowledge', desc: 'Watch the stars and keep the tallies.' },
+  { key: 'warriors', name: 'Warriors', sign: 'army', desc: 'Guard the valley and raid the neighbors.' },
+];
+
+// wood, stone, bronze costs. `grow` makes each one dearer than the last; `wonder` marks great works.
+const BUILDINGS = {
+  house:     { name: 'Houses', one: 'a row of houses', wood: 15, stone: 5, grow: 3, max: 99, tech: null, desc: () => `+${houseSize()} housing` },
+  granary:   { name: 'Granary', one: 'a granary', wood: 30, stone: 20, max: 4, tech: 'pottery', desc: () => '+250 food storage' },
+  storehouse:{ name: 'Storehouse', one: 'a storehouse', wood: 30, stone: 10, max: 4, tech: 'mudbrick', desc: () => '+200 wood and stone storage' },
+  temple:    { name: 'Temple', one: 'a temple', wood: 30, stone: 60, max: 3, tech: 'rituals', desc: () => '+7 mood' },
+  workshop:  { name: 'Workshop', one: 'a workshop', wood: 40, stone: 30, max: 3, tech: 'copper', desc: () => 'Wood and stone +15%' },
+  forge:     { name: 'Forge', one: 'a forge', wood: 40, stone: 50, max: 4, tech: 'copper', desc: () => `Work for ${forgeSlots()} smiths` },
+  walls:     { name: 'Walls', one: 'a stretch of wall', wood: 20, stone: 120, max: 3, tech: 'masonry', desc: () => 'Defence +30%' },
+  tablets:   { name: 'Tablet house', one: 'a tablet house', wood: 40, stone: 80, max: 2, tech: 'writing', desc: () => 'Knowledge +25%' },
+  market:    { name: 'Market', one: 'the market', wood: 80, stone: 100, max: 1, tech: 'currency', desc: () => '+2 trades a turn, better prices, +3 mood' },
+  tombs:     { name: 'Royal tombs', one: 'the royal tombs', wood: 100, stone: 250, bronze: 25, max: 1, tech: 'bronze', wonder: 150, desc: () => '+8 mood' },
+  canal:     { name: 'Great canal', one: 'the great canal', wood: 150, stone: 300, max: 1, tech: 'mathematics', wonder: 150, desc: () => 'Every river bend and plain feeds 4 more farmers' },
+  ziggurat:  { name: 'Ziggurat', one: 'the ziggurat', wood: 200, stone: 600, bronze: 40, max: 1, tech: 'monumental', wonder: 300, desc: () => '+15 mood. A mountain of brick for the gods' },
+  palace:    { name: 'Palace', one: 'the palace', wood: 250, stone: 500, bronze: 30, max: 1, tech: 'law', wonder: 150, desc: () => '+120 housing, +5 mood, 3 more lands before unrest' },
+};
+const WONDERS = Object.keys(BUILDINGS).filter(k => BUILDINGS[k].wonder);
+
+const PROJECTS = {
+  sickles: { name: 'Bronze sickles', bronze: 20, tech: 'bronze', desc: 'Farmers +15% food' },
+  tools:   { name: 'Bronze tools', bronze: 25, tech: 'bronze', desc: 'Wood and stone +25%' },
+  weapons: { name: 'Bronze weapons', bronze: 30, tech: 'bronze', desc: 'Each warrior fights 60% harder' },
+  chariots:{ name: 'War chariots', bronze: 45, tech: 'chariots', desc: 'Each warrior fights another 60% harder' },
+  armour:  { name: 'Scale armour', bronze: 50, tech: 'metallurgy', desc: 'Defence +25%' },
+  iron:    { name: 'Iron blades', bronze: 0, stone: 200, tech: 'iron', desc: 'Each warrior fights another 80% harder' },
+};
+
+const TECHS = {
+  agriculture: { name: 'Agriculture', cost: 0, req: [], desc: 'Barley and emmer wheat in the river silt.' },
+  pottery:     { name: 'Pottery', cost: 10, req: [], desc: 'Unlocks the Granary.' },
+  herding:     { name: 'Herding', cost: 15, req: [], desc: 'Farmers +10% food. Sheep and goats graze the plains.' },
+  rituals:     { name: 'Rituals', cost: 15, req: [], desc: 'Unlocks the Temple. Mood +2.' },
+  mudbrick:    { name: 'Mud brick', cost: 20, req: ['pottery'], desc: 'Houses hold 30 instead of 20. Unlocks the Storehouse.' },
+  boats:       { name: 'Reed boats', cost: 20, req: [], desc: 'Expeditions cost less and find river land and marsh more often. Marsh gives 4 more food.' },
+  irrigation:  { name: 'Irrigation', cost: 35, req: ['pottery'], desc: 'Each river bend keeps 6 more farmers busy.' },
+  weaving:     { name: 'Weaving', cost: 30, req: ['herding'], desc: 'Mood +3. Wool cloth sells well.' },
+  copper:      { name: 'Copper smelting', cost: 45, req: ['mudbrick'], desc: 'Unlocks the Forge and Workshop. Copper axes: wood +10%.' },
+  plough:      { name: 'The plough', cost: 55, req: ['herding', 'copper'], desc: 'Farmers +15% food.' },
+  wheel:       { name: 'The wheel', cost: 65, req: ['plough'], desc: 'Expeditions cost less. +1 trade a turn.' },
+  writing:     { name: 'Writing', cost: 80, req: ['rituals', 'pottery'], desc: 'Mood +3. Unlocks the Tablet house.' },
+  bronze:      { name: 'Bronze', cost: 90, req: ['copper'], desc: 'Smiths cast bronze from copper and tin. Unlocks bronze projects and the Royal tombs.' },
+  sailing:     { name: 'Sailing', cost: 75, req: ['boats'], desc: '+1 trade a turn. Ships bring tin from afar: bronze can be cast without mountains.' },
+  masonry:     { name: 'Masonry', cost: 95, req: ['mudbrick'], desc: 'Unlocks Walls. Stone +10%.' },
+  horses:      { name: 'Horses', cost: 175, req: ['wheel'], desc: 'Warriors +10%.' },
+  mathematics: { name: 'Mathematics', cost: 215, req: ['writing'], desc: 'Knowledge +20%. Unlocks the Great canal.' },
+  medicine:    { name: 'Medicine', cost: 230, req: ['writing'], desc: 'Plague and crowding kill half as many.' },
+  law:         { name: 'Law code', cost: 250, req: ['writing'], desc: 'Mood +8. 4 more lands before unrest. Unlocks the Palace.' },
+  currency:    { name: 'Silver weights', cost: 250, req: ['writing', 'wheel'], desc: 'Unlocks the Market.' },
+  astronomy:   { name: 'Astronomy', cost: 310, req: ['mathematics'], desc: 'Farmers +15% food. Droughts hurt less.' },
+  chariots:    { name: 'Chariots', cost: 350, req: ['horses', 'bronze'], desc: 'Unlocks War chariots.' },
+  literature:  { name: 'Literature', cost: 370, req: ['writing'], desc: 'Mood +4. The Epic of Gilgamesh.' },
+  monumental:  { name: 'Monumental building', cost: 400, req: ['masonry', 'mathematics'], desc: 'Unlocks the Ziggurat.' },
+  metallurgy:  { name: 'Metallurgy', cost: 475, req: ['bronze', 'mathematics'], desc: 'Each forge works for 8 smiths. Unlocks Scale armour.' },
+  diplomacy:   { name: 'Diplomacy', cost: 505, req: ['literature', 'currency'], desc: 'Neighbors forget anger faster. +1 trade a turn.' },
+  alphabet:    { name: 'The alphabet', cost: 695, req: ['literature'], desc: 'Knowledge +15%. Mood +3.' },
+  iron:        { name: 'Iron working', cost: 845, req: ['metallurgy'], desc: 'Unlocks Iron blades.' },
+};
+const LORE = { name: 'Songs of the ancestors', base: 700, step: 350, score: 30 };
+const loreCost = () => LORE.base + LORE.step * (S.lore || 0);
+
+const NEIGHBOR_DEFS = [
+  { id: 'eridu', name: 'Eridu', epithet: 'temple town downriver', mil: 0.8, base: 20, oc: '#f3ead7' },
+  { id: 'zagros', name: 'Zagros clans', epithet: 'mountain herders', mil: 1.3, base: -12, oc: '#e66a4c' },
+  { id: 'steppe', name: 'Steppe riders', epithet: 'wanderers of the dry lands', mil: 1.15, base: -24, oc: '#b693e8' },
+];
+const NB = Object.fromEntries(NEIGHBOR_DEFS.map(d => [d.id, d]));
+const DIFFS = {
+  easy:   { name: 'Easy', sub: 'Gentle floods, patient neighbors', ai: 0.75, anger: 0.6, bad: 0.7, invade: 0.75, food: 1.05, score: 0.8 },
+  normal: { name: 'Normal', sub: 'The Bronze Age as it was', ai: 1, anger: 1, bad: 1, invade: 1, food: 1, score: 1 },
+  hard:   { name: 'Hard', sub: 'Burning skies, hungry kings', ai: 1.3, anger: 1.35, bad: 1.3, invade: 1.25, food: 0.93, score: 1.2 },
+};
+// Barter rates in "value" per lot
+const GOODS = { food: { lot: 40, value: 1 }, wood: { lot: 20, value: 1.4 }, stone: { lot: 20, value: 1.6 }, bronze: { lot: 5, value: 8 } };
+const TITLES = ['Band', 'Village', 'Town', 'City', 'Kingdom', 'Empire'];
+const AGES = ['Late Neolithic', 'Copper Age', 'Early Bronze Age', 'Middle Bronze Age', 'Late Bronze Age'];
+
+const GOALS = [
+  { id: 'study', text: 'Choose something to study', done: () => !!S.research || S.techs.length > 1, reward: { knowledge: 5 } },
+  { id: 'land3', text: 'Hold 3 lands', done: () => landCount() >= 3, reward: { food: 30 } },
+  { id: 'houses', text: 'Build a row of houses', done: () => S.b.house > 0, reward: { wood: 15 } },
+  { id: 'pop100', text: 'Grow to 100 people', done: () => S.pop >= 100, reward: { food: 50 } },
+  { id: 'temple', text: 'Build a temple', done: () => S.b.temple > 0, reward: { mood: 5 } },
+  { id: 'forest', text: 'Find a forest', done: () => S.lands.forest > 0, reward: { wood: 30 } },
+  { id: 'forge', text: 'Build a forge', done: () => S.b.forge > 0, reward: { stone: 30 } },
+  { id: 'bronze', text: 'Cast the first bronze', done: () => S.stats.bronzeCast > 0, reward: { bronze: 5 } },
+  { id: 'writing', text: 'Learn Writing', done: () => has('writing'), reward: { knowledge: 40 } },
+  { id: 'land8', text: 'Hold 8 lands', done: () => landCount() >= 8, reward: { stone: 60 } },
+  { id: 'pop400', text: 'Grow to 400 people', done: () => S.pop >= 400, reward: { food: 120 } },
+  { id: 'friend', text: 'Become friends with a neighbor', done: () => S.nbs.some(a => a.alive && a.att >= 50), reward: { bronze: 10 } },
+  { id: 'wonder', text: 'Raise a great work', done: () => WONDERS.some(k => S.b[k]), reward: { mood: 6 } },
+  { id: 'city', text: 'Become a city', done: () => TITLES.indexOf(S.title) >= 3, reward: { food: 150 } },
+  { id: 'walls', text: 'Build all three stretches of wall', done: () => S.b.walls >= 3, reward: { mood: 4 } },
+  { id: 'pop1000', text: 'Grow to 1000 people', done: () => S.pop >= 1000, reward: { food: 200 } },
+];
+const GOAL_SCORE = 25;
+const ACHIEVEMENTS = [
+  { id: 'survive', sign: 'city', name: 'Into the Iron Age', desc: 'Reach 1200 BC with your people still standing.' },
+  { id: 'unbroken', sign: 'king', name: 'Unbroken', desc: 'Pass all three tests of the Collapse.' },
+  { id: 'defiant', sign: 'foreign', name: 'Defiant', desc: 'Refuse Sargon and drive back the army of Akkad.' },
+  { id: 'scholar', sign: 'knowledge', name: 'House of wisdom', desc: 'Learn every idea.' },
+  { id: 'builder', sign: 'palace', name: 'Builder of wonders', desc: 'Raise every great work in one game.' },
+  { id: 'empire', sign: 'land', name: 'King of the four quarters', desc: 'Become an empire.' },
+  { id: 'hard', sign: 'storm', name: 'Burning skies', desc: 'Reach 1200 BC on Hard.' },
+  { id: 'legend', sign: 'star', name: 'Light of the Bronze Age', desc: 'Reach the highest rank.' },
+];
+
+/* ---------- 2. State ---------- */
+let S = null;
+const ui = { tab: 'council', drawer: true, step: 5, series: {} };
+let modalQueue = [], modalOpen = false, currentModal = null, toastTimer = 0;
+const has = id => S.techs.includes(id);
+const done = id => S.proj.includes(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const R = Math.round;
+const yearOf = turn => START_YEAR - turn * YEARS_PER_TURN;
+const fmtYear = turn => `${yearOf(turn)} BC`;
+const signed = n => (n >= 0 ? `+${n}` : `−${Math.abs(n)}`);
+const fmt1 = n => (Math.round(n * 10) / 10).toString();
+const R10 = x => (x < 20 ? Math.max(0, R(x)) : R(x / 10) * 10);
+const pct = a => `${a >= 0 ? '+' : '−'}${Math.abs(R(a * 100))}%`;
+const article = w => (/^[aeiou]/i.test(w) ? 'an' : 'a');
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+const escapeHTML = s => String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+const cu = key => `<span class="cu" aria-hidden="true">${SIGN[key]}</span>`;
+const D = () => DIFFS[S.diff] || DIFFS.normal;
+const landCount = () => Object.values(S.lands).reduce((a, b) => a + b, 0);
+const houseSize = () => (S && has('mudbrick') ? 30 : 20);
+const forgeSlots = () => (S && has('metallurgy') ? 8 : 5);
+const nbById = id => S.nbs.find(a => a.id === id);
+const jobTotal = () => JOBS.reduce((a, j) => a + S.jobs[j.key], 0);
+const idle = () => S.pop - jobTotal();
+
+function rnd() {
+  let t = (S.rng = (S.rng + 0x6D2B79F5) | 0);
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+const rand = (a, b) => a + rnd() * (b - a);
+const pick = list => list[Math.floor(rnd() * list.length)];
+const freshSeed = () => (Math.random() * 4294967296) >>> 0;
+
+function defaults() {
+  return {
+    v: SAVE_VERSION, name: 'Uruma', diff: 'normal', turn: 0, pop: 30, rng: freshSeed(),
+    jobs: { farmers: 18, woodcutters: 5, masons: 2, smiths: 0, scholars: 2, warriors: 3 },
+    res: { food: 80, wood: 30, stone: 10, bronze: 0 },
+    lands: { river: 1, plain: 1, marsh: 0, forest: 0, hills: 0, mountain: 0 },
+    mood: 60, techs: ['agriculture'], research: null, progress: 0, lore: 0,
+    b: Object.fromEntries(Object.keys(BUILDINGS).map(k => [k, 0])), proj: [],
+    nbs: NEIGHBOR_DEFS.map(d => ({ id: d.id, att: d.base, army: 8 * d.mil, alive: true, war: false, warTurns: 0 })),
+    buffs: [], log: [], cool: {}, tradeUsed: 0, raided: false, over: false, title: 'Band', age: AGES[0],
+    hist: [], goals: [], pending: [], vassal: null, threats: [], flags: {}, fame: [],
+    stats: { bronzeCast: 0, raidsWon: 0, expeditions: 0 },
+  };
+}
+function newGame(name, diff = 'normal') {
+  S = { ...defaults(), name, diff };
+  log(`The ${name} build their first huts beside the river.`, 'big');
+  ui.tab = 'council';
+  recordHistory();
+}
+function log(text, kind = '') {
+  S.log.unshift({ y: S.turn, text, kind });
+  if (S.log.length > 150) S.log.length = 150;
+}
+function sanitize(s) {
+  if (!s || typeof s !== 'object' || s.v !== SAVE_VERSION || !s.jobs || !s.res || !s.lands || !Array.isArray(s.nbs)) return null;
+  const base = defaults(), num = (v, d = 0) => (Number.isFinite(+v) ? +v : d), arr = v => (Array.isArray(v) ? v : []);
+  for (const k of Object.keys(base)) if (s[k] === undefined) s[k] = base[k];
+  s.name = String(s.name || '').replace(/[<>&"'`]/g, '').trim().slice(0, 24) || 'Uruma';
+  if (!DIFFS[s.diff]) s.diff = 'normal';
+  s.turn = clamp(Math.floor(num(s.turn)), 0, LAST_TURN);
+  s.pop = Math.max(0, Math.floor(num(s.pop)));
+  s.jobs = Object.fromEntries(JOBS.map(j => [j.key, Math.max(0, Math.floor(num(s.jobs[j.key])))]));
+  for (const j of JOBS) { const over = Object.values(s.jobs).reduce((a, b) => a + b, 0) - s.pop; if (over > 0) s.jobs[j.key] = Math.max(0, s.jobs[j.key] - over); }
+  s.res = Object.fromEntries(Object.keys(base.res).map(k => [k, Math.max(0, R(num(s.res[k])))]));
+  s.lands = Object.fromEntries(Object.keys(LANDS).map(k => [k, Math.max(0, Math.floor(num(s.lands[k])))]));
+  s.mood = clamp(R(num(s.mood, 50)), 0, 100);
+  s.techs = [...new Set(['agriculture', ...arr(s.techs).filter(id => TECHS[id])])];
+  if (s.research !== 'lore' && !(TECHS[s.research] && !s.techs.includes(s.research))) s.research = null;
+  s.progress = Math.max(0, num(s.progress));
+  s.lore = Math.max(0, Math.floor(num(s.lore)));
+  s.b = Object.fromEntries(Object.keys(BUILDINGS).map(k => [k, clamp(Math.floor(num(s.b && s.b[k])), 0, BUILDINGS[k].max)]));
+  s.proj = [...new Set(arr(s.proj).filter(id => PROJECTS[id]))];
+  s.nbs = NEIGHBOR_DEFS.map(d => { const a = s.nbs.find(x => x && x.id === d.id) || {}; return { id: d.id, att: clamp(num(a.att, d.base), -100, 100), army: Math.max(0, num(a.army)), alive: a.alive !== false, war: !!a.war, warTurns: num(a.warTurns) }; });
+  s.buffs = arr(s.buffs).filter(b => b && typeof b === 'object').map(b => ({ name: String(b.name || 'Omen').slice(0, 60), turns: Math.max(1, Math.floor(num(b.turns, 1))), food: num(b.food), mood: num(b.mood), army: num(b.army) }));
+  s.log = arr(s.log).filter(e => e && typeof e.text === 'string').slice(0, 150).map(e => ({ y: num(e.y), text: e.text.slice(0, 400), kind: ['good', 'bad', 'big'].includes(e.kind) ? e.kind : '' }));
+  s.hist = arr(s.hist).filter(d => d && typeof d === 'object').map(d => ({ t: num(d.t), pop: num(d.pop), food: num(d.food), know: num(d.know), def: num(d.def), lands: num(d.lands), mood: num(d.mood) }));
+  s.goals = arr(s.goals).filter(id => GOALS.some(g => g.id === id));
+  s.pending = arr(s.pending).filter(p => p && ['event', 'hist', 'collapse'].includes(p.type)).map(p => ({ type: p.type, arg: p.arg == null ? undefined : String(p.arg) }));
+  s.vassal = s.vassal && typeof s.vassal === 'object' ? { to: 'Akkad', until: num(s.vassal.until), food: clamp(num(s.vassal.food), 0, 500) } : null;
+  s.threats = arr(s.threats).filter(t => t && typeof t === 'object').map(t => ({ name: 'Akkad', turn: num(t.turn), power: Math.max(0, num(t.power)), id: 'akkad' }));
+  s.flags = Object.fromEntries(Object.entries(s.flags && typeof s.flags === 'object' ? s.flags : {}).map(([k, v]) => [k, !!v]));
+  s.cool = Object.fromEntries(Object.entries(s.cool && typeof s.cool === 'object' ? s.cool : {}).map(([k, v]) => [k, num(v)]));
+  s.fame = arr(s.fame).filter(Array.isArray).map(f => [String(f[0]).slice(0, 80), num(f[1])]);
+  s.stats = Object.fromEntries(Object.keys(base.stats).map(k => [k, num(s.stats && s.stats[k])]));
+  s.rng = num(s.rng, freshSeed()) >>> 0;
+  s.over = !!s.over; s.raided = !!s.raided; s.tradeUsed = Math.max(0, num(s.tradeUsed));
+  s.title = TITLES.includes(s.title) ? s.title : 'Band';
+  s.age = AGES.includes(s.age) ? s.age : AGES[0];
+  return s;
+}
+function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* storage blocked: play on */ } }
+function loadSave() { try { const raw = localStorage.getItem(SAVE_KEY); return raw ? sanitize(JSON.parse(raw)) : null; } catch (e) { return null; } }
+function loadMeta() {
+  try { const m = JSON.parse(localStorage.getItem(META_KEY) || 'null'); if (m && Array.isArray(m.best) && m.ach) return m; } catch (e) { /* fall through */ }
+  return { best: [], ach: {} };
+}
+function saveMeta(m) { try { localStorage.setItem(META_KEY, JSON.stringify(m)); } catch (e) { /* storage blocked */ } }
+const sessionAch = new Set();
+function unlock(id) {
+  if (sessionAch.has(id)) return;
+  sessionAch.add(id);
+  const m = loadMeta();
+  if (m.ach[id]) return;
+  m.ach[id] = Date.now();
+  saveMeta(m);
+  const a = ACHIEVEMENTS.find(x => x.id === id);
+  if (a) { log(`Achievement: ${a.name}.`, 'big'); toast(`Achievement unlocked: ${a.name}`, 'gold'); Sound.play('goal'); }
+}
+function loadSettings() { try { return { sound: true, music: false, ...JSON.parse(localStorage.getItem(SET_KEY) || '{}') }; } catch (e) { return { sound: true, music: false }; } }
+function saveSettings() { try { localStorage.setItem(SET_KEY, JSON.stringify(Sound.set)); } catch (e) { /* storage blocked */ } }
+// Population changes keep the split between jobs; the idle absorb rounding
+function rescalePop(target) {
+  target = Math.max(0, R(target));
+  const old = S.pop;
+  if (old <= 0) { S.pop = target; return; }
+  const keys = JOBS.map(j => j.key), f = target / old;
+  keys.forEach(k => { S.jobs[k] = Math.floor(S.jobs[k] * f); });
+  S.pop = target;
+  while (jobTotal() > S.pop) { const k = keys.find(x => S.jobs[x] > 0); S.jobs[k]--; }
+}
+
+/* ---------- 3. Economy ---------- */
+function slots() {
+  const L = S.lands, o = { farm: 0, wood: 0, stone: 0, house: 0, food: 0, ore: 0, tin: false };
+  for (const [k, n] of Object.entries(L)) {
+    const d = LANDS[k];
+    o.farm += d.farm * n; o.wood += d.wood * n; o.stone += d.stone * n; o.house += d.house * n; o.food += d.food * n;
+    o.ore += (d.ore || 0) * n;
+    if (d.tin && n) o.tin = true;
+  }
+  if (has('irrigation')) o.farm += 6 * L.river;
+  if (S.b.canal) o.farm += 4 * (L.river + L.plain);
+  if (has('boats')) o.food += 4 * L.marsh;
+  if (has('sailing') && !S.flags.tinClosed) o.tin = true;
+  return o;
+}
+function calc() {
+  const c = {}, j = S.jobs, sl = slots(), d = D();
+  const buff = k => S.buffs.reduce((a, b) => a + (b[k] || 0), 0);
+  const low = S.mood < 15 ? 0.7 : S.mood < 30 ? 0.85 : 1;
+  c.slots = sl;
+  c.idle = idle();
+  // food
+  c.foodMult = Math.max(0.2, 1 + (has('herding') ? 0.1 : 0) + (has('plough') ? 0.15 : 0) + (has('astronomy') ? 0.15 : 0) + (done('sickles') ? 0.15 : 0) + buff('food')) * d.food;
+  const goodF = Math.min(j.farmers, sl.farm);
+  c.farmFood = R((goodF * 3 + (j.farmers - goodF) * 0.5) * c.foodMult * low);
+  c.wildFood = R(c.idle * 0.5 + sl.food);
+  c.foodIn = c.farmFood + c.wildFood;
+  c.foodOut = R(S.pop + j.warriors * 0.3);
+  c.foodNet = c.foodIn - c.foodOut;
+  c.foodCap = 150 + 250 * S.b.granary + 20 * landCount();
+  // wood and stone
+  const craft = 1 + 0.15 * S.b.workshop + (done('tools') ? 0.25 : 0);
+  const goodW = Math.min(j.woodcutters, sl.wood), goodS = Math.min(j.masons, sl.stone);
+  c.woodIn = R((goodW * 1.6 + (j.woodcutters - goodW) * 0.3) * craft * (has('copper') ? 1.1 : 1) * low);
+  c.stoneIn = R((goodS * 1.2 + (j.masons - goodS) * 0.2) * craft * (has('masonry') ? 1.1 : 1) * low);
+  c.storeCap = 100 + 200 * S.b.storehouse;
+  // bronze: smiths need a forge, copper ore from hills or mountains, and tin from mountains or ships
+  c.smithCap = S.b.forge * forgeSlots();
+  c.workingSmiths = Math.min(j.smiths, c.smithCap);
+  c.oreCap = has('bronze') && sl.tin ? sl.ore : 0;
+  c.bronzeIn = Math.min(R(c.workingSmiths * 0.4 * 10) / 10, c.oreCap);
+  c.bronzeWood = Math.ceil(c.bronzeIn * 2);
+  // knowledge
+  c.knowMult = 1 + 0.25 * S.b.tablets + (has('mathematics') ? 0.2 : 0) + (has('alphabet') ? 0.15 : 0);
+  c.know = Math.round((j.scholars + S.pop / 25) * c.knowMult * low * 10) / 10;
+  // defence
+  c.weapon = 1 + (done('weapons') ? 0.6 : 0) + (done('chariots') ? 0.6 : 0) + (done('iron') ? 0.8 : 0);
+  c.strength = R(j.warriors * c.weapon * (has('horses') ? 1.1 : 1) + buff('army'));
+  c.defense = R(c.strength * (1 + 0.3 * S.b.walls + (done('armour') ? 0.25 : 0)) + S.pop * 0.05 + S.b.walls * 8);
+  // people
+  c.housing = 40 + sl.house + S.b.house * houseSize() + (S.b.palace ? 120 : 0);
+  const room = c.housing - S.pop, after = S.res.food + c.foodNet;
+  c.births = after > 0 && room > 0 ? Math.min(Math.max(1, R(S.pop * 0.09 * (0.6 + S.mood / 125))), room, Math.max(0, Math.floor(c.foodNet * 0.8 + S.res.food * 0.05))) : 0;
+  c.crowd = S.pop > c.housing ? Math.ceil((S.pop - c.housing) * (has('medicine') ? 0.08 : 0.15)) : 0;
+  c.starve = after < 0 ? Math.ceil(-after * 0.5) : 0;
+  // mood
+  const parts = [['Base', 50]];
+  if (S.b.temple) parts.push(['Temples', 7 * S.b.temple]);
+  if (has('rituals')) parts.push(['Rituals', 2]);
+  if (has('weaving')) parts.push(['Fine cloth', 3]);
+  if (has('writing')) parts.push(['Written records', 3]);
+  if (has('law')) parts.push(['Law code', 8]);
+  if (has('literature')) parts.push(['Epics and hymns', 4]);
+  if (has('alphabet')) parts.push(['The alphabet', 3]);
+  if (S.b.market) parts.push(['Market', 3]);
+  if (S.b.tombs) parts.push(['Royal tombs', 8]);
+  if (S.b.ziggurat) parts.push(['Ziggurat', 15]);
+  if (S.b.palace) parts.push(['Palace', 5]);
+  if (S.lore) parts.push([LORE.name, Math.min(10, S.lore)]);
+  if (S.pop > c.housing) parts.push(['Overcrowding', -Math.min(20, R((S.pop - c.housing) / Math.max(1, c.housing) * 60))]);
+  if (S.pop >= 300) parts.push(['Big-town quarrels', -Math.min(25, Math.floor((S.pop - 200) / 60))]);
+  c.landLimit = 6 + (has('law') ? 4 : 0) + (S.b.palace ? 3 : 0);
+  if (landCount() > c.landLimit) parts.push(['Too many lands to govern', -(landCount() - c.landLimit) * 3]);
+  const wars = S.nbs.filter(a => a.alive && a.war).length;
+  if (wars) parts.push(['War', -5 * wars]);
+  if (after < 0) parts.push(['Hunger', -10]);
+  if (S.vassal && S.turn < S.vassal.until) parts.push([`Bowing to ${S.vassal.to}`, -3]);
+  S.buffs.forEach(b => { if (b.mood) parts.push([b.name, b.mood]); });
+  c.moodParts = parts;
+  c.moodTarget = clamp(parts.reduce((a, p) => a + p[1], 0), 0, 100);
+  // trade and expeditions
+  c.trades = (S.nbs.some(a => a.alive && !a.war && a.att > -20) ? 1 : 0) + (has('wheel') ? 1 : 0) + (has('sailing') ? 1 : 0) + (has('diplomacy') ? 1 : 0) + 2 * S.b.market;
+  c.rate = S.b.market ? 0.85 : 0.7;
+  const k = (has('boats') ? 0.85 : 1) * (has('wheel') ? 0.8 : 1);
+  c.expedition = { pop: 8 + Math.floor(landCount() / 2), food: R((30 + 8 * landCount()) * k), wood: R((10 + 4 * landCount()) * k) };
+  return c;
+}
+const ageOf = () => (has('bronze') && S.techs.length >= 20 ? AGES[4] : has('bronze') && has('writing') ? AGES[3] : has('bronze') ? AGES[2] : has('copper') ? AGES[1] : AGES[0]);
+const titleOf = () => {
+  const n = landCount(), p = S.pop;
+  if (p >= 1500 && n >= 12) return 'Empire';
+  if (p >= 800 && n >= 9) return 'Kingdom';
+  if (p >= 400 && has('writing')) return 'City';
+  if (p >= 150 && n >= 4) return 'Town';
+  if (p >= 60) return 'Village';
+  return 'Band';
+};
+
+/* ---------- 4. Player actions ---------- */
+function canAfford(cost) { return !cost || Object.entries(cost).every(([k, v]) => S.res[k] >= v); }
+function pay(cost) { Object.entries(cost || {}).forEach(([k, v]) => { S.res[k] -= v; }); }
+const costText = cost => Object.entries(cost).filter(([, v]) => v).map(([k, v]) => `${v} ${k}`).join(', ');
+function addBuff(name, turns, fx) { S.buffs.push({ name, turns, ...fx }); }
+function applyFx(fx) {
+  for (const [k, v] of Object.entries(fx || {})) {
+    if (!v) continue;
+    if (k === 'pop') rescalePop(S.pop + v);
+    else if (k === 'mood') S.mood = clamp(S.mood + v, 0, 100);
+    else if (k === 'knowledge') S.progress += v;
+    else if (k === 'land') addLand(v);
+    else S.res[k] = Math.max(0, S.res[k] + v);
+  }
+  if (fx && fx.knowledge) checkResearch().forEach(n => toast(`Learned ${n}`));
+}
+const researchCost = id => (id === 'lore' ? loreCost() : TECHS[id].cost);
+const allKnown = () => Object.keys(TECHS).every(has);
+function checkResearch() {
+  const learned = [];
+  while (S.research && S.progress >= researchCost(S.research)) {
+    S.progress -= researchCost(S.research);
+    if (S.research === 'lore') { S.lore++; learned.push(`${LORE.name}, song ${S.lore}`); continue; }
+    const t = TECHS[S.research];
+    S.techs.push(S.research);
+    S.research = allKnown() ? 'lore' : null;
+    learned.push(t.name);
+    log(`We learned ${t.name}. ${t.desc}`, 'good');
+  }
+  return learned;
+}
+function setResearch(id) {
+  if (id === 'lore' ? !allKnown() : (!TECHS[id] || has(id) || !TECHS[id].req.every(has))) return;
+  S.research = id;
+  Sound.play('tap');
+  checkResearch().forEach(n => toast(`Learned ${n}`));
+}
+function changeJob(key, dir) {
+  if (dir === '+') {
+    const n = Math.min(ui.step, idle());
+    if (!n) return toast('Everyone already has work. Take people from another trade first.');
+    if (key === 'smiths' && !S.b.forge) return toast('Smiths need a forge first.');
+    S.jobs[key] += n;
+  } else S.jobs[key] -= Math.min(ui.step, S.jobs[key]);
+  Sound.play('tap');
+}
+function autoFarm() {
+  const j = S.jobs, pool = S.pop - jobTotal() + j.farmers;
+  const enough = c => c.foodNet >= Math.max(3, R(c.foodOut * 0.05));
+  const tryF = f => { j.farmers = f; return calc(); };
+  if (!enough(tryF(pool))) { toast('Even with everyone farming, the food falls short.'); return; }
+  let lo = 0, hi = pool;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (enough(tryF(mid))) hi = mid; else lo = mid + 1; }
+  tryF(lo);
+  Sound.play('tap');
+  toast(`${lo} farmers feed everyone. ${idle()} people are free for other work.`);
+}
+function buildCost(id) {
+  const b = BUILDINGS[id], n = S.b[id], g = b.grow ? 1 + n * b.grow / 10 + n * n / 60 : 1;
+  const out = {};
+  for (const k of ['wood', 'stone', 'bronze']) if (b[k]) out[k] = R(b[k] * g);
+  return out;
+}
+function buildCheck(id) {
+  const b = BUILDINGS[id];
+  if (b.tech && !has(b.tech)) return `Needs ${TECHS[b.tech].name}`;
+  if (S.b[id] >= b.max) return 'Maximum built';
+  for (const [k, v] of Object.entries(buildCost(id))) if (S.res[k] < v) return `Needs ${v} ${k}`;
+  return '';
+}
+function build(id) {
+  if (buildCheck(id)) return;
+  const b = BUILDINGS[id];
+  pay(buildCost(id));
+  S.b[id]++;
+  if (b.wonder) { log(`We raised ${b.one}.`, 'big'); toast(`${b.name} complete`, 'gold'); Sound.play('wonder'); }
+  else { log(`Built ${b.one}.`); toast(`Built ${b.one}`); Sound.play('build'); }
+  scene.dirty = true;
+}
+function projectCheck(id) {
+  const p = PROJECTS[id];
+  if (done(id)) return 'Done';
+  if (!has(p.tech)) return `Needs ${TECHS[p.tech].name}`;
+  if (S.res.bronze < p.bronze) return `Needs ${p.bronze} bronze`;
+  if (p.stone && S.res.stone < p.stone) return `Needs ${p.stone} stone`;
+  return '';
+}
+function project(id) {
+  if (projectCheck(id)) return;
+  const p = PROJECTS[id];
+  pay({ bronze: p.bronze, stone: p.stone || 0 });
+  S.proj.push(id);
+  log(`Finished: ${p.name}.`, 'good');
+  toast(`${p.name} ready`);
+  Sound.play('forge');
+}
+function expeditionCheck(c) {
+  const e = c.expedition;
+  if (S.pop - e.pop < 15) return 'Not enough people to spare';
+  if (S.res.food < e.food) return `Needs ${e.food} food`;
+  if (S.res.wood < e.wood) return `Needs ${e.wood} wood`;
+  if (S.cool.expedition === S.turn) return 'One expedition a turn';
+  return '';
+}
+// What the scouts find depends on the age and on boats
+function findLand() {
+  const w = { river: 3, plain: 4, marsh: 1.5, forest: 3, hills: 2.5, mountain: 1.5 };
+  if (has('boats')) { w.river += 2; w.marsh += 1.5; }
+  if (!S.lands.forest) w.forest += 3;
+  if (has('copper') && !S.lands.hills) w.hills += 3;
+  if (has('bronze') && !S.lands.mountain) w.mountain += 3;
+  let x = rnd() * Object.values(w).reduce((a, b) => a + b, 0);
+  for (const [k, v] of Object.entries(w)) { x -= v; if (x <= 0) return k; }
+  return 'plain';
+}
+function addLand(n = 1, kind) {
+  for (let k = 0; k < n; k++) S.lands[kind || findLand()]++;
+  scene.dirty = true;
+}
+function expedition() {
+  const c = calc();
+  if (expeditionCheck(c)) return;
+  const e = c.expedition;
+  rescalePop(S.pop - e.pop);
+  S.res.food -= e.food;
+  S.res.wood -= e.wood;
+  S.cool.expedition = S.turn;
+  S.stats.expeditions++;
+  const kind = findLand();
+  S.lands[kind]++;
+  scene.dirty = true;
+  log(`Our settlers claimed ${article(LANDS[kind].name)} ${LANDS[kind].name.toLowerCase()}.`, 'good');
+  Sound.play('settle');
+  pushModal({ sign: 'land', title: `New land: ${LANDS[kind].name.toLowerCase()}`, body: `${e.pop} families walk out with their seed grain and tools. They found ${article(LANDS[kind].name)} ${LANDS[kind].name.toLowerCase()}. ${LANDS[kind].note}`, choices: [{ label: 'Good' }] });
+}
+const festivalCost = () => ({ food: R(S.pop * 0.3 + 15) });
+const festivalWait = () => Math.max(0, (S.cool.festival ?? -99) + 4 - S.turn);
+function festivalCheck() {
+  if (festivalWait()) return `The people will be ready for another festival in ${plural(festivalWait(), 'turn')}`;
+  if (S.res.food < festivalCost().food) return `Needs ${festivalCost().food} food`;
+  return '';
+}
+function festival() {
+  if (festivalCheck()) return;
+  pay(festivalCost());
+  S.cool.festival = S.turn;
+  S.mood = clamp(S.mood + 8, 0, 100);
+  log('We held a festival with music, beer and offerings.', 'good');
+  toast('The people feast and sing (+8 mood)');
+  Sound.play('festival');
+}
+function gift(arg) {
+  const [id, kind] = arg.split(':'), a = nbById(id), amt = { food: 40, bronze: 5 }[kind], good = { food: 8, bronze: 14 }[kind];
+  if (!a || !a.alive || S.res[kind] < amt) return;
+  S.res[kind] -= amt;
+  a.att = clamp(a.att + (a.war ? good / 2 : good), -100, 100);
+  toast(`${NB[id].name} accepts the gift`);
+  Sound.play('coin');
+}
+function askPeace(id) {
+  const a = nbById(id), c = calc();
+  if (!a || !a.war) return;
+  if (a.att > -35 || a.army < c.strength * 0.7) { makePeace(a); toast(`${NB[id].name} agrees to peace`); }
+  else { a.att -= 3; toast(`${NB[id].name} refuses. Send gifts or grow stronger first.`); }
+}
+function makePeace(a) { a.war = false; a.warTurns = 0; a.att = Math.max(a.att, -25) + 10; log(`Peace with ${NB[a.id].name}.`, 'good'); Sound.play('chime'); }
+// A raid on a neighbor: our warriors against theirs. Victory brings loot, and sometimes a land.
+function raidCheck(a, c) {
+  if (!a.alive) return 'Gone';
+  if (S.raided) return 'Our warriors have already marched this turn';
+  if (!S.jobs.warriors) return 'We have no warriors';
+  return '';
+}
+function raidNeighbor(id) {
+  const a = nbById(id), c = calc();
+  if (!a || raidCheck(a, c)) return;
+  if (!a.war) {
+    pushModal({ sign: 'army', title: `Raid ${NB[id].name}?`, body: `This means war with ${NB[id].name}. They will raid us back until one side asks for peace.`,
+      choices: [{ label: 'Raid them', danger: true, run: () => { a.war = true; a.warTurns = 0; a.att = Math.min(a.att, -50); log(`We went to war with ${NB[id].name}.`, 'bad'); Sound.play('war'); doRaid(a); } }, { label: 'Hold back', ghost: true, cancel: true }] });
+    return;
+  }
+  doRaid(a);
+}
+function doRaid(a) {
+  const c = calc(), atk = c.strength * rand(0.85, 1.15), def = (a.army + 5 + S.turn * 0.5) * rand(0.85, 1.15);
+  S.raided = true;
+  let title, body;
+  if (atk > def) {
+    const lost = Math.min(S.jobs.warriors, R(S.jobs.warriors * 0.15 * def / atk));
+    S.jobs.warriors -= lost; S.pop -= lost;
+    a.army = Math.max(0, a.army - def * 0.6);
+    const loot = { food: R(30 + S.turn * 3), bronze: has('bronze') ? R(2 + S.turn / 10) : 0 };
+    applyFx(loot);
+    S.stats.raidsWon++;
+    title = 'The raid succeeds';
+    body = `Our warriors broke through and came home with ${costText(loot)}. ${lost} of them fell.`;
+    if (rnd() < 0.35) { const kind = pick(['plain', 'hills', 'forest', 'river']); S.lands[kind]++; scene.dirty = true; body += ` They also seized ${article(LANDS[kind].name)} ${LANDS[kind].name.toLowerCase()} from ${NB[a.id].name}.`; addBuff('Conquered land restless', 6, { mood: -4 }); }
+    S.nbs.forEach(o => { if (o !== a && o.alive) o.att = clamp(o.att - 3, -100, 100); });
+    log(`We raided ${NB[a.id].name}.`, 'good');
+    Sound.play('victory');
+  } else {
+    const lost = Math.min(S.jobs.warriors, R(S.jobs.warriors * 0.35));
+    S.jobs.warriors -= lost; S.pop -= lost;
+    S.mood = clamp(S.mood - 5, 0, 100);
+    title = 'The raid fails';
+    body = `${NB[a.id].name} drove our warriors back. ${lost} of them fell.`;
+    log(`Our raid on ${NB[a.id].name} failed.`, 'bad');
+    Sound.play('defeat');
+  }
+  pushModal({ sign: 'army', title, body, choices: [{ label: 'Continue' }] });
+}
+function trade(arg) {
+  const [give, get] = arg.split(':'), c = calc();
+  if (S.tradeUsed >= c.trades || give === get) return;
+  const G = GOODS[give], W = GOODS[get];
+  if (S.res[give] < G.lot) return;
+  const amount = Math.max(1, Math.floor(G.lot * G.value * c.rate / W.value));
+  S.res[give] -= G.lot;
+  S.res[get] += amount;
+  S.tradeUsed++;
+  toast(`Traded ${G.lot} ${give} for ${amount} ${get}`);
+  Sound.play('coin');
+}
+function checkGoals() {
+  const c = calc(), newly = [];
+  for (const g of GOALS) {
+    if (S.goals.includes(g.id) || !g.done(c)) continue;
+    S.goals.push(g.id);
+    newly.push(g);
+    log(`Goal reached: ${g.text}. Reward: ${describe(null, g.reward)}.`, 'good');
+    applyFx(g.reward);
+  }
+  if (newly.length) { toast(`Goal reached: ${newly[0].text} (${describe(null, newly[0].reward)})`, 'gold'); Sound.play('goal'); }
+  if (S.title === 'Empire') unlock('empire');
+  if (allKnown()) unlock('scholar');
+  if (WONDERS.every(k => S.b[k])) unlock('builder');
+}
+
+/* ---------- 5. End of turn ---------- */
+function endTurn() {
+  if (!S || S.over || modalOpen) return;
+  const c = calc(), rep = [], before = { pop: S.pop, food: S.res.food };
+  Sound.play('turn');
+  let food = S.res.food + c.foodNet;
+  if (food < 0) {
+    const dead = Math.min(S.pop, Math.ceil(-food * 0.5));
+    rescalePop(S.pop - dead);
+    food = 0;
+    S.mood -= 8;
+    rep.push(['bad', `Famine: ${dead} people starved.`]);
+  } else if (food > c.foodCap) {
+    const lost = R(food - c.foodCap);
+    food = c.foodCap;
+    if (lost >= 10) rep.push(['', `${lost} grain spoiled. Granaries hold more.`]);
+  }
+  S.res.food = R(food);
+  S.res.wood = Math.min(c.storeCap, S.res.wood + c.woodIn);
+  S.res.stone = Math.min(c.storeCap, S.res.stone + c.stoneIn);
+  // smiths burn charcoal: no wood, no bronze
+  const cast = S.res.wood >= c.bronzeWood ? c.bronzeIn : 0;
+  if (cast) { S.res.wood -= c.bronzeWood; S.res.bronze = R((S.res.bronze + cast) * 10) / 10; S.stats.bronzeCast += cast; }
+  else if (c.bronzeIn) rep.push(['bad', 'The forges went cold: there was no wood for charcoal.']);
+  if (S.vassal && S.turn < S.vassal.until) {
+    const owe = S.vassal.food, paid = Math.min(owe, S.res.food);
+    S.res.food -= paid;
+    if (paid < owe) { S.mood = clamp(S.mood - 4, 0, 100); rep.push(['bad', `We could not pay ${S.vassal.to} its full tribute in grain.`]); }
+  }
+  S.progress += c.know;
+  if (!S.research && allKnown()) S.research = 'lore';
+  const learned = checkResearch();
+  if (c.births > 0 && S.res.food > 0) rescalePop(S.pop + c.births);
+  if (c.crowd > 0) { rescalePop(S.pop - c.crowd); rep.push(['bad', `Crowding and disease killed ${c.crowd}. Build houses or find more land.`]); }
+  const diff = c.moodTarget - S.mood;
+  if (diff) S.mood += Math.sign(diff) * Math.max(1, R(Math.abs(diff) * 0.3));
+  S.mood = clamp(S.mood, 0, 100);
+  if (S.mood < 15 && rnd() < 0.45) revolt(rep, c);
+  S.buffs.forEach(b => { b.turns--; });
+  S.buffs = S.buffs.filter(b => b.turns > 0);
+  neighborsTurn(c, rep);
+  S.turn++;
+  S.raided = false;
+  S.tradeUsed = 0;
+  resolveThreats(rep);
+  if (S.vassal && S.turn >= S.vassal.until) { rep.push(['good', `${S.vassal.to} has fallen; no one collects tribute from us any more.`]); S.vassal = null; }
+  const age = ageOf(), title = titleOf();
+  if (age !== S.age) { S.age = age; rep.push(['big', `A new age begins: the ${age}.`]); }
+  if (title !== S.title) {
+    const up = TITLES.indexOf(title) > TITLES.indexOf(S.title);
+    S.title = title;
+    rep.push([up ? 'good' : 'bad', up ? `We have become ${article(title)} ${title.toLowerCase()}.` : `We have fallen back to ${article(title)} ${title.toLowerCase()}.`]);
+  }
+  recordHistory();
+  scene.dirty = true;
+  const dPop = S.pop - before.pop, dFood = S.res.food - before.food;
+  log(`People ${signed(dPop)}, food ${signed(dFood)}.`);
+  rep.forEach(([kind, text]) => log(text, kind));
+  if (learned.length) Sound.play('chime');
+  if (S.pop <= 5) return gameOver('Your people scatter', `Too few remain to keep the hearths burning, and the name of the ${S.name} is forgotten.`);
+  if (S.mood <= 0) return gameOver('Civil war', `Rival elders raise their own followers. The ${S.name} tear themselves apart.`);
+  if (S.turn >= LAST_TURN) { checkGoals(); save(); renderAll(); pushModal(collapseModal()); return; }
+  const serious = rep.filter(([kind]) => kind === 'bad' || kind === 'big');
+  if (serious.length) pushModal({ sign: 'land', title: `The years to ${fmtYear(S.turn)}`, html: `<ul>${rep.map(([kind, text]) => `<li class="${kind === 'bad' ? 'neg' : kind === 'good' ? 'pos' : ''}">${text}</li>`).join('')}</ul>`, choices: [{ label: 'Continue' }] });
+  else toast(`${fmtYear(S.turn)}: people ${signed(dPop)}, food ${signed(dFood)}${learned.length ? ` · learned ${learned.join(', ')}` : ''}`);
+  if (learned.length && serious.length) toast(`Learned ${learned.join(', ')}`);
+  if (!historyEvent()) maybeEvent();
+  checkGoals();
+  save();
+  renderAll();
+}
+function recordHistory() {
+  const c = calc();
+  S.hist.push({ t: S.turn, pop: S.pop, food: S.res.food, know: c.know, def: c.defense, lands: landCount(), mood: S.mood });
+}
+function revolt(rep, c) {
+  const lost = R(S.pop * 0.08);
+  rescalePop(S.pop - lost);
+  const ids = Object.keys(S.b).filter(k => S.b[k] > 0 && !BUILDINGS[k].wonder);
+  let burned = '';
+  if (ids.length) { const k = pick(ids); S.b[k]--; burned = ` and burned ${BUILDINGS[k].one}`; }
+  S.mood = clamp(S.mood + 10, 0, 100);
+  rep.push(['bad', `Revolt! Rioters killed ${lost} people${burned}.`]);
+  if (landCount() > c.landLimit) {
+    const kinds = Object.keys(S.lands).filter(k => S.lands[k] > 0 && !(k === 'river' && S.lands.river === 1));
+    if (kinds.length) { const k = pick(kinds); S.lands[k]--; rep.push(['bad', `A distant ${LANDS[k].name.toLowerCase()} broke away from us.`]); }
+  }
+}
+
+/* ---------- 6. Neighbors ---------- */
+const underProtection = () => !!(S.vassal && S.turn < S.vassal.until);
+function neighborsTurn(c, rep) {
+  const d = D();
+  for (const a of S.nbs) {
+    if (!a.alive) continue;
+    const def = NB[a.id];
+    const target = (5 + S.turn * 1.0) * def.mil * d.ai * (1 + S.turn / 80);
+    a.army += (target - a.army) * (a.war ? 0.3 : 0.2);
+    a.att += (def.base - a.att) * (has('diplomacy') && a.att < def.base ? 0.12 : 0.06) - 0.4 * d.anger;
+    a.att = clamp(a.att, -100, 100);
+    if (!a.war) {
+      if (!underProtection() && a.att < -40 && a.army > c.defense * 0.8 && rnd() < 0.22 * d.anger) {
+        a.war = true; a.warTurns = 0;
+        log(`${def.name} declared war on us.`, 'bad');
+        rep.push(['bad', `${def.name} declared war. Their warriors number about ${R10(a.army)}; our defence is ${c.defense}.`]);
+        Sound.play('war');
+      }
+    } else {
+      a.warTurns++;
+      if ((a.army < c.strength * 0.5 && rnd() < 0.4) || (a.warTurns > 4 && rnd() < 0.15)) {
+        makePeace(a);
+        rep.push(['good', `${def.name} asked for peace, and the war is over.`]);
+      } else if (rnd() < 0.45) {
+        const power = a.army * rand(0.5, 0.9), held = c.defense * rand(0.85, 1.15);
+        if (power > held) {
+          const food = R(S.res.food * 0.2), wood = R(S.res.wood * 0.15), dead = Math.max(1, R(S.pop * 0.04));
+          S.res.food -= food; S.res.wood -= wood; rescalePop(S.pop - dead);
+          S.mood = clamp(S.mood - 6, 0, 100);
+          rep.push(['bad', `${def.name} raiders carried off ${food} food and ${wood} wood. ${dead} of our people died.`]);
+        } else {
+          a.army *= 0.85;
+          S.mood = clamp(S.mood + 2, 0, 100);
+          rep.push(['good', `Our warriors drove off ${def.name} raiders.`]);
+        }
+      }
+    }
+  }
+}
+
+/* ---------- 7. Events and history ---------- */
+const pickNb = pred => { const list = S.nbs.filter(a => a.alive && pred(a)); return list.length ? pick(list) : null; };
+const EVENTS = [
+  { id: 'harvest', weight: 3, make: () => { const n = R(20 + S.pop * 0.25); return { sign: 'food', title: 'The barley stands tall', body: `The fields yield ${n} grain more than anyone hoped.`, choices: [{ label: 'Store it', fx: { food: n } }, { label: 'Hold a harvest feast', fx: { food: R(n / 2), mood: 6 } }] }; } },
+  { id: 'drought', weight: 3, bad: true, make: () => { const a = has('astronomy') ? -0.15 : -0.25; return { sign: 'food', title: 'The rains fail', body: 'The river runs low and the fields crack.', choices: [{ label: 'Ration the grain', hint: `Food ${pct(a)} for 2 turns, −4 mood`, run: () => { addBuff('Drought', 2, { food: a }); applyFx({ mood: -4 }); } }, { label: 'Dig wells', cost: { wood: 25, stone: 15 }, hint: `−25 wood, −15 stone, food ${pct(a / 2)} for 2 turns`, run: () => addBuff('Drought', 2, { food: a / 2 }) }] }; } },
+  { id: 'flood', weight: 2, bad: true, make: () => { const loss = R(S.res.food * 0.15); return { sign: 'water', title: 'The river floods', body: 'Brown water covers the low fields and pours into the stores, and leaves fresh silt behind.', choices: [{ label: 'Replant in the silt', hint: `−${loss} food, then food +20% for 3 turns`, run: () => { applyFx({ food: -loss }); addBuff('Rich silt', 3, { food: 0.2 }); } }, { label: 'Raise dikes', cost: { wood: 20, stone: 20 }, ghost: true }] }; } },
+  { id: 'plague', weight: 1.5, bad: true, cond: () => S.pop > 80, make: () => { const m = has('medicine') ? 0.5 : 1, a = R(S.pop * 0.06 * m), b = R(S.pop * 0.1 * m); return { sign: 'people', title: 'Fever in the huts', body: 'A sickness moves from house to house.', choices: [{ label: 'Isolate the sick', fx: { pop: -a, mood: -5 } }, { label: 'Trust the healers', fx: { pop: -b } }] }; } },
+  { id: 'wanderers', weight: 2, make: c => { const n = R(5 + S.pop * 0.08); return { sign: 'people', title: 'Families at the edge of the fields', body: `${n} wanderers ask to settle among us.${S.pop + n > c.housing ? ' We do not have houses for all of them.' : ''}`, choices: [{ label: 'Welcome them', fx: { pop: n, mood: S.pop + n > c.housing ? -3 : 0 } }, { label: 'Send them on', ghost: true, fx: { mood: -1 } }] }; } },
+  { id: 'comet', weight: 1, make: () => ({ sign: 'star', title: 'A star with a burning tail', body: 'For forty nights a bright star crosses the sky.', choices: [{ label: 'Declare it an omen of glory', fx: { mood: 8 } }, { label: 'Let the scholars watch it', fx: { knowledge: R(10 + S.turn * 2) } }] }) },
+  { id: 'locusts', weight: 1.5, bad: true, cond: () => S.turn > 4, make: () => ({ sign: 'food', title: 'Locusts', body: 'A cloud of locusts settles on the green barley.', choices: [{ label: 'Burn the field edges', cost: { wood: 15 }, hint: '−15 wood, food −20% next turn', run: () => addBuff('Locusts', 1, { food: -0.2 }) }, { label: 'Wait for them to pass', hint: 'Food −40% next turn', run: () => addBuff('Locusts', 1, { food: -0.4 }) }] }) },
+  { id: 'sage', weight: 1.5, make: () => ({ sign: 'knowledge', title: 'A wandering sage', body: 'An old traveller offers to teach our young.', choices: [{ label: 'Give the sage a seat by the fire', cost: { food: 10 }, fx: { knowledge: R(10 + S.turn * 2.5) } }, { label: 'Send the sage on', ghost: true }] }) },
+  { id: 'unrest', weight: 3, cond: () => S.mood < 40, make: () => ({ sign: 'stability', title: 'Grumbling at the well', body: 'People gather to complain about hunger, crowding and the elders.', choices: [{ label: 'Hold a feast', cost: { food: R(S.pop * 0.4) }, fx: { mood: 10 } }, { label: 'Ignore it', ghost: true, fx: { mood: -5 } }] }) },
+  { id: 'wolves', weight: 1.2, bad: true, cond: () => S.turn < 40, make: c => ({ sign: 'army', title: 'Wolves among the flocks', body: 'Wolves come down from the hills at night.', choices: [{ label: 'Send the warriors hunting', hint: c.strength >= 6 ? 'They should manage' : 'Too few warriors: −3 mood', run: () => applyFx(c.strength >= 6 ? { food: 20, mood: 2 } : { mood: -3 }) }, { label: 'Build pens', cost: { wood: 20 } }] }) },
+  { id: 'ore', weight: 1.2, cond: () => has('copper') && !S.lands.hills, make: () => ({ sign: 'copper', title: 'Green stones from far away', body: 'A trader shows us copper ore from hills to the north.', choices: [{ label: 'Follow the trader home', hint: 'Gain a hills land, −20 food', cost: { food: 20 }, run: () => { S.lands.hills++; scene.dirty = true; } }, { label: 'Not now', ghost: true }] }) },
+  { id: 'tin', weight: 1, cond: () => has('bronze') && !slots().tin, make: () => ({ sign: 'tin', title: 'A tin trader', body: 'A caravan from the far east carries tin, the metal we lack for bronze.', choices: [{ label: 'Buy it with grain', cost: { food: 60 }, fx: { bronze: 8 } }, { label: 'Send them on', ghost: true }] }) },
+  { id: 'fire', weight: 1, bad: true, cond: () => S.b.house > 2, make: () => { const w = R(S.res.wood * 0.4); return { sign: 'house', title: 'Fire in the reed roofs', body: 'A spark from a hearth sets a row of roofs alight.', choices: [{ label: 'Rebuild', fx: { wood: -w } }] }; } },
+  { id: 'twins', weight: 0.8, make: () => ({ sign: 'king', title: 'Twins born to the chief', body: 'The priests call it a sign of the gods’ favour.', choices: [{ label: 'Celebrate', fx: { mood: 4 } }] }) },
+  { id: 'beer', weight: 1, make: () => ({ sign: 'food', title: 'A new beer', body: 'The brewers sing a hymn to Ninkasi and pour a beer of dates and honey.', choices: [{ label: 'Share it with everyone', fx: { food: -15, mood: 4 } }] }) },
+  { id: 'smith', weight: 1, cond: () => S.b.forge > 0 && has('bronze'), make: () => ({ sign: 'bronze', title: 'A master smith', body: 'A smith from the hills shows ours how to make two-piece moulds.', choices: [{ label: 'Put the smith to work', fx: { bronze: 8 } }] }) },
+  { id: 'quarrel', weight: 1.2, cond: () => !!pickNb(a => !a.war && a.att < 15 && a.att > -40), make: () => { const a = pickNb(x => !x.war && x.att < 15 && x.att > -40), n = NB[a.id].name; return { sign: 'land', title: 'A boundary stone moved', body: `Herders from ${n} have moved a boundary stone into our pastures.`, choices: [{ label: 'Stand firm', hint: `+2 mood, ${n} grows angrier`, run: () => { a.att -= 12; applyFx({ mood: 2 }); } }, { label: 'Settle it with a gift', cost: { food: 30 }, run: () => { a.att += 10; } }] }; } },
+  { id: 'marriage', weight: 1, cond: () => !!pickNb(a => !a.war && a.att > 5), make: () => { const a = pickNb(x => !x.war && x.att > 5), n = NB[a.id].name; return { sign: 'king', title: `A marriage offer from ${n}`, body: `The chief of ${n} proposes a marriage between our houses.`, choices: [{ label: 'Agree', cost: { food: 40 }, hint: `−40 food, +3 mood, ${n} becomes much friendlier`, run: () => { a.att += 30; applyFx({ mood: 3 }); } }, { label: 'Decline', ghost: true, run: () => { a.att -= 10; } }] }; } },
+  { id: 'raiders', weight: 1.5, bad: true, cond: () => !underProtection() && !!pickNb(a => !a.war && a.att < -10), make: c => { const a = pickNb(x => !x.war && x.att < -10), n = NB[a.id].name, power = R(a.army * rand(0.4, 0.7)); return { sign: 'army', title: `${n} raid our fields`, body: `A war band of about ${R10(power)} falls on our outlying fields. Our defence is ${c.defense}.`, choices: [{ label: 'Stand and fight', hint: power < c.defense ? 'We should hold' : 'They may break through', run: () => { if (c.defense * rand(0.85, 1.15) >= power) { applyFx({ mood: 2 }); toast('The raiders were driven off'); } else { applyFx({ food: -R(S.res.food * 0.2), mood: -5 }); toast('The raiders broke through'); } } }, { label: 'Buy them off', cost: { food: R(20 + S.pop * 0.1) } }] }; } },
+  { id: 'salt', weight: 1.2, bad: true, cond: () => has('irrigation') && S.turn > 30, make: () => ({ sign: 'land', title: 'Salt in the fields', body: 'Years of canal water have left a white crust on the oldest fields.', choices: [{ label: 'Leave them fallow', hint: 'Food −15% for 3 turns', run: () => addBuff('Salted fields', 3, { food: -0.15 }) }, { label: 'Flush them with fresh water', cost: { wood: 30, stone: 20 }, hint: 'Food −5% for 3 turns', run: () => addBuff('Salted fields', 3, { food: -0.05 }) }] }) },
+];
+function maybeEvent() {
+  if (S.turn < 2 || rnd() > 0.45) return;
+  const c = calc(), bad = D().bad, weight = e => e.weight * (e.bad ? bad : 1);
+  const pool = EVENTS.filter(e => (S.cool[e.id] ?? -99) + 5 <= S.turn && (!e.cond || e.cond(c)));
+  let x = rnd() * pool.reduce((a, e) => a + weight(e), 0);
+  for (const e of pool) {
+    x -= weight(e);
+    if (x <= 0) { S.cool[e.id] = S.turn; pushModal({ ...e.make(c), persist: { type: 'event', arg: e.id }, sfx: 'event' }); return; }
+  }
+}
+const HISTORY = [
+  { turn: 8, id: 'ubaid', make: () => ({ sign: 'water', title: 'Canals of the south', body: 'Villages downriver dig long ditches to lead the river onto their fields. Their elders offer to teach us.', choices: [{ label: 'Dig with them', cost: { wood: 20 }, hint: 'Study toward Irrigation', fx: { knowledge: 40 } }, { label: 'Keep to our own ways', ghost: true, fx: { mood: 2 } }] }) },
+  { turn: 17, id: 'smelting', make: () => ({ sign: 'copper', title: 'Green stone melts', body: 'A potter firing his kiln too hot finds a bead of red metal among the ashes of green stones.', choices: [{ label: 'Study the strange metal', fx: { knowledge: 50 } }] }) },
+  { turn: 28, id: 'uruk', make: () => ({ sign: 'city', title: 'The great town of Uruk', body: 'Travellers speak of Uruk, where thousands live inside walls around a white temple on a high terrace.', choices: [{ label: 'Send young people to learn there', fx: { pop: -5, knowledge: 80 } }, { label: 'Trade with them', fx: { food: -30, bronze: 3, stone: 40 } }] }) },
+  { turn: 46, id: 'tablets', make: () => ({ sign: 'knowledge', title: 'Marks on clay', body: 'Temple stewards in the south press reed marks into clay to count grain and sheep.', choices: [{ label: 'Learn their marks', fx: { knowledge: 100 } }] }) },
+  { turn: 55, id: 'gilgamesh', make: () => ({ sign: 'city', title: 'The walls of Uruk', body: 'Tales spread of Gilgamesh, king of Uruk, who raised walls an hour’s walk around and sought a life without end.', choices: [{ label: 'Build walls like his', hint: has('masonry') && S.b.walls < 3 ? 'A free stretch of wall' : '+60 stone', run: () => { if (has('masonry') && S.b.walls < 3) S.b.walls++; else applyFx({ stone: 60 }); scene.dirty = true; } }, { label: 'Tell the tales at every hearth', fx: { mood: 5 } }] }) },
+  { turn: 61, id: 'sargon', make: c => { const power = R((40 + S.turn * 2) * D().invade); return { sign: 'king', title: 'Sargon of Akkad', body: `Sargon of Akkad has conquered every city between the rivers. His envoys demand tribute, or his army of about ${R10(power)} will come. Our defence is ${c.defense}.`, choices: [
+    { label: 'Bow to Akkad', hint: 'Pay 30 grain a turn until Akkad falls. No neighbor dares attack us. −3 mood', run: () => { S.vassal = { to: 'Akkad', until: 64, food: 30 }; log('We bow to Akkad.', 'bad'); } },
+    { label: 'Send rich gifts', cost: { food: 120, bronze: 15 } },
+    { label: 'Refuse', danger: true, hint: `Akkad's army arrives next turn`, run: () => { S.threats.push({ name: 'Akkad', turn: S.turn + 1, power, id: 'akkad' }); Sound.play('war'); } },
+  ] }; } },
+  { turn: 64, id: 'gutians', make: c => { const power = R((30 + S.turn * 1.8) * D().invade); return { sign: 'storm', title: 'The Gutians', body: `Mountain tribes have brought down Akkad. Their war bands, about ${R10(power)} strong, ride toward our valley. Our defence is ${c.defense}.`, choices: [
+    { label: 'Meet them in the field', run: () => invasionNow('the Gutians', power) },
+    { label: 'Pay them to ride on', cost: { food: 100, bronze: 10 } },
+  ] }; } },
+  { turn: 71, id: 'hammurabi', make: () => ({ sign: 'king', title: 'Hammurabi of Babylon', body: 'Hammurabi has carved his laws on a black stone and asks every town to send warriors for his wars.', choices: [{ label: 'Send warriors', hint: `${R(S.jobs.warriors * 0.2)} warriors march away; +40 food in plunder, +4 mood`, run: () => { const n = R(S.jobs.warriors * 0.2); S.jobs.warriors -= n; S.pop -= n; applyFx({ food: 40, mood: 4 }); } }, { label: 'Send grain instead', cost: { food: 80 } }] }) },
+  { turn: 73, id: 'thera', make: () => ({ sign: 'star', title: 'A darkness in the west', body: 'Ash drifts down for days; far over the western sea a mountain island has burst apart.', choices: [{ label: 'Wait for the sky to clear', hint: `Food ${pct(has('astronomy') ? -0.12 : -0.25)} for 2 turns`, run: () => addBuff('Ash-darkened sky', 2, { food: has('astronomy') ? -0.12 : -0.25 }) }] }) },
+  { turn: 77, id: 'amarna', make: () => ({ sign: 'palace', title: 'Letters from Pharaoh', body: 'The Pharaoh of Egypt writes to the great kings as brothers and asks for bronze.', choices: [{ label: 'Send bronze', cost: { bronze: 15 }, fx: { food: 150, mood: 5 } }, { label: 'Ignore the letter', ghost: true }] }) },
+  { turn: 78, id: 'drought', make: () => ({ sign: 'storm', title: 'The rains fail, year after year', body: 'A drought settles over the whole world. Wells run dry from Hatti to Egypt.', choices: [{ label: 'Prepare for hard years', hint: `Food ${pct(has('astronomy') ? -0.1 : -0.2)} until the end, −3 mood`, run: () => { addBuff('The great drought', 4, { food: has('astronomy') ? -0.1 : -0.2 }); applyFx({ mood: -3 }); } }] }) },
+  { turn: 79, id: 'seapeoples', make: () => ({ sign: 'ship', title: 'The tin roads close', body: 'Cities along the coast are burning, and raiders from the sea are coming up the rivers. No tin comes from the east any more.', choices: [{ label: 'Hoard what we have', hint: 'Bronze from ships stops: only mountain tin remains', run: () => { S.flags.tinClosed = true; } }] }) },
+];
+function historyEvent() {
+  const h = HISTORY.find(x => x.turn === S.turn && !S.flags[`h_${x.id}`]);
+  if (!h) return false;
+  S.flags[`h_${h.id}`] = true;
+  pushModal({ ...h.make(calc()), date: fmtYear(h.turn), persist: { type: 'hist', arg: h.id }, sfx: 'gong' });
+  return true;
+}
+function resolveThreats(rep) {
+  const due = S.threats.filter(t => S.turn >= t.turn);
+  S.threats = S.threats.filter(t => S.turn < t.turn);
+  for (const t of due) {
+    const held = invasion(t.name, t.power, rep);
+    if (held) { S.fame.push(['Drove back the army of Akkad', 100]); unlock('defiant'); }
+    else { S.vassal = { to: 'Akkad', until: 64, food: 45 }; rep.push(['bad', 'Akkad takes our grain as tribute: 45 a turn.']); }
+  }
+}
+function invasion(name, power, rep) {
+  const c = calc(), def = c.defense * rand(0.9, 1.1);
+  if (def >= power) { S.mood = clamp(S.mood + 6, 0, 100); rep.push(['good', `The army of ${name} broke against our defence of ${c.defense}.`]); Sound.play('victory'); return true; }
+  const food = R(S.res.food * 0.3), dead = Math.max(2, R(S.pop * 0.07));
+  S.res.food -= food; rescalePop(S.pop - dead);
+  S.mood = clamp(S.mood - 10, 0, 100);
+  rep.push(['bad', `The army of ${name} overwhelmed our defence of ${c.defense}, carried off ${food} food and killed ${dead} of our people.`]);
+  Sound.play('defeat');
+  return false;
+}
+function invasionNow(name, power) {
+  const rep = [], held = invasion(name, power, rep);
+  rep.forEach(([kind, text]) => log(text, kind));
+  pushModal({ sign: held ? 'king' : 'army', title: held ? 'They are driven back' : 'They broke through', body: rep.map(r => r[1]).join(' '), choices: [{ label: 'Continue' }] });
+}
+
+/* ---------- 8. End of the game ---------- */
+function collapseTests(focus) {
+  const c = calc();
+  const invasion = R((60 + S.pop * 0.25 + landCount() * 10) * D().invade), need = R(S.pop * 0.5);
+  const def = c.defense * (focus === 'walls' ? 1.2 : 1), food = S.res.food * (focus === 'food' ? 1.3 : 1), mood = S.mood + (focus === 'unity' ? 12 : 0);
+  return [
+    ['The Sea Peoples', `Defence ${R(def)} against about ${invasion}`, def >= invasion, 0.25],
+    ['The great drought', `${R(food)} food stored, ${need} needed`, food >= need, 0.2],
+    ['Unity', `Mood ${R(mood)}, 55 needed`, mood >= 55, 0.15],
+  ];
+}
+const testsHTML = (tests, final) => `<div class="tests">${tests.map(t => `<div><span><b>${t[0]}</b><br><span class="muted small">${t[1]}</span></span><b class="${t[2] ? 'pos' : 'neg'}">${t[2] ? (final ? 'Passed' : 'Ready') : (final ? 'Failed' : 'Short')}</b></div>`).join('')}</div>`;
+function collapseModal() {
+  return {
+    sign: 'foreign', date: `${END_YEAR} BC`, title: 'The Bronze Age Collapse', persist: { type: 'collapse' }, sfx: 'gong',
+    body: 'The drought has not broken, the tin roads are closed, and the Sea Peoples are rowing up the river. Our valley will now be tested: its walls, its granaries and the loyalty of its people.',
+    html: `<h3>Where we stand</h3>${testsHTML(collapseTests(null), false)}<p>Where do you put your last effort?</p>`,
+    choices: [
+      { label: 'Man the walls', hint: 'Defence +20% for the test', run: () => resolveCollapse('walls') },
+      { label: 'Guard the granaries', hint: 'Stored food counts 30% more', run: () => resolveCollapse('food') },
+      { label: 'Gather the people at the temples', hint: 'Mood +12 for the test', run: () => resolveCollapse('unity') },
+    ],
+  };
+}
+const RANKS = [[0, 'A name lost to the sands'], [1200, 'Remembered on a few tablets'], [2200, 'A town of songs'], [3300, 'A kingdom of legend'], [4600, 'Light of the Bronze Age']];
+const rankOf = total => RANKS.filter(r => total >= r[0]).pop()[1];
+function computeScore(passes) {
+  const parts = [
+    ['People', R(S.pop * 0.6)], ['Lands', landCount() * 40], ['Ideas learned', (S.techs.length - 1) * 35], [LORE.name, S.lore * LORE.score],
+    ['Buildings', Object.keys(S.b).filter(k => k !== 'house' && !BUILDINGS[k].wonder).reduce((a, k) => a + S.b[k], 0) * 15],
+    ['Bronze projects', S.proj.length * 40], ['Great works', WONDERS.reduce((a, k) => a + (S.b[k] ? BUILDINGS[k].wonder : 0), 0)],
+    ['Mood', S.mood * 2], ['Goals reached', S.goals.length * GOAL_SCORE], ...S.fame, ['Collapse tests passed', passes * 250],
+  ];
+  const raw = parts.reduce((a, p) => a + p[1], 0), mult = D().score, total = R(raw * mult);
+  return { parts, raw, mult, total, rank: rankOf(total), passes };
+}
+function resolveCollapse(focus) {
+  const tests = collapseTests(focus), passes = tests.filter(t => t[2]).length;
+  rescalePop(S.pop - R(S.pop * tests.reduce((a, t) => a + (t[2] ? 0 : t[3]), 0)));
+  const [title, text] = [
+    ['Swept away', `The ${S.name} vanish from the record. Later travellers find only a mound of melted brick.`],
+    ['Diminished', `The ${S.name} survive, but only as a shadow of what they were.`],
+    ['Shaken but standing', `The ${S.name} lose much, but the valley endures into the Iron Age.`],
+    ['Unbroken', `While palaces burn across the world, the ${S.name} hold firm.`],
+  ][passes];
+  S.over = true;
+  log(`The Collapse: ${title.toLowerCase()}.`, 'big');
+  const sc = computeScore(passes);
+  unlock('survive');
+  if (passes === 3) unlock('unbroken');
+  if (S.diff === 'hard') unlock('hard');
+  if (sc.rank === RANKS[RANKS.length - 1][1]) unlock('legend');
+  recordBest(sc, title);
+  Sound.play(passes >= 2 ? 'victory' : 'defeat');
+  pushModal({ sign: 'king', title, body: text, html: testsHTML(tests, true) + scoreHTML(sc), choices: endChoices() });
+  save();
+}
+function gameOver(title, text) {
+  S.over = true;
+  log(title, 'bad');
+  const sc = computeScore(0);
+  recordBest(sc, title);
+  save();
+  renderAll();
+  Sound.play('defeat');
+  pushModal({ sign: 'land', title, body: text, html: scoreHTML(sc), choices: endChoices() });
+}
+const endChoices = () => [{ label: 'Play again', run: startNew }, { label: 'Look at the valley', ghost: true, cancel: true }];
+function scoreHTML(sc) {
+  const rows = sc.parts.filter(p => p[1]).map(([k, v]) => `<span>${escapeHTML(k)}</span><span>${v}</span>`).join('');
+  return `<div class="ledger">${rows}${sc.mult !== 1 ? `<span>${D().name} difficulty</span><span>×${sc.mult}</span>` : ''}<span class="tot">Score</span><span class="tot">${sc.total}</span></div><p class="rank">${sc.rank}</p>`;
+}
+function recordBest(sc, outcome) {
+  const m = loadMeta();
+  m.best.push({ name: S.name, score: sc.total, rank: sc.rank, diff: S.diff, outcome, date: new Date().toISOString().slice(0, 10) });
+  m.best.sort((a, b) => b.score - a.score);
+  m.best.length = Math.min(m.best.length, 10);
+  saveMeta(m);
+}
+function startNew() { newGame(S ? S.name : 'Uruma', S ? S.diff : 'normal'); scene.dirty = true; showIntro(); }
+
+/* ---------- 9a. Painting helpers, shared with Bronze Dawn ---------- */
+function hashRand(seed) {
+  let s = (seed >>> 0) || 1;
+  return () => { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return (s >>> 0) / 4294967296; };
+}
+const hashStr = str => [...String(str)].reduce((h, ch) => Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0, 2166136261);
+let grainTile = null;
+function grain() {
+  if (grainTile) return grainTile;
+  const c = document.createElement('canvas');
+  c.width = c.height = 160;
+  const g = c.getContext('2d'), img = g.createImageData(160, 160), r = hashRand(7);
+  for (let k = 0; k < img.data.length; k += 4) {
+    const v = 128 + (r() - 0.5) * 110;
+    img.data[k] = img.data[k + 1] = img.data[k + 2] = v;
+    img.data[k + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  return (grainTile = c);
+}
+function grainOver(ctx, W, H, alpha) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'overlay';
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = ctx.createPattern(grain(), 'repeat');
+  ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+}
+
+// Event banners: a small landscape painted for the mood of each card
+const MOODS = {
+  dawn:  { sky: ['#e9a46a', '#f7dca6'], sun: '#fff1c9', far: '#a7775c', near: '#5c4636', ground: '#3b3024' },
+  day:   { sky: ['#7eb0d6', '#eadcb5'], sun: '#fff7da', far: '#8c9fa4', near: '#6e7d4c', ground: '#4f5b35' },
+  dusk:  { sky: ['#4e2b5c', '#e0794f'], sun: '#ffcd88', far: '#6a3a4f', near: '#3a2233', ground: '#22141e' },
+  night: { sky: ['#0a1135', '#2c3d7c'], sun: '#eef0ff', far: '#1f2c5d', near: '#131b3f', ground: '#0b1029' },
+  storm: { sky: ['#283140', '#6e7783'], sun: null, far: '#3a434f', near: '#262d36', ground: '#1a1f26' },
+  war:   { sky: ['#37111a', '#c4542f'], sun: '#ffb070', far: '#5b2420', near: '#2e1414', ground: '#1b0c0c' },
+  sea:   { sky: ['#5b8dbf', '#f2d8a4'], sun: '#fff3cf', far: '#5c80a4', near: '#2f5d87', ground: '#1f4a74' },
+  forge: { sky: ['#140b08', '#5c2b12'], sun: '#ff9a3c', far: '#2b170d', near: '#1a0f0a', ground: '#0f0906' },
+};
+const SIGN_MOOD = {
+  food: 'day', water: 'day', land: 'day', materials: 'day', wedge: 'day', people: 'dawn', house: 'dawn', silver: 'dawn',
+  stability: 'dawn', king: 'dawn', god: 'dawn', city: 'dawn', palace: 'dawn', copper: 'forge', tin: 'forge', bronze: 'forge',
+  army: 'war', foreign: 'dusk', road: 'dusk', knowledge: 'night', star: 'night', ship: 'sea', storm: 'storm',
+};
+function ridge(ctx, W, base, amp, r, color) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(0, ctx.canvas.height);
+  let y = base;
+  for (let x = 0; x <= W; x += W / 24) {
+    y = clamp(y + (r() - 0.5) * amp, base - amp * 1.4, base + amp * 0.6);
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(W, y);
+  ctx.lineTo(W, ctx.canvas.height);
+  ctx.closePath();
+  ctx.fill();
+}
+function paintBanner(cv, sign, seedText) {
+  const dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round((cv.clientWidth || 580) * dpr), H = Math.round((cv.clientHeight || 150) * dpr);
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d'), m = MOODS[SIGN_MOOD[sign] || 'dawn'], r = hashRand(hashStr(seedText));
+  const sky = ctx.createLinearGradient(0, 0, 0, H * 0.75);
+  sky.addColorStop(0, m.sky[0]); sky.addColorStop(1, m.sky[1]);
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, H);
+  if (m === MOODS.night) {
+    ctx.fillStyle = '#fff';
+    for (let k = 0; k < 70; k++) { ctx.globalAlpha = 0.3 + r() * 0.7; ctx.fillRect(r() * W, r() * H * 0.6, dpr * (r() < 0.9 ? 1 : 2), dpr * (r() < 0.9 ? 1 : 2)); }
+    ctx.globalAlpha = 1;
+  }
+  if (m.sun) {
+    const sx = W * (0.2 + r() * 0.6), sy = H * (0.25 + r() * 0.2), sr = H * 0.11;
+    const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr * 5);
+    glow.addColorStop(0, m.sun); glow.addColorStop(0.2, `${m.sun}aa`); glow.addColorStop(1, `${m.sun}00`);
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = m.sun;
+    ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fill();
+  }
+  if (sign === 'star') {
+    const cx = W * (0.55 + r() * 0.3), cy = H * 0.22;
+    const tail = ctx.createLinearGradient(cx, cy, cx - W * 0.35, cy + H * 0.25);
+    tail.addColorStop(0, 'rgba(255,255,255,.95)'); tail.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.strokeStyle = tail; ctx.lineWidth = 3 * dpr; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx - W * 0.35, cy + H * 0.25); ctx.stroke();
+  }
+  ridge(ctx, W, H * 0.58, H * 0.12, r, m.far);
+  // a ziggurat on the horizon for kings, gods and cities
+  if (['king', 'god', 'city', 'palace', 'stability', 'house'].includes(sign)) {
+    const zx = W * (0.25 + r() * 0.5), zb = H * 0.66, step = H * 0.07;
+    ctx.fillStyle = m.near;
+    for (let k = 0; k < 4; k++) ctx.fillRect(zx - (4 - k) * step * 1.4, zb - (k + 1) * step, (4 - k) * step * 2.8, step + 1);
+  }
+  ridge(ctx, W, H * 0.74, H * 0.07, r, m.near);
+  if (sign === 'ship' || sign === 'water') {
+    ctx.fillStyle = m.ground;
+    ctx.fillRect(0, H * 0.78, W, H * 0.22);
+    ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = dpr;
+    for (let k = 0; k < 14; k++) { const wx = r() * W, wy = H * (0.82 + r() * 0.15); ctx.beginPath(); ctx.moveTo(wx, wy); ctx.lineTo(wx + 12 * dpr, wy); ctx.stroke(); }
+    if (sign === 'ship') {
+      const bx = W * (0.3 + r() * 0.4), by = H * 0.83;
+      ctx.fillStyle = '#1a1410';
+      ctx.beginPath(); ctx.moveTo(bx - 34 * dpr, by); ctx.quadraticCurveTo(bx, by + 12 * dpr, bx + 34 * dpr, by - 6 * dpr); ctx.lineTo(bx + 30 * dpr, by + 2 * dpr); ctx.lineTo(bx - 30 * dpr, by + 2 * dpr); ctx.fill();
+      ctx.fillRect(bx - dpr, by - 34 * dpr, 2 * dpr, 34 * dpr);
+      ctx.fillStyle = '#e9dcc0';
+      ctx.beginPath(); ctx.moveTo(bx + dpr, by - 32 * dpr); ctx.lineTo(bx + 22 * dpr, by - 10 * dpr); ctx.lineTo(bx + dpr, by - 8 * dpr); ctx.fill();
+    }
+  } else {
+    ctx.fillStyle = m.ground;
+    ctx.fillRect(0, H * 0.84, W, H * 0.16);
+  }
+  if (['food', 'land', 'people', 'materials', 'road'].includes(sign)) {
+    // date palms along the river bank
+    for (let k = 0; k < 4; k++) {
+      const px = W * (0.08 + r() * 0.84), pb = H * 0.86, ph = H * (0.22 + r() * 0.1);
+      ctx.strokeStyle = m.near; ctx.lineWidth = 3 * dpr;
+      ctx.beginPath(); ctx.moveTo(px, pb); ctx.quadraticCurveTo(px + 6 * dpr, pb - ph / 2, px + 3 * dpr, pb - ph); ctx.stroke();
+      ctx.lineWidth = 2 * dpr;
+      for (let a = 0; a < 6; a++) {
+        const ang = Math.PI * (0.15 + a * 0.14);
+        ctx.beginPath(); ctx.moveTo(px + 3 * dpr, pb - ph);
+        ctx.quadraticCurveTo(px + 3 * dpr - Math.cos(ang) * 14 * dpr, pb - ph - 8 * dpr, px + 3 * dpr - Math.cos(ang) * 24 * dpr, pb - ph + Math.sin(ang) * 6 * dpr); ctx.stroke();
+      }
+    }
+  }
+  if (sign === 'road') {
+    ctx.fillStyle = '#20140c';
+    for (let k = 0; k < 5; k++) {
+      const dx = W * 0.2 + k * 26 * dpr, dy = H * 0.83;
+      ctx.fillRect(dx, dy - 8 * dpr, 14 * dpr, 6 * dpr);
+      ctx.fillRect(dx + 1 * dpr, dy - 2 * dpr, 2 * dpr, 6 * dpr); ctx.fillRect(dx + 11 * dpr, dy - 2 * dpr, 2 * dpr, 6 * dpr);
+      ctx.fillRect(dx + 12 * dpr, dy - 13 * dpr, 4 * dpr, 7 * dpr);
+    }
+  }
+  if (['army', 'foreign', 'copper', 'tin', 'bronze'].includes(sign)) {
+    // smoke rising from fires or forges
+    for (let k = 0; k < 3; k++) {
+      let sx = W * (0.15 + r() * 0.7), sy = H * 0.8;
+      for (let p = 0; p < 9; p++) {
+        ctx.fillStyle = `rgba(30, 24, 22, ${0.32 - p * 0.03})`;
+        ctx.beginPath(); ctx.arc(sx, sy, (6 + p * 3) * dpr, 0, Math.PI * 2); ctx.fill();
+        sx += (4 + r() * 6) * dpr; sy -= 9 * dpr;
+      }
+    }
+  }
+  if (sign === 'army') {
+    ctx.strokeStyle = '#120808'; ctx.lineWidth = 2 * dpr;
+    for (let k = 0; k < 22; k++) {
+      const sx = W * 0.05 + k * W * 0.042 + r() * 6, sb = H * (0.86 + r() * 0.04);
+      ctx.beginPath(); ctx.moveTo(sx, sb); ctx.lineTo(sx + 4 * dpr, sb - H * 0.3); ctx.stroke();
+    }
+  }
+  if (sign === 'storm') {
+    ctx.strokeStyle = 'rgba(210, 225, 240, .35)'; ctx.lineWidth = dpr;
+    for (let k = 0; k < 90; k++) { const rx = r() * W, ry = r() * H; ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx - 6 * dpr, ry + 16 * dpr); ctx.stroke(); }
+  }
+  const vig = ctx.createLinearGradient(0, 0, 0, H);
+  vig.addColorStop(0.6, 'rgba(18, 27, 66, 0)'); vig.addColorStop(1, 'rgba(18, 27, 66, .85)');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, W, H);
+  grainOver(ctx, W, H, 0.18);
+}
+
+/* ---------- 9. Painting the valley ---------- */
+// The static valley (sky, land, river, fields, buildings) is painted into a cache when the
+// settlement changes; clouds, people, boats and smoke move on top of it every frame.
+const scene = { dirty: true, cache: null, key: '', walkers: [], smokes: [], boats: [], clouds: [], t: 0, raf: 0, last: 0, layout: null };
+const reduceMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function skyFor() {
+  if (S.turn >= 78) return ['#6b3a3a', '#e08a4e', '#f2c27a'];         // the Collapse: hazy fire
+  if (S.turn < 20) return ['#4a5a8c', '#e9a77a', '#f7d9a6'];           // Neolithic dawn
+  if (S.turn < 50) return ['#4f86bf', '#9cc3dd', '#f1dfb4'];           // bright day
+  return ['#3d6aa8', '#8fb6d6', '#f3d9a3'];                            // late afternoon
+}
+// Where everything sits, in fractions of the canvas, so the valley scales to any size
+function sceneLayout(W, H) {
+  const hz = H * 0.34;
+  const river = t => {            // t from 0 (horizon) to 1 (bottom edge): centre x and half width
+    const x = W * (0.56 - 0.38 * t * t + 0.06 * Math.sin(t * 5));
+    return [x, W * (0.006 + 0.07 * t * t)];
+  };
+  return { W, H, hz, river, town: [W * 0.73, hz + (H - hz) * 0.46] };
+}
+function paintValley(W, H) {
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d'), L = sceneLayout(W, H), r = hashRand(4242), sc = Math.min(W / 1000, H / 650);
+  scene.layout = L;
+  const sk = skyFor();
+  const sky = ctx.createLinearGradient(0, 0, 0, L.hz);
+  sky.addColorStop(0, sk[0]); sky.addColorStop(0.65, sk[1]); sky.addColorStop(1, sk[2]);
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, L.hz + 2);
+  // sun
+  const sx = W * 0.78, sy = L.hz * 0.38, sr = 26 * sc;
+  const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr * 6);
+  glow.addColorStop(0, 'rgba(255, 245, 210, .9)'); glow.addColorStop(0.25, 'rgba(255, 230, 170, .35)'); glow.addColorStop(1, 'rgba(255, 230, 170, 0)');
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, W, L.hz);
+  ctx.fillStyle = '#fff6dc'; ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fill();
+  // distant ranges, then mountains if we hold them
+  const range = (base, amp, color, seed) => {
+    const rr = hashRand(seed);
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.moveTo(0, L.hz + 2);
+    let y = base;
+    for (let x = 0; x <= W + 20; x += 20) { y = clamp(y + (rr() - 0.5) * amp, base - amp * 2, base + amp * 0.4); ctx.lineTo(x, y); }
+    ctx.lineTo(W, L.hz + 2); ctx.closePath(); ctx.fill();
+  };
+  range(L.hz - 40 * sc, 14 * sc, 'rgba(120, 130, 170, .45)', 11);
+  const mountains = Math.min(5, S.lands.mountain);
+  for (let k = 0; k < mountains; k++) {
+    const mx = W * (0.62 + k * 0.08 + (k % 2) * 0.02), mh = (110 + (k % 3) * 30) * sc, mw = (120 + (k % 2) * 40) * sc;
+    ctx.fillStyle = '#7d7895';
+    ctx.beginPath(); ctx.moveTo(mx - mw, L.hz); ctx.lineTo(mx, L.hz - mh); ctx.lineTo(mx + mw, L.hz); ctx.fill();
+    ctx.fillStyle = '#5c5873';
+    ctx.beginPath(); ctx.moveTo(mx, L.hz - mh); ctx.lineTo(mx + mw, L.hz); ctx.lineTo(mx + mw * 0.15, L.hz); ctx.fill();
+    ctx.fillStyle = '#f1f0f7';
+    ctx.beginPath(); ctx.moveTo(mx - mw * 0.28, L.hz - mh * 0.72); ctx.lineTo(mx, L.hz - mh); ctx.lineTo(mx + mw * 0.28, L.hz - mh * 0.72); ctx.lineTo(mx + mw * 0.08, L.hz - mh * 0.66); ctx.lineTo(mx - mw * 0.1, L.hz - mh * 0.76); ctx.fill();
+  }
+  range(L.hz - 12 * sc, 8 * sc, 'rgba(95, 105, 120, .55)', 23);
+  // the land itself
+  const ground = ctx.createLinearGradient(0, L.hz, 0, H);
+  ground.addColorStop(0, '#9c9a63'); ground.addColorStop(0.5, '#8a8247'); ground.addColorStop(1, '#6d6236');
+  ctx.fillStyle = ground; ctx.fillRect(0, L.hz, W, H - L.hz);
+  // grass and scrub, denser in the foreground
+  const gr = hashRand(31);
+  for (let k = 0; k < 900; k++) {
+    const t = Math.pow(gr(), 0.7), y = L.hz + t * (H - L.hz), x = gr() * W, s = (2 + t * 7) * sc;
+    ctx.strokeStyle = gr() < 0.5 ? 'rgba(70, 80, 30, .35)' : 'rgba(200, 190, 110, .3)';
+    ctx.lineWidth = Math.max(1, s * 0.25);
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + s * 0.3, y - s); ctx.stroke();
+  }
+  // hills on the left horizon
+  for (let k = 0; k < Math.min(5, S.lands.hills); k++) {
+    const hx = W * (0.08 + k * 0.1), hw = (90 + (k % 2) * 30) * sc, hh = (55 + (k % 3) * 12) * sc, hy = L.hz + 6 * sc;
+    const g = ctx.createLinearGradient(hx - hw, hy - hh, hx + hw, hy);
+    g.addColorStop(0, '#b38c5c'); g.addColorStop(1, '#6e5233');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.moveTo(hx - hw, hy); ctx.quadraticCurveTo(hx, hy - hh * 2, hx + hw, hy); ctx.fill();
+    ctx.strokeStyle = 'rgba(60, 40, 20, .5)'; ctx.lineWidth = 2 * sc;
+    ctx.beginPath(); ctx.moveTo(hx - hw * 0.2, hy - hh * 0.6); ctx.lineTo(hx + hw * 0.1, hy - hh * 0.55); ctx.stroke();
+  }
+  // the river, wide in the foreground
+  ctx.beginPath();
+  for (let k = 0; k <= 40; k++) { const t = k / 40, [x, w] = L.river(t); ctx[k ? 'lineTo' : 'moveTo'](x - w, L.hz + t * (H - L.hz)); }
+  for (let k = 40; k >= 0; k--) { const t = k / 40, [x, w] = L.river(t); ctx.lineTo(x + w, L.hz + t * (H - L.hz)); }
+  ctx.closePath();
+  const water = ctx.createLinearGradient(0, L.hz, 0, H);
+  water.addColorStop(0, '#9fc8d8'); water.addColorStop(1, '#2f6f92');
+  ctx.fillStyle = water; ctx.fill();
+  ctx.strokeStyle = 'rgba(60, 80, 50, .5)'; ctx.lineWidth = 3 * sc; ctx.stroke();
+  // fields along the banks: more as the farmers grow
+  const plots = Math.max(4, Math.min(60, Math.ceil(Math.min(S.jobs.farmers, slots().farm) / 2)));
+  const fr = hashRand(77);
+  for (let k = 0; k < plots; k++) {
+    const t = 0.12 + fr() * 0.72, y = L.hz + t * (H - L.hz), [x, w] = L.river(t), side = fr() < 0.5 ? -1 : 1;
+    const fx = x + side * (w + (30 + fr() * 170) * sc * (0.4 + t)), fw = (60 + fr() * 50) * sc * (0.4 + t), fh = (14 + fr() * 10) * sc * (0.4 + t);
+    ctx.fillStyle = k % 3 === 0 ? '#c8b45a' : k % 3 === 1 ? '#7f9b4a' : '#a8a650';
+    ctx.globalAlpha = 0.9;
+    ctx.beginPath(); ctx.moveTo(fx - fw / 2, y); ctx.lineTo(fx + fw / 2 - fh, y); ctx.lineTo(fx + fw / 2, y + fh); ctx.lineTo(fx - fw / 2 + fh, y + fh); ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = 'rgba(80, 60, 30, .35)'; ctx.lineWidth = 1;
+    for (let s = 1; s < 4; s++) { ctx.beginPath(); ctx.moveTo(fx - fw / 2 + s * fw / 4, y); ctx.lineTo(fx - fw / 2 + s * fw / 4 + fh * 0.6, y + fh); ctx.stroke(); }
+  }
+  // marsh reeds where the river meets the bottom edge
+  for (let k = 0; k < Math.min(60, S.lands.marsh * 20); k++) {
+    const t = 0.75 + r() * 0.25, [x, w] = L.river(t), y = L.hz + t * (H - L.hz), side = r() < 0.5 ? -1 : 1, bx = x + side * (w + r() * 40 * sc);
+    ctx.strokeStyle = r() < 0.5 ? '#5f7a3a' : '#8a9a4a'; ctx.lineWidth = 2 * sc;
+    ctx.beginPath(); ctx.moveTo(bx, y); ctx.lineTo(bx + (r() - 0.5) * 6 * sc, y - (14 + r() * 12) * sc); ctx.stroke();
+  }
+  // forest on the left: groves grow with each forest we hold
+  const trees = [];
+  const nTrees = 8 + Math.min(90, S.lands.forest * 22);
+  for (let k = 0; k < nTrees; k++) {
+    const t = 0.05 + r() * 0.85, y = L.hz + t * (H - L.hz), x = W * (0.01 + r() * 0.24) * (1 - t * 0.3);
+    trees.push([x, y, (8 + r() * 6) * sc * (0.5 + t)]);
+  }
+  trees.sort((a, b) => a[1] - b[1]).forEach(([x, y, s]) => {
+    ctx.fillStyle = 'rgba(20, 30, 10, .35)'; ctx.beginPath(); ctx.ellipse(x + s * 0.4, y + s * 0.2, s, s * 0.35, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#3e2c1c'; ctx.fillRect(x - s * 0.1, y - s * 0.8, s * 0.2, s * 0.8);
+    ctx.fillStyle = '#2f5a35'; ctx.beginPath(); ctx.arc(x, y - s, s, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#4f8a52'; ctx.beginPath(); ctx.arc(x - s * 0.3, y - s * 1.3, s * 0.55, 0, Math.PI * 2); ctx.fill();
+  });
+  // date palms by the water
+  for (let k = 0; k < 7; k++) {
+    const t = 0.2 + r() * 0.6, [x, w] = L.river(t), y = L.hz + t * (H - L.hz), px = x + (r() < 0.5 ? -1 : 1) * (w + 18 * sc), ph = 42 * sc * (0.5 + t);
+    ctx.strokeStyle = '#5a4128'; ctx.lineWidth = 3 * sc * (0.5 + t);
+    ctx.beginPath(); ctx.moveTo(px, y); ctx.quadraticCurveTo(px + 6 * sc, y - ph / 2, px + 3 * sc, y - ph); ctx.stroke();
+    ctx.strokeStyle = '#3f6a35'; ctx.lineWidth = 2.5 * sc;
+    for (let a = 0; a < 6; a++) {
+      const ang = Math.PI * (0.1 + a * 0.16), len = 22 * sc * (0.5 + t);
+      ctx.beginPath(); ctx.moveTo(px + 3 * sc, y - ph); ctx.quadraticCurveTo(px + 3 * sc - Math.cos(ang) * len * 0.6, y - ph - 8 * sc, px + 3 * sc - Math.cos(ang) * len, y - ph + Math.sin(ang) * len * 0.3); ctx.stroke();
+    }
+  }
+  // footpaths from the houses down to the water
+  ctx.strokeStyle = 'rgba(190, 160, 110, .55)'; ctx.lineCap = 'round';
+  [0.45, 0.6, 0.75].forEach((t, k) => {
+    const [x] = L.river(t), y = L.hz + t * (H - L.hz);
+    ctx.lineWidth = (3 + t * 5) * sc;
+    ctx.beginPath(); ctx.moveTo(L.town[0], L.town[1]); ctx.quadraticCurveTo((L.town[0] + x) / 2, (L.town[1] + y) / 2 + (k - 1) * 30 * sc, x + 10 * sc, y); ctx.stroke();
+  });
+  paintTown(ctx, L, sc);
+  // lamplight and grain
+  const light = ctx.createRadialGradient(W * 0.75, L.hz * 0.4, 0, W * 0.75, L.hz * 0.4, W);
+  light.addColorStop(0, 'rgba(255, 230, 170, .12)'); light.addColorStop(1, 'rgba(255, 230, 170, 0)');
+  ctx.fillStyle = light; ctx.fillRect(0, 0, W, H);
+  const vig = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.4, W / 2, H / 2, Math.max(W, H) * 0.75);
+  vig.addColorStop(0, 'rgba(4, 6, 16, 0)'); vig.addColorStop(1, 'rgba(4, 6, 16, .55)');
+  ctx.fillStyle = vig; ctx.fillRect(0, 0, W, H);
+  grainOver(ctx, W, H, 0.12);
+  return cv;
+}
+// The settlement: houses spiral out from the centre; public buildings take their places around it
+function paintTown(ctx, L, sc) {
+  const [cx, cy] = L.town, items = [], depth = y => 0.55 + (y - L.hz) / (L.H - L.hz) * 0.7;
+  // keep buildings on the east bank: anything that would land in the river is moved across to dry ground
+  const bank = (x, y) => {
+    const [rx, rw] = L.river(clamp((y - L.hz) / (L.H - L.hz), 0, 1)), edge = rx + rw + 26 * sc;
+    return x < edge ? edge + (edge - x) * 0.35 : x;
+  };
+  const houses = Math.min(80, Math.max(3, Math.round(S.pop / 10)));
+  const hr = hashRand(99);
+  scene.chimneys = [];
+  for (let k = 0; k < houses; k++) {
+    const a = k * 2.4, d = (22 + Math.sqrt(k) * 26) * sc, y = cy + Math.sin(a) * d * 0.55, x = bank(cx + Math.cos(a) * d * 1.5, y);
+    items.push({ y, draw: () => (has('mudbrick') ? house : hut)(ctx, x, y, 19 * sc * depth(y), hr) });
+    if (k % 7 === 0) scene.chimneys.push([x, y - 24 * sc * depth(y)]);
+  }
+  const at = (dx, dy) => [bank(cx + dx * sc, cy + dy * sc), cy + dy * sc];
+  if (S.b.ziggurat) { const [x, y] = at(-40, -150); items.push({ y: y - 400, draw: () => ziggurat(ctx, x, y, 50 * sc) }); }
+  if (S.b.temple) { const [x, y] = at(60, -110); items.push({ y: y - 300, draw: () => temple(ctx, x, y, 22 * sc, S.b.temple) }); }
+  if (S.b.palace) { const [x, y] = at(-200, -70); items.push({ y, draw: () => palace(ctx, x, y, 24 * sc) }); }
+  for (let k = 0; k < S.b.granary; k++) { const [x, y] = at(190 + k * 40, 20 + k * 10); items.push({ y, draw: () => granary(ctx, x, y, 18 * sc) }); }
+  for (let k = 0; k < S.b.forge; k++) { const [x, y] = at(-230 - k * 50, 60 + k * 15); items.push({ y, draw: () => forge(ctx, x, y, 18 * sc) }); scene.chimneys.push([x + 6 * sc, y - 26 * sc, true]); }
+  for (let k = 0; k < S.b.tablets; k++) { const [x, y] = at(130 + k * 50, -60); items.push({ y, draw: () => hall(ctx, x, y, 18 * sc) }); }
+  if (S.b.market) { const [x, y] = at(-30, 90); items.push({ y, draw: () => market(ctx, x, y, 18 * sc) }); }
+  if (S.b.tombs) { const [x, y] = at(260, -100); items.push({ y: y - 200, draw: () => tomb(ctx, x, y, 32 * sc) }); }
+  if (S.b.canal) {
+    ctx.strokeStyle = '#4f93b3'; ctx.lineWidth = 4 * sc;
+    ctx.beginPath(); const [x0, w0] = L.river(0.55); ctx.moveTo(x0 + w0, L.hz + 0.55 * (L.H - L.hz)); ctx.quadraticCurveTo(L.W * 0.85, L.hz + 0.5 * (L.H - L.hz), L.W * 0.98, L.hz + 0.62 * (L.H - L.hz)); ctx.stroke();
+  }
+  items.sort((a, b) => a.y - b.y).forEach(it => it.draw());
+  if (S.b.walls) {
+    // a mud-brick wall curving in front of the town; each stretch built adds a third of it
+    const pts = [], n = 40, span = S.b.walls / 3;
+    for (let k = 0; k <= n * span; k++) {
+      const a = Math.PI * (0.02 + 0.96 * k / n), y = cy + Math.sin(a) * 130 * sc + 34 * sc;
+      pts.push([bank(cx + Math.cos(a) * 320 * sc, y), y]);
+    }
+    const h = 22 * sc;
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#9d7f53'; ctx.lineWidth = 12 * sc;
+    ctx.beginPath(); pts.forEach(([x, y], k) => ctx[k ? 'lineTo' : 'moveTo'](x, y)); ctx.stroke();
+    ctx.fillStyle = '#c9a774';
+    pts.forEach(([x, y], k) => {
+      if (k === pts.length - 1) return;
+      const [x2, y2] = pts[k + 1];
+      ctx.beginPath(); ctx.moveTo(x, y - h); ctx.lineTo(x2, y2 - h); ctx.lineTo(x2, y2); ctx.lineTo(x, y); ctx.fill();
+      if (k % 2 === 0) ctx.fillRect(x - 3 * sc, y - h - 6 * sc, 7 * sc, 6 * sc);
+    });
+    for (let k = 0; k < pts.length; k += 10) { const [x, y] = pts[k]; ctx.fillStyle = '#b8955f'; ctx.fillRect(x - 9 * sc, y - h - 16 * sc, 18 * sc, h + 16 * sc); }
+  }
+}
+function house(ctx, x, y, s, r) {
+  const w = s * (1.4 + r() * 0.6), h = s * (0.9 + r() * 0.3);
+  ctx.fillStyle = 'rgba(20, 15, 5, .3)'; ctx.fillRect(x - w / 2 + s * 0.3, y - s * 0.1, w, s * 0.3);
+  ctx.fillStyle = '#d8bf8f'; ctx.fillRect(x - w / 2, y - h, w, h);
+  ctx.fillStyle = '#b9996a'; ctx.fillRect(x + w / 2, y - h + s * 0.2, s * 0.45, h - s * 0.2);
+  ctx.fillStyle = '#e9d6ad'; ctx.fillRect(x - w / 2 - s * 0.1, y - h - s * 0.2, w + s * 0.55, s * 0.25);
+  ctx.fillStyle = '#4a3420'; ctx.fillRect(x - s * 0.15, y - h * 0.55, s * 0.32, h * 0.55);
+}
+function hut(ctx, x, y, s, r) {
+  const w = s * (1.1 + r() * 0.3);
+  ctx.fillStyle = 'rgba(20, 15, 5, .3)'; ctx.beginPath(); ctx.ellipse(x + s * 0.3, y, w * 1.1, s * 0.3, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#c9a76a'; ctx.beginPath(); ctx.ellipse(x, y, w, s * 1.2, 0, Math.PI, 0); ctx.fill();
+  ctx.strokeStyle = 'rgba(110, 80, 40, .6)'; ctx.lineWidth = Math.max(1, s * 0.08);
+  for (let k = 1; k < 4; k++) { ctx.beginPath(); ctx.ellipse(x, y, w, s * 1.2 * k / 4, 0, Math.PI, 0); ctx.stroke(); }
+  ctx.fillStyle = '#3a2816'; ctx.beginPath(); ctx.ellipse(x, y, s * 0.25, s * 0.45, 0, Math.PI, 0); ctx.fill();
+}
+function temple(ctx, x, y, s, n) {
+  ctx.fillStyle = '#cdb07c'; ctx.fillRect(x - s * 3, y - s * 1.2, s * 6, s * 1.2);
+  ctx.fillStyle = '#f0e2bf'; ctx.fillRect(x - s * 1.6, y - s * 3, s * 3.2, s * 1.8);
+  ctx.fillStyle = '#7a5a34'; ctx.fillRect(x - s * 0.3, y - s * 2.3, s * 0.6, s * 1.1);
+  for (let k = 0; k < Math.min(3, n); k++) { ctx.fillStyle = '#c48a43'; ctx.fillRect(x - s * 1.5 + k * s * 1.2, y - s * 3.3, s * 0.6, s * 0.3); }
+}
+function ziggurat(ctx, x, y, s) {
+  const tiers = [[3.2, 1], [2.4, 1], [1.6, 1], [0.8, 0.9]];
+  let top = y;
+  tiers.forEach(([w, h], k) => {
+    ctx.fillStyle = k % 2 ? '#c99f6a' : '#dcb983'; ctx.fillRect(x - w * s, top - h * s, w * s * 2, h * s);
+    ctx.fillStyle = 'rgba(80, 50, 20, .35)'; ctx.fillRect(x + w * s * 0.55, top - h * s, w * s * 0.45, h * s);
+    top -= h * s;
+  });
+  ctx.fillStyle = '#8f3c2a'; ctx.fillRect(x - s * 0.2, y - s * 3.9, s * 0.4, s * 3.9);
+}
+function palace(ctx, x, y, s) {
+  ctx.fillStyle = '#e3cc9c'; ctx.fillRect(x - s * 4, y - s * 2, s * 8, s * 2);
+  ctx.fillStyle = '#c4a671'; for (let k = 0; k < 7; k++) ctx.fillRect(x - s * 3.8 + k * s * 1.2, y - s * 2.4, s * 0.6, s * 0.5);
+  ctx.fillStyle = '#3d6aa8'; ctx.fillRect(x - s * 0.5, y - s * 1.6, s, s * 1.6);
+}
+function granary(ctx, x, y, s) {
+  ctx.fillStyle = '#d9c59a'; ctx.beginPath(); ctx.ellipse(x, y - s * 0.8, s, s * 1.2, 0, Math.PI, 0); ctx.fill(); ctx.fillRect(x - s, y - s * 0.8, s * 2, s * 0.8);
+  ctx.fillStyle = '#5a3e22'; ctx.fillRect(x - s * 0.2, y - s * 0.6, s * 0.4, s * 0.6);
+}
+function forge(ctx, x, y, s) {
+  ctx.fillStyle = '#9b7a55'; ctx.fillRect(x - s * 1.4, y - s * 1.3, s * 2.8, s * 1.3);
+  ctx.fillStyle = '#5b4632'; ctx.fillRect(x + s * 0.4, y - s * 2.4, s * 0.5, s * 1.2);
+  ctx.fillStyle = '#ff9a3c'; ctx.fillRect(x - s * 0.8, y - s * 0.8, s * 0.7, s * 0.6);
+}
+function hall(ctx, x, y, s) {
+  ctx.fillStyle = '#e8d6b0'; ctx.fillRect(x - s * 1.8, y - s * 1.8, s * 3.6, s * 1.8);
+  ctx.fillStyle = '#b39463'; for (let k = 0; k < 4; k++) ctx.fillRect(x - s * 1.5 + k * s, y - s * 1.6, s * 0.3, s * 1.6);
+  ctx.fillStyle = '#d7c193'; ctx.fillRect(x - s * 2, y - s * 2.1, s * 4, s * 0.35);
+}
+function market(ctx, x, y, s) {
+  const cols = ['#c9533a', '#e8d6b0', '#3d6aa8'];
+  for (let k = 0; k < 3; k++) {
+    const mx = x + (k - 1) * s * 2.4;
+    ctx.fillStyle = '#6b5236'; ctx.fillRect(mx - s, y - s * 1.2, s * 0.15, s * 1.2); ctx.fillRect(mx + s * 0.85, y - s * 1.2, s * 0.15, s * 1.2);
+    ctx.fillStyle = cols[k]; ctx.fillRect(mx - s * 1.1, y - s * 1.5, s * 2.2, s * 0.45);
+  }
+}
+function tomb(ctx, x, y, s) {
+  ctx.fillStyle = '#a88b5d'; ctx.beginPath(); ctx.ellipse(x, y, s * 2, s, 0, Math.PI, 0); ctx.fill();
+  ctx.fillStyle = '#2c2015'; ctx.fillRect(x - s * 0.25, y - s * 0.5, s * 0.5, s * 0.5);
+}
+// Moving things: walkers between town and fields, smoke from chimneys and forges, boats, clouds
+function seedMotion(L) {
+  const r = hashRand(S.turn * 31 + 7), sc = Math.min(L.W / 1000, L.H / 650);
+  const walkers = Math.min(36, Math.ceil(S.pop / 10));
+  scene.walkers = Array.from({ length: walkers }, () => {
+    const t = 0.25 + r() * 0.55, [x, w] = L.river(t), side = r() < 0.5 ? -1 : 1;
+    return { a: [...L.town], b: [x + side * (w + (20 + r() * 80) * sc), L.hz + t * (L.H - L.hz)], p: r(), v: 0.02 + r() * 0.03, c: ['#2c2118', '#5a2d1c', '#e8dcc0'][Math.floor(r() * 3)] };
+  });
+  scene.boats = has('boats') ? Array.from({ length: Math.min(4, 1 + Math.floor(S.turn / 20)) }, () => ({ t: r(), v: 0.012 + r() * 0.01 })) : [];
+  scene.clouds = Array.from({ length: 5 }, () => ({ x: r(), y: 0.08 + r() * 0.25, s: 0.6 + r() * 0.8, v: 0.004 + r() * 0.006 }));
+  scene.sc = sc;
+}
+function drawMotion(ctx, L, dt) {
+  const sc = scene.sc;
+  scene.clouds.forEach(c => {
+    c.x = (c.x + c.v * dt) % 1.2;
+    const x = (c.x - 0.1) * L.W, y = c.y * L.hz, s = 34 * sc * c.s;
+    ctx.fillStyle = 'rgba(255, 252, 240, .55)';
+    [[0, 0, 1], [0.8, 0.1, 0.8], [-0.8, 0.15, 0.7], [0.3, -0.35, 0.75]].forEach(([dx, dy, k]) => { ctx.beginPath(); ctx.ellipse(x + dx * s, y + dy * s, s * k * 1.2, s * k * 0.6, 0, 0, Math.PI * 2); ctx.fill(); });
+  });
+  scene.boats.forEach(b => {
+    b.t = (b.t + b.v * dt) % 1;
+    const t = 0.15 + b.t * 0.8, [x] = L.river(t), y = L.hz + t * (L.H - L.hz), s = 10 * sc * (0.4 + t);
+    ctx.fillStyle = '#3a2a1a'; ctx.beginPath(); ctx.moveTo(x - s * 1.6, y); ctx.quadraticCurveTo(x, y + s * 0.8, x + s * 1.6, y - s * 0.3); ctx.lineTo(x - s * 1.6, y); ctx.fill();
+    ctx.fillStyle = '#efe4c8'; ctx.beginPath(); ctx.moveTo(x, y - s * 2.2); ctx.lineTo(x + s * 1.1, y - s * 0.4); ctx.lineTo(x, y - s * 0.4); ctx.fill();
+  });
+  scene.walkers.forEach(w => {
+    w.p = (w.p + w.v * dt) % 2;
+    const f = w.p < 1 ? w.p : 2 - w.p, x = w.a[0] + (w.b[0] - w.a[0]) * f, y = w.a[1] + (w.b[1] - w.a[1]) * f;
+    const s = 5 * sc * (0.55 + (y - L.hz) / (L.H - L.hz) * 0.7), bob = Math.sin(scene.t * 8 + w.v * 100) * s * 0.15;
+    ctx.fillStyle = w.c; ctx.fillRect(x - s * 0.5, y - s * 2.6 + bob, s, s * 2);
+    ctx.fillStyle = '#c99a6c'; ctx.beginPath(); ctx.arc(x, y - s * 3 + bob, s * 0.55, 0, Math.PI * 2); ctx.fill();
+  });
+  (scene.chimneys || []).forEach(([x, y, hot], k) => {
+    for (let p = 0; p < 6; p++) {
+      const life = (scene.t * 0.35 + p / 6 + k * 0.13) % 1, s = (3 + life * 10) * sc;
+      ctx.fillStyle = hot ? `rgba(50, 40, 35, ${0.4 * (1 - life)})` : `rgba(235, 230, 220, ${0.3 * (1 - life)})`;
+      ctx.beginPath(); ctx.arc(x + Math.sin(life * 3 + k) * 6 * sc + life * 14 * sc, y - life * 60 * sc, s, 0, Math.PI * 2); ctx.fill();
+    }
+  });
+}
+function sceneFrame(now) {
+  scene.raf = 0;
+  const cv = $('#scene');
+  if (!cv || !S) return;
+  const box = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = Math.round(box.width * dpr), H = Math.round(box.height * dpr);
+  if (!W || !H) return;
+  const key = `${W}x${H}`;
+  if (scene.dirty || key !== scene.key || !scene.cache) {
+    scene.key = key;
+    scene.dirty = false;
+    cv.width = W; cv.height = H;
+    scene.cache = paintValley(W, H);
+    seedMotion(scene.layout);
+  }
+  const dt = scene.last ? Math.min(0.1, (now - scene.last) / 1000) : 0;
+  scene.last = now;
+  scene.t += dt;
+  const ctx = cv.getContext('2d');
+  ctx.drawImage(scene.cache, 0, 0);
+  drawMotion(ctx, scene.layout, dt);
+  if (!reduceMotion() && !document.hidden) scene.raf = requestAnimationFrame(sceneFrame);
+}
+function kickScene() { if (!scene.raf) scene.raf = requestAnimationFrame(sceneFrame); }
+
+/* ---------- 10. Rendering ---------- */
+const $ = sel => document.querySelector(sel);
+const CHART_LINE = '#bd8640'; // checked against the panel colour for lightness, chroma and contrast
+function renderAll() {
+  if (!S) return;
+  const c = calc();
+  $('#realmName').textContent = `The ${S.name}`;
+  $('#era').innerHTML = [`<b>${S.title}</b>`, S.age, D().name].join(' · ');
+  renderRes(c);
+  renderLands(c);
+  renderTabs(c);
+  renderPane(c);
+  renderTicker(c);
+  renderBar();
+  renderSoundBtn();
+  kickScene();
+}
+function chip(sign, label, value, delta, warn, tip) {
+  const d = delta == null || delta === 0 ? '' : ` <span class="d ${delta < 0 ? 'neg' : 'pos'}">${signed(delta)}</span>`;
+  return `<div class="chip${warn ? ' warn' : ''}" title="${escapeHTML(tip)}" tabindex="0" role="button" aria-label="${escapeHTML(`${label}: ${tip}`)}"><span class="cu" aria-hidden="true">${SIGN[sign]}</span><span class="lab">${label}</span><span class="val">${value}${d}</span></div>`;
+}
+function renderRes(c) {
+  const r = S.res;
+  $('#res').innerHTML = [
+    chip('people', 'People', `${S.pop}<span class="muted small">/${c.housing}</span>`, c.births - c.crowd - c.starve, S.pop > c.housing, `${S.pop} people, housing for ${c.housing}. ${c.idle} without work gather wild food.`),
+    chip('food', 'Food', `${r.food}<span class="muted small">/${c.foodCap}</span>`, c.foodNet, c.foodNet < 0, `We gather ${c.foodIn} and eat ${c.foodOut} a turn. Granaries hold ${c.foodCap}.`),
+    chip('wood', 'Wood', `${r.wood}<span class="muted small">/${c.storeCap}</span>`, c.woodIn - (c.bronzeIn ? c.bronzeWood : 0), false, `Woodcutters bring ${c.woodIn} a turn${c.bronzeIn ? `; smiths burn ${c.bronzeWood} as charcoal` : ''}. Storehouses hold ${c.storeCap}.`),
+    chip('stone', 'Stone', `${r.stone}<span class="muted small">/${c.storeCap}</span>`, c.stoneIn, false, `Masons quarry ${c.stoneIn} a turn. Storehouses hold ${c.storeCap}.`),
+    chip('bronze', 'Bronze', fmt1(r.bronze), c.bronzeIn || null, false, c.oreCap ? `Smiths cast ${c.bronzeIn} a turn; the ore in our lands allows ${c.oreCap}.` : 'Bronze needs the Bronze idea, a forge, copper from hills or mountains, and tin from mountains or ships.'),
+    chip('knowledge', 'Knowledge', `+${fmt1(c.know)}`, null, false, `Scholars and curious people bring ${fmt1(c.know)} knowledge a turn.`),
+    chip('mood', 'Mood', `${S.mood}<span class="muted small"> → ${c.moodTarget}</span>`, null, S.mood < 30, `Mood moves toward ${c.moodTarget}. Below 30 work slows, below 15 riots break out, at 0 the people turn on each other.`),
+    chip('army', 'Defence', `${c.defense}`, null, false, `Warriors give a raiding strength of ${c.strength}; walls and the people bring defence to ${c.defense}.`),
+  ].join('');
+}
+function renderLands() {
+  const list = Object.entries(S.lands).filter(([, n]) => n);
+  $('#landstrip').innerHTML = `<span class="h">Our lands</span>${list.map(([k, n]) => `<span class="land">${LANDS[k].name}${n > 1 ? ` <b>×${n}</b>` : ''}</span>`).join('')}`;
+}
+const TABS = [['council', 'Council', 'king'], ['people', 'People', 'people'], ['lands', 'Lands', 'land'], ['build', 'Build', 'house'], ['research', 'Research', 'knowledge'], ['neighbors', 'Neighbors', 'foreign'], ['chronicle', 'Chronicle', 'star']];
+function renderTabs(c) {
+  const dots = {
+    council: tips(c).some(t => t[0] === 'bad') && ui.tab !== 'council',
+    research: !S.research && !S.over && Object.keys(TECHS).some(id => !has(id) && TECHS[id].req.every(has)),
+    neighbors: S.nbs.some(a => a.alive && a.war) || S.threats.length > 0,
+  };
+  $('#tabs').innerHTML = TABS.map(([id, label, sign], k) => `<button class="tab" role="tab" id="tab-${id}" aria-selected="${ui.tab === id && ui.drawer}" data-act="tab" data-arg="${id}" title="${label} (${k + 1})">${cu(sign)}<span class="lbl">${label}</span>${dots[id] ? '<span class="dot" aria-label="needs attention"></span>' : ''}</button>`).join('');
+  $('#drawer').classList.toggle('closed', !ui.drawer);
+}
+function renderPane(c) {
+  const fn = { council: paneCouncil, people: panePeople, lands: paneLands, build: paneBuild, research: paneResearch, neighbors: paneNeighbors, chronicle: paneChronicle }[ui.tab];
+  $('#paneTitle').textContent = TABS.find(t => t[0] === ui.tab)[1];
+  $('#pane').innerHTML = fn(c);
+}
+function tips(c, max = 4) {
+  const t = [];
+  if (S.res.food + c.foodNet < 0) t.push(['bad', 'Famine next turn: the grain will run out. Move people into farming (try Balance farmers).']);
+  else if (c.foodNet < 0) t.push(['bad', `We eat ${-c.foodNet} more than we gather each turn. The stores last about ${Math.floor(S.res.food / -c.foodNet)} turns.`]);
+  if (S.pop > c.housing) t.push(['bad', `Overcrowded: ${S.pop} people, room for ${c.housing}. Build houses or find new land.`]);
+  else if (S.pop >= c.housing - 2) t.push(['', `No room to grow (${S.pop}/${c.housing}). Build houses or send an expedition.`]);
+  if (S.mood < 35) t.push(['bad', `The people are unhappy (mood ${S.mood}). Temples, festivals, food and peace help.`]);
+  S.threats.forEach(th => t.push(['bad', `The army of ${th.name}, about ${R10(th.power)} strong, arrives next turn. Our defence is ${c.defense}.`]));
+  S.nbs.forEach(a => { if (a.alive && a.war) t.push(['bad', `At war with ${NB[a.id].name}. Their warriors number about ${R10(a.army)}; our defence is ${c.defense}.`]); else if (a.alive && a.att < -32 && !underProtection()) t.push(['bad', `${NB[a.id].name} is close to war with us. Gifts calm them; warriors and walls deter them.`]); });
+  if (!S.research && Object.keys(TECHS).some(id => !has(id) && TECHS[id].req.every(has))) t.push(['', 'The scholars have nothing to study. Pick something in Research.']);
+  if (S.jobs.farmers > c.slots.farm) t.push(['', `${plural(S.jobs.farmers - c.slots.farm, 'farmer')} on poor ground. Find river land or plains, or learn Irrigation.`]);
+  if (S.jobs.woodcutters > c.slots.wood) t.push(['', `${plural(S.jobs.woodcutters - c.slots.wood, 'woodcutter')} with little timber. Find a forest.`]);
+  if (S.jobs.masons > c.slots.stone) t.push(['', `${plural(S.jobs.masons - c.slots.stone, 'mason')} with little stone. Find hills or mountains.`]);
+  if (S.jobs.smiths > c.smithCap) t.push(['', `${plural(S.jobs.smiths - c.smithCap, 'smith')} with no forge to work at.`]);
+  if (has('bronze') && !c.oreCap) t.push(['', 'Bronze needs copper and tin: find hills or mountains, or learn Sailing to bring tin by ship.']);
+  if (c.idle > S.pop * 0.25) t.push(['', `${c.idle} people have no work and only gather wild food.`]);
+  if (landCount() > c.landLimit) t.push(['', `We hold ${landCount()} lands but can govern only ${c.landLimit} without unrest.`]);
+  const left = LAST_TURN - S.turn;
+  if (left <= 10 && !S.over) t.push(['bad', `The Collapse comes in ${left * YEARS_PER_TURN} years. Prepare walls, full granaries and a loyal people.`]);
+  t.sort((a, b) => (b[0] === 'bad') - (a[0] === 'bad'));
+  return t.length ? t.slice(0, max) : [['good', 'All is well. End the turn when you are ready.']];
+}
+const goalsHTML = list => `<ul class="goals">${list.map(g => `<li class="${S.goals.includes(g.id) ? 'done' : ''}"><span>${g.text}</span><span class="rw">${describe(null, g.reward)}</span></li>`).join('')}</ul>`;
+function paneCouncil(c) {
+  if (S.over) return `<p class="tip good">${cu('wedge')}<span>The game is over. Start a new one from the Game menu.</span></p>`;
+  const study = S.research ? (S.research === 'lore' ? LORE.name : TECHS[S.research].name) : 'nothing yet';
+  const nextH = HISTORY.find(x => x.turn > S.turn);
+  let h = `<div class="glance"><div><span class="h">Rank</span><b>${S.title}</b></div><div><span class="h">Lands</span><b>${landCount()} <span class="muted small">of ${c.landLimit} we can govern</span></b></div><div><span class="h">Studying</span><b>${study}</b></div><div><span class="h">Next turning point</span><b>${nextH ? fmtYear(nextH.turn) : 'The Collapse'} <span class="muted small">${nextH ? `in ${plural(nextH.turn - S.turn, 'turn')}` : ''}</span></b></div></div>`;
+  h += `<p class="h">Advisors</p>${tips(c, 8).map(([k, text]) => `<p class="tip ${k}">${cu('wedge')}<span>${text}</span></p>`).join('')}`;
+  if (S.buffs.length) h += `<p class="h">In effect</p><div class="buffs">${S.buffs.map(b => `<span class="pill${b.food < 0 || b.mood < 0 ? ' bad' : ''}">${escapeHTML(b.name)}${b.food ? ` · food ${pct(b.food)}` : ''}${b.mood ? ` · mood ${signed(b.mood)}` : ''} · ${plural(b.turns, 'turn')}</span>`).join('')}</div>`;
+  if (S.vassal && S.turn < S.vassal.until) h += `<p class="small neg">We bow to ${S.vassal.to} and pay ${S.vassal.food} grain a turn until ${fmtYear(S.vassal.until)}.</p>`;
+  const next = GOALS.filter(g => !S.goals.includes(g.id)).slice(0, 4);
+  if (next.length) h += `<p class="h">Goals <span class="count">${S.goals.length} of ${GOALS.length} reached</span></p>${goalsHTML(next)}`;
+  return h;
+}
+function panePeople(c) {
+  const j = S.jobs, sl = c.slots;
+  const notes = {
+    farmers: `+${c.farmFood} food · ${Math.min(j.farmers, sl.farm)} of ${sl.farm} on good ground`,
+    woodcutters: `+${c.woodIn} wood · ${Math.min(j.woodcutters, sl.wood)} of ${sl.wood} in good timber`,
+    masons: `+${c.stoneIn} stone · ${Math.min(j.masons, sl.stone)} of ${sl.stone} at good stone`,
+    smiths: c.smithCap ? `+${c.bronzeIn} bronze · ${c.workingSmiths} of ${c.smithCap} at a forge` : 'No forge yet',
+    scholars: `+${fmt1(c.know)} knowledge`,
+    warriors: `Raiding strength ${c.strength} · defence ${c.defense}`,
+  };
+  let h = `<div class="steps"><span class="muted small">Move people in groups of</span>${[1, 5, 10, 25].map(n => `<button class="chipbtn" data-act="step" data-arg="${n}" aria-pressed="${ui.step === n}">${n}</button>`).join('')}</div>`;
+  h += '<div class="jobs">' + JOBS.map(job => `<div class="job">${cu(job.sign)}<div class="job-txt"><b>${job.name}</b><span class="muted small">${job.desc}</span><span class="out">${notes[job.key]}</span></div><div class="stepper"><button class="btn sq ghost" data-act="job" data-arg="${job.key}:-" ${j[job.key] && !S.over ? '' : 'disabled'} aria-label="Fewer ${job.name.toLowerCase()}">−</button><span class="n">${j[job.key]}</span><button class="btn sq" data-act="job" data-arg="${job.key}:+" ${c.idle && !S.over ? '' : 'disabled'} aria-label="More ${job.name.toLowerCase()}">+</button></div></div>`).join('');
+  h += `<div class="job">${cu('people')}<div class="job-txt"><b>Without work</b><span class="muted small">They gather wild food.</span><span class="out">+${R(c.idle * 0.5)} food</span></div><div class="stepper"><span class="n">${c.idle}</span></div></div></div>`;
+  h += `<div class="row"><button class="btn ghost" data-act="autofarm" ${S.over ? 'disabled' : ''}>Balance farmers</button><span class="muted small">Just enough farmers to feed everyone.</span></div>`;
+  h += `<p class="h">Food each turn</p><div class="ledger"><span>Fields</span><span>+${c.farmFood}</span><span>Wild food, fish and fowl</span><span>+${c.wildFood}</span><span>Eaten</span><span>−${c.foodOut}</span><span class="tot">Balance</span><span class="tot ${c.foodNet < 0 ? 'neg' : 'pos'}">${signed(c.foodNet)}</span></div>`;
+  h += `<p class="h">Mood ${S.mood} → ${c.moodTarget}</p><div class="ledger">${c.moodParts.map(([k, v]) => `<span>${escapeHTML(k)}</span><span class="${v < 0 ? 'neg' : ''}">${k === 'Base' ? v : signed(v)}</span>`).join('')}</div>`;
+  const why = S.over ? 'Game over' : festivalCheck();
+  h += `<div class="item"><div><h4>Hold a festival</h4><p class="meta">+8 mood now · ${festivalCost().food} food</p>${why ? `<p class="why">${why}</p>` : ''}</div><button class="btn" data-act="festival" ${why ? 'disabled' : ''}>Celebrate</button></div>`;
+  return h;
+}
+function paneLands(c) {
+  const e = c.expedition, why = S.over ? 'Game over' : expeditionCheck(c);
+  let h = `<div class="current"><h4>Send an expedition</h4><p class="small">Families set out with seed grain and tools to claim new land. What they find depends on luck${has('boats') ? ' and our boats' : ''}.</p><p class="meta muted small">${e.pop} people · ${e.food} food · ${e.wood} wood</p>${why ? `<p class="small neg">${why}</p>` : ''}<div><button class="btn" data-act="expedition" ${why ? 'disabled' : ''}>Send them out</button></div></div>`;
+  if (landCount() >= c.landLimit) h += `<p class="small neg">We already hold ${landCount()} lands and can govern ${c.landLimit}. Each land beyond that costs 3 mood. Law and a palace raise the limit.</p>`;
+  h += '<p class="h">Our lands</p><div>';
+  for (const [k, n] of Object.entries(S.lands)) {
+    if (!n) continue;
+    const L = LANDS[k];
+    h += `<div class="item"><div><h4>${L.name} <span class="count">×${n}</span></h4><p class="meta">Each: ${L.farm} farmers, ${L.wood} woodcutters, ${L.stone} masons${L.ore ? `, ore for ${L.ore} bronze` : ''}${L.food ? `, ${L.food} wild food` : ''}, ${L.house} housing</p><p class="note">${L.note}</p></div></div>`;
+  }
+  h += '</div>';
+  h += `<p class="h">Work the lands give</p><div class="ledger"><span>Good ground for farmers</span><span>${c.slots.farm}</span><span>Timber for woodcutters</span><span>${c.slots.wood}</span><span>Stone for masons</span><span>${c.slots.stone}</span><span>Ore for bronze</span><span>${c.slots.ore}${c.slots.tin ? '' : ' (no tin)'}</span></div>`;
+  return h;
+}
+function paneBuild() {
+  const row = (id, b) => {
+    const why = S.over ? 'Game over' : buildCheck(id), built = b.wonder && S.b[id];
+    return `<div class="item${b.tech && !has(b.tech) ? ' locked' : ''}${b.wonder ? ' wonder' : ''}${built ? ' built' : ''}"><div><h4>${b.name}${b.wonder ? '' : ` <span class="count">${S.b[id]}${b.max < 99 ? ` of ${b.max}` : ''}</span>`}</h4><p class="meta">${b.desc()}${built ? '' : ` · ${costText(buildCost(id))}`}</p>${why && why !== 'Maximum built' ? `<p class="why">${why}</p>` : ''}</div><button class="btn" data-act="build" data-arg="${id}" ${why ? 'disabled' : ''}>${why === 'Maximum built' ? 'Built' : 'Build'}</button></div>`;
+  };
+  let h = '<p class="h">Buildings</p><div>';
+  for (const [id, b] of Object.entries(BUILDINGS)) if (!b.wonder) h += row(id, b);
+  h += `</div><p class="h">Great works <span class="count">${WONDERS.filter(k => S.b[k]).length} of ${WONDERS.length}</span></p><div>`;
+  for (const id of WONDERS) h += row(id, BUILDINGS[id]);
+  h += '</div><p class="h">Bronze projects</p><div>';
+  for (const [id, p] of Object.entries(PROJECTS)) {
+    const why = S.over ? 'Game over' : projectCheck(id);
+    h += `<div class="item${!has(p.tech) ? ' locked' : ''}"><div><h4>${p.name}</h4><p class="meta">${p.desc} · ${costText({ bronze: p.bronze, stone: p.stone || 0 })}</p>${why && why !== 'Done' ? `<p class="why">${why}</p>` : ''}</div><button class="btn" data-act="project" data-arg="${id}" ${why ? 'disabled' : ''}>${why === 'Done' ? 'Done' : 'Make'}</button></div>`;
+  }
+  return h + '</div>';
+}
+function paneResearch(c) {
+  const ids = Object.keys(TECHS).filter(id => !has(id)), avail = ids.filter(id => TECHS[id].req.every(has)), locked = ids.filter(id => !TECHS[id].req.every(has));
+  let h = '<div class="current"><p class="h">Studying</p>';
+  if (S.research) {
+    const cost = researchCost(S.research), p = Math.min(S.progress, cost), turns = c.know > 0 ? Math.ceil((cost - S.progress) / c.know) : '∞';
+    h += `<h4>${S.research === 'lore' ? `${LORE.name}, song ${S.lore + 1}` : TECHS[S.research].name}</h4><div class="bar"><i style="width:${(p / cost * 100).toFixed(1)}%"></i></div><p class="muted small">${R(p)} of ${cost} knowledge · about ${turns} turn${turns === 1 ? '' : 's'}</p>`;
+  } else h += '<p>Nothing yet. Pick something below.</p>';
+  h += `</div><p class="muted small">${S.techs.length - 1} of ${Object.keys(TECHS).length - 1} ideas learned.</p>`;
+  if (avail.length) h += '<p class="h">Ready to study</p><div>' + avail.map(id => { const t = TECHS[id], on = S.research === id; return `<div class="item"><div><h4>${t.name} <span class="count">${t.cost}</span></h4><p class="meta">${t.desc}</p></div><button class="btn${on ? ' ghost' : ''}" data-act="research" data-arg="${id}" ${on || S.over ? 'disabled' : ''}>${on ? 'Studying' : 'Study'}</button></div>`; }).join('') + '</div>';
+  if (allKnown()) h += `<div class="item"><div><h4>${LORE.name} <span class="count">${loreCost()}</span></h4><p class="meta">Each song adds ${LORE.score} to the final score and 1 mood (up to 10).</p></div><button class="btn" data-act="research" data-arg="lore" ${S.research === 'lore' || S.over ? 'disabled' : ''}>${S.research === 'lore' ? 'Studying' : 'Study'}</button></div>`;
+  if (locked.length) h += '<p class="h">Later</p><div>' + locked.map(id => `<div class="item locked"><div><h4>${TECHS[id].name} <span class="count">${TECHS[id].cost}</span></h4><p class="meta">${TECHS[id].desc}</p><p class="why">Needs ${TECHS[id].req.filter(r => !has(r)).map(r => TECHS[r].name).join(' and ')}</p></div></div>`).join('') + '</div>';
+  return h;
+}
+const moodOf = att => (att < -40 ? 'Hostile' : att < -10 ? 'Wary' : att < 20 ? 'Neutral' : att < 50 ? 'Friendly' : 'Kin');
+function paneNeighbors(c) {
+  const off = S.over ? 'disabled' : '';
+  let h = `<p class="muted small">Our warriors: raiding strength <b>${c.strength}</b>, defence <b>${c.defense}</b>. Hostile neighbors raid when they think they can win.</p>`;
+  for (const a of S.nbs) {
+    const d = NB[a.id];
+    if (!a.alive) { h += `<div class="nb gone"><div class="nb-head"><span class="sw" style="background:${d.oc}"></span><h4>${d.name}</h4><span class="pill">Gone</span></div></div>`; continue; }
+    const why = raidCheck(a, c);
+    h += `<div class="nb"><div class="nb-head"><span class="sw" style="background:${d.oc}"></span><h4>${d.name}</h4><span class="muted small">${d.epithet}</span><span class="pill ${a.war ? 'war' : 'peace'}">${a.war ? 'At war' : 'At peace'}</span></div>
+      <div class="nb-stats"><span>Mood <b>${moodOf(a.att)}</b></span><span>Warriors about <b>${R10(a.army)}</b></span></div>
+      <div class="meter" aria-hidden="true"><i style="left:${((a.att + 100) / 2).toFixed(1)}%"></i></div>
+      <div class="nb-acts"><button class="btn ghost" data-act="gift" data-arg="${a.id}:food" ${S.res.food >= 40 && !S.over ? '' : 'disabled'}>Give 40 food</button><button class="btn ghost" data-act="gift" data-arg="${a.id}:bronze" ${S.res.bronze >= 5 && !S.over ? '' : 'disabled'}>Give 5 bronze</button>${a.war ? `<button class="btn" data-act="peace" data-arg="${a.id}" ${off}>Ask for peace</button>` : ''}<button class="btn danger" data-act="raid" data-arg="${a.id}" ${why || S.over ? 'disabled' : ''} title="${escapeHTML(why || `Our ${c.strength} against about ${R10(a.army + 5 + S.turn * 0.5)}`)}">Raid</button></div></div>`;
+  }
+  const left = Math.max(0, c.trades - S.tradeUsed);
+  h += `<p class="h">Barter <span class="count">${left} of ${c.trades} trades left this turn</span></p>`;
+  if (!c.trades) h += '<p class="small neg">No one will trade with us. Make peace or win a friend.</p>';
+  h += '<div class="scroll"><table class="trade"><thead><tr><th>Give</th><th>For</th><th></th></tr></thead><tbody>';
+  for (const [g, G] of Object.entries(GOODS)) {
+    const opts = Object.keys(GOODS).filter(k => k !== g).map(k => { const amt = Math.max(1, Math.floor(G.lot * G.value * c.rate / GOODS[k].value)); return `<button class="btn ghost" data-act="trade" data-arg="${g}:${k}" ${left && S.res[g] >= G.lot && !S.over ? '' : 'disabled'}>${amt} ${k}</button>`; }).join('');
+    h += `<tr><td>${cu(g)}${G.lot} ${g}</td><td colspan="2"><div class="acts" style="justify-content:flex-start;flex-wrap:wrap">${opts}</div></td></tr>`;
+  }
+  return h + '</tbody></table></div>';
+}
+const CHARTS = [['pop', 'People'], ['food', 'Food stored'], ['know', 'Knowledge a turn'], ['def', 'Defence'], ['lands', 'Lands'], ['mood', 'Mood']];
+const CW = 260, CH = 92, CL = 34, CR = 8, CT = 8, CB = 20;
+const niceMax = v => { const p = 10 ** Math.floor(Math.log10(v)), m = v / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p; };
+const chartX = t => CL + t / LAST_TURN * (CW - CL - CR);
+function miniChart(key, label) {
+  const data = S.hist, last = data.length ? data[data.length - 1][key] : 0;
+  const top = key === 'mood' ? 100 : niceMax(Math.max(1, ...data.map(d => d[key])));
+  const y = v => CT + (1 - v / top) * (CH - CT - CB);
+  let g = '';
+  (Number.isInteger(top / 2) ? [0, top / 2, top] : [0, top]).forEach(v => { g += `<line class="grid" x1="${CL}" x2="${CW - CR}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}"/><text class="axis" x="${CL - 5}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end">${v >= 1000 ? `${fmt1(v / 1000)}k` : R(v)}</text>`; });
+  g += `<text class="axis" x="${CL}" y="${CH - 4}">${START_YEAR} BC</text><text class="axis" x="${CW - CR}" y="${CH - 4}" text-anchor="end">${END_YEAR} BC</text>`;
+  const line = data.length > 1 ? `<path class="ln" stroke="${CHART_LINE}" d="M${data.map(d => `${chartX(d.t).toFixed(1)} ${y(d[key]).toFixed(1)}`).join(' L')}"/>` : '';
+  const shown = key === 'know' ? fmt1(last) : last;
+  return `<figure class="mini"><figcaption><span class="h">${label}</span><b>${shown}</b></figcaption><svg class="chart" viewBox="0 0 ${CW} ${CH}" data-chart="${key}" data-top="${top}" tabindex="0" role="img" aria-label="${label} by year. Latest: ${shown}. Use the arrow keys to read earlier years.">${g}${line}<line class="xhair" stroke="var(--muted)" stroke-width="1" y1="${CT}" y2="${CH - CB}" visibility="hidden"/><circle class="xdot" r="4" fill="${CHART_LINE}" stroke="var(--lapis)" stroke-width="2" visibility="hidden"/></svg><div class="ctip" hidden><b></b> <span class="muted"></span></div></figure>`;
+}
+function chartPoint(svg, idx) {
+  const key = svg.dataset.chart, data = S.hist, d = data[clamp(idx, 0, data.length - 1)];
+  if (!d) return;
+  svg.dataset.idx = data.indexOf(d);
+  const top = +svg.dataset.top, x = chartX(d.t), y = CT + (1 - d[key] / top) * (CH - CT - CB);
+  const xh = svg.querySelector('.xhair'), dot = svg.querySelector('.xdot');
+  xh.setAttribute('x1', x); xh.setAttribute('x2', x); xh.setAttribute('visibility', 'visible');
+  dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('visibility', 'visible');
+  const tip = svg.parentNode.querySelector('.ctip');
+  tip.querySelector('b').textContent = key === 'know' ? fmt1(d[key]) : d[key];
+  tip.querySelector('span').textContent = fmtYear(d.t);
+  tip.hidden = false;
+  const box = svg.getBoundingClientRect();
+  tip.style.left = `${clamp(x / CW * box.width - tip.offsetWidth / 2, 0, box.width - tip.offsetWidth)}px`;
+}
+function chartHide(svg) { svg.querySelector('.xhair').setAttribute('visibility', 'hidden'); svg.querySelector('.xdot').setAttribute('visibility', 'hidden'); svg.parentNode.querySelector('.ctip').hidden = true; }
+function paneChronicle() {
+  let h = '<p class="h">The age in numbers</p>';
+  h += S.hist.length < 2 ? '<p class="muted small">Charts appear after the first turn.</p>' : `<div class="minis">${CHARTS.map(([k, l]) => miniChart(k, l)).join('')}</div>`;
+  h += `<p class="h">Goals <span class="count">${S.goals.length} of ${GOALS.length}</span></p>${goalsHTML(GOALS)}`;
+  h += `<p class="h">Chronicle</p><ol class="chron">${S.log.slice(0, 80).map(e => `<li class="${e.kind}"><span class="yr">${fmtYear(e.y)}</span><span>${escapeHTML(e.text)}</span></li>`).join('')}</ol>`;
+  h += `<p class="h">The signs</p><div class="gloss">${GLOSSARY.map(([k, reading, meaning]) => `<div>${cu(k)}<span><b>${reading}</b> <span class="muted">${meaning}</span></span></div>`).join('')}</div>`;
+  const m = loadMeta();
+  h += `<p class="h">Achievements</p><div class="ach">${ACHIEVEMENTS.map(a => `<div class="${m.ach[a.id] ? '' : 'locked'}">${cu(a.sign)}<span><b>${a.name}</b> <span class="muted">${a.desc}</span></span></div>`).join('')}</div>`;
+  return h;
+}
+function renderTicker(c) {
+  const all = tips(c, 8), [kind, text] = all[0], el = $('#ticker');
+  el.className = `ticker${kind === 'bad' ? ' bad' : ''}`;
+  el.innerHTML = `${cu('wedge')}<span class="txt">${text}</span>${all.length > 1 ? `<span class="more">+${all.length - 1} more</span>` : ''}`;
+}
+function renderBar() {
+  const p = Math.min(100, S.turn / LAST_TURN * 100), next = HISTORY.find(x => x.turn > S.turn);
+  const ticks = HISTORY.map(x => `<b class="${x === next ? 'next' : ''}" style="left:${(x.turn / LAST_TURN * 100).toFixed(1)}%" title="${fmtYear(x.turn)}"></b>`).join('');
+  $('#timeline').innerHTML = `<div class="tl-labels"><span class="edge">${START_YEAR} BC</span><b>${fmtYear(S.turn)} · turn ${S.turn} of ${LAST_TURN}</b><span class="edge col">${END_YEAR} BC · Collapse</span></div><div class="tl-track" aria-hidden="true"><i style="width:${p.toFixed(1)}%"></i>${ticks}</div>`;
+  const btn = $('#endBtn');
+  btn.disabled = S.over;
+  btn.innerHTML = S.over ? 'Game over' : `End turn<small>to ${fmtYear(S.turn + 1)}</small>`;
+}
+function renderSoundBtn() { const b = $('#soundBtn'); b.setAttribute('aria-pressed', String(Sound.set.sound)); b.title = `Sound is ${Sound.set.sound ? 'on' : 'off'} (M)`; }
+function toast(text, kind = '') {
+  const el = $('#toast');
+  el.textContent = text;
+  el.className = `toast${kind ? ` ${kind}` : ''}`;
+  el.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.hidden = true; }, 3200);
+}
+
+/* ---------- 11. Modals ---------- */
+const NAMES = { food: 'food', wood: 'wood', stone: 'stone', bronze: 'bronze', pop: 'people', mood: 'mood', knowledge: 'knowledge', land: 'land' };
+function describe(cost, fx) {
+  const parts = [];
+  Object.entries(cost || {}).forEach(([k, v]) => { if (v) parts.push(`−${v} ${NAMES[k]}`); });
+  Object.entries(fx || {}).forEach(([k, v]) => { if (v) parts.push(`${signed(v)} ${NAMES[k]}`); });
+  return parts.join(', ');
+}
+function pushModal(m) {
+  if (m.persist && S && !S.pending.includes(m.persist)) S.pending.push(m.persist);
+  modalQueue.push(m);
+  if (!modalOpen) nextModal();
+}
+function nextModal() {
+  currentModal = modalQueue.shift() || null;
+  const box = $('#modal');
+  if (!currentModal) { modalOpen = false; box.hidden = true; return; }
+  modalOpen = true;
+  drawModal(currentModal);
+  box.hidden = false;
+  if (currentModal.sfx) Sound.play(currentModal.sfx);
+  const f = $('#mCard input') || $('#mCard .choice:not(:disabled)');
+  if (f) f.focus({ preventScroll: true });
+}
+function drawModal(m) {
+  const choices = m.choices.map((ch, k) => {
+    const ok = canAfford(ch.cost);
+    const hint = ok ? (ch.hint ?? describe(ch.cost, ch.fx)) : `Not enough: ${describe(ch.cost)}`;
+    return `<button class="btn choice${ch.ghost ? ' ghost' : ''}${ch.danger ? ' danger' : ''}" data-act="choose" data-arg="${k}" ${ok ? '' : 'disabled'}><span>${ch.label}</span>${hint ? `<span class="hint">${hint}</span>` : ''}</button>`;
+  }).join('');
+  const sign = m.sign || 'wedge', glyphs = [...SIGN[sign]].length, html = typeof m.html === 'function' ? m.html() : (m.html || '');
+  $('#mCard').innerHTML = `<canvas class="banner" aria-hidden="true"></canvas><div class="medal cu" aria-hidden="true" style="font-size:${glyphs > 2 ? 1 : glyphs > 1 ? 1.35 : 1.9}rem">${SIGN[sign]}</div>${m.date ? `<p class="date">${m.date}</p>` : ''}<h2 id="mTitle">${m.title}</h2>${m.body ? `<p>${m.body}</p>` : ''}${html}<div class="choices">${choices}</div>`;
+  paintBanner($('#mCard .banner'), sign, m.title);
+}
+function choose(k) {
+  const m = currentModal, ch = m && m.choices[k];
+  if (!ch || !canAfford(ch.cost)) return;
+  if (m.persist) S.pending = S.pending.filter(p => p !== m.persist);
+  pay(ch.cost);
+  if (ch.fx) applyFx(ch.fx);
+  if (ch.run) ch.run();
+  nextModal();
+  if (!S.over) checkGoals();
+  save();
+  renderAll();
+}
+const REBUILD = {
+  event: id => { const e = EVENTS.find(x => x.id === id), c = calc(); return e && (!e.cond || e.cond(c)) ? { ...e.make(c), sfx: 'event' } : null; },
+  hist: id => { const h = HISTORY.find(x => x.id === id); return h ? { ...h.make(calc()), date: fmtYear(h.turn), sfx: 'gong' } : null; },
+  collapse: () => (S.turn >= LAST_TURN ? collapseModal() : null),
+};
+function restorePending() {
+  const list = S.pending;
+  S.pending = [];
+  list.forEach(p => { const m = REBUILD[p.type] && REBUILD[p.type](p.arg); if (m) pushModal({ ...m, persist: p }); });
+  if (S.turn >= LAST_TURN && !S.over && !S.pending.some(p => p.type === 'collapse')) pushModal(collapseModal());
+}
+const HOWTO = `<ul>
+  <li>Each turn is 60 years, from 6000 BC to the Bronze Age Collapse of 1200 BC. Everyone eats 1 food a turn.</li>
+  <li>In <b>People</b>, set your farmers, woodcutters, masons, smiths, scholars and warriors. Each land keeps only so many of each trade busy; the rest work poor ground.</li>
+  <li>In <b>Lands</b>, send expeditions to claim new land: river bends and plains for farming, forests for wood, hills and mountains for stone, copper and tin.</li>
+  <li>Food, wood, stone and bronze build houses, granaries, temples, forges, walls and great works.</li>
+  <li>Bronze needs the Bronze idea, a forge, copper from hills or mountains, and tin from mountains or ships. Smiths burn wood as charcoal.</li>
+  <li>Keep <b>mood</b> up with temples, festivals, food and peace. Neighbors trade, marry and raid; you can raid them too.</li>
+  <li>The marks on the year-line are turning points of the age. In 1200 BC your defence, granaries and mood are tested.</li>
+</ul>`;
+const KEYS = '<p class="small muted"><kbd>E</kbd> end turn · <kbd>1</kbd>–<kbd>7</kbd> drawer tabs · <kbd>M</kbd> sound · <kbd>?</kbd> help · <kbd>Esc</kbd> close</p>';
+// The map version of the game sits next to this file
+const MAP_URL = 'index.html';
+const cleanName = v => String(v || '').replace(/[<>&"'`]/g, '').trim().slice(0, 24);
+function showIntro() {
+  ui.diff = S.diff;
+  const best = loadMeta().best[0];
+  pushModal({
+    sign: 'house', title: 'Bronze Dawn Valley',
+    body: 'It is 6000 BC. Thirty people have built huts of reed and mud where the river bends. Grow them into a city, and keep it standing through the Bronze Age Collapse of 1200 BC.',
+    html: `${HOWTO}<label for="peopleName">Name your people</label><input id="peopleName" maxlength="24" autocomplete="off" value="${escapeHTML(S.name)}"><p class="h">Difficulty</p><div class="seg" role="group" aria-label="Difficulty">${Object.entries(DIFFS).map(([id, d]) => `<button class="btn ghost" data-act="diff" data-arg="${id}" aria-pressed="${ui.diff === id}"><span>${d.name}</span><small>${d.sub}</small></button>`).join('')}</div>${best ? `<p class="small muted">Best so far: the ${escapeHTML(best.name)}, ${Number(best.score) || 0} points (${escapeHTML(best.rank)}).</p>` : ''}<p class="small muted">Prefer a map you can walk? <a href="${MAP_URL}" style="color:var(--gold)">Play Bronze Dawn</a>, the version with a hex map and many more resources.</p>`,
+    choices: [{ label: 'Begin', run: () => { const v = cleanName($('#peopleName') && $('#peopleName').value); if (v) S.name = v; S.diff = DIFFS[ui.diff] ? ui.diff : 'normal'; S.log = []; log(`The ${S.name} build their first huts beside the river.`, 'big'); Sound.play('settle'); } }],
+  });
+}
+function showHelp() { pushModal({ sign: 'knowledge', title: 'How to play', html: HOWTO + KEYS, choices: [{ label: 'Back to the valley', cancel: true }] }); }
+function confirmNew() { pushModal({ sign: 'land', title: 'Start a new game?', body: 'Your current game will be lost.', choices: [{ label: 'Start over', danger: true, run: startNew }, { label: 'Keep playing', ghost: true, cancel: true }] }); }
+const saveCode = () => `BDV1:${btoa(unescape(encodeURIComponent(JSON.stringify(S))))}`;
+function importSave(text) {
+  let s = null;
+  try { const t = String(text).trim(); s = sanitize(JSON.parse(t.startsWith('{') ? t : decodeURIComponent(escape(atob(t.replace(/^BDV\d*:/, '').replace(/\s+/g, '')))))); } catch (e) { s = null; }
+  if (!s) { toast('That is not a Bronze Dawn Valley save.'); return; }
+  S = s;
+  if (!S.hist.length) recordHistory();
+  modalQueue = [];
+  nextModal();
+  scene.dirty = true;
+  save();
+  renderAll();
+  restorePending();
+  toast(`Loaded the ${S.name}, ${fmtYear(S.turn)}`);
+}
+function copySave() {
+  const ta = $('#saveCode');
+  if (!ta) return;
+  const ok = () => toast('Save code copied');
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(ta.value).then(ok, () => { ta.select(); document.execCommand('copy'); ok(); });
+  else { ta.select(); document.execCommand('copy'); ok(); }
+}
+function menuModal() {
+  const m = loadMeta();
+  return {
+    sign: 'palace', title: 'Game', menu: true,
+    html: () => `<h3>Sound</h3><div class="row"><button class="btn ghost" data-act="sound" aria-pressed="${Sound.set.sound}">Sound ${Sound.set.sound ? 'on' : 'off'}</button><button class="btn ghost" data-act="music" aria-pressed="${Sound.set.music}">Music ${Sound.set.music ? 'on' : 'off'}</button></div>
+      <h3>Save code</h3><textarea id="saveCode" readonly rows="3" aria-label="Save code">${saveCode()}</textarea><div class="row"><button class="btn ghost" data-act="copysave">Copy code</button></div>
+      <h3>Load a game</h3><textarea id="loadCode" rows="2" placeholder="Paste a save code here" aria-label="Save code to load"></textarea><div class="row"><button class="btn ghost" data-act="loadsave">Load this code</button></div>
+      <h3>Hall of records</h3>${m.best.length ? `<table class="best"><thead><tr><th>People</th><th>Outcome</th><th>Score</th></tr></thead><tbody>${m.best.map(b => `<tr><td>The ${escapeHTML(b.name)}</td><td>${escapeHTML(b.outcome)}</td><td>${Number(b.score) || 0}</td></tr>`).join('')}</tbody></table>` : '<p class="muted small">No finished games yet.</p>'}
+      <h3>The other version</h3><p class="small">Bronze Dawn has a hex map to settle and conquer, ten resources and trade pacts. <a href="${MAP_URL}" style="color:var(--gold)">Play Bronze Dawn</a>.</p>
+      <h3>Keyboard</h3>${KEYS}`,
+    choices: [{ label: 'Back to the valley', cancel: true }, { label: 'Start a new game', ghost: true, run: confirmNew }],
+  };
+}
+
+/* ---------- 12. Sound ---------- */
+// Everything is synthesised with Web Audio: no files to load. Lyre plucks, drums, bells and a soft drone.
+const SCALE = [293.66, 329.63, 349.23, 392, 440, 466.16, 523.25, 587.33, 659.25, 698.46, 783.99, 880];
+const PENTA = [146.83, 174.61, 196, 220, 261.63, 293.66, 349.23, 392, 440];
+const Sound = {
+  set: { sound: true, music: false },
+  ctx: null, out: null, musicBus: null, nbuf: null, drone: null, timer: 0, nextNote: 0, step: 3,
+  init() {
+    if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return true; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    try { this.ctx = new AC(); } catch (e) { return false; }
+    const comp = this.ctx.createDynamicsCompressor();
+    comp.connect(this.ctx.destination);
+    this.out = this.ctx.createGain();
+    this.out.gain.value = 0.55;
+    this.out.connect(comp);
+    this.musicBus = this.ctx.createGain();
+    this.musicBus.gain.value = 0;
+    this.musicBus.connect(comp);
+    return true;
+  },
+  tone(f, t, dur, { type = 'triangle', vol = 0.18, a = 0.005, f2 = 0, bus = null } = {}) {
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f, t);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + a);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g);
+    g.connect(bus || this.out);
+    o.start(t);
+    o.stop(t + dur + 0.05);
+  },
+  noise(t, dur, { vol = 0.15, freq = 1200, q = 0.8, f2 = 0 } = {}) {
+    const ctx = this.ctx;
+    if (!this.nbuf) {
+      this.nbuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+      const d = this.nbuf.getChannelData(0);
+      for (let k = 0; k < d.length; k++) d[k] = Math.random() * 2 - 1;
+    }
+    const src = ctx.createBufferSource(), fl = ctx.createBiquadFilter(), g = ctx.createGain();
+    src.buffer = this.nbuf;
+    fl.type = 'bandpass';
+    fl.frequency.setValueAtTime(freq, t);
+    if (f2) fl.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    fl.Q.value = q;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(fl);
+    fl.connect(g);
+    g.connect(this.out);
+    src.start(t);
+    src.stop(t + dur + 0.05);
+  },
+  pluck(f, t, vol = 0.16, bus = null) {
+    this.tone(f, t, 1.2, { type: 'triangle', vol, a: 0.003, bus });
+    this.tone(f * 2, t, 0.45, { type: 'sine', vol: vol * 0.35, a: 0.003, bus });
+  },
+  drum(t, vol = 0.5, f = 110) {
+    this.tone(f, t, 0.35, { type: 'sine', vol, a: 0.002, f2: f * 0.45 });
+    this.noise(t, 0.08, { vol: vol * 0.25, freq: 900 });
+  },
+  bell(f, t, vol = 0.12) {
+    [1, 2.76, 5.4].forEach((m, k) => this.tone(f * m, t, 1.6 / (k + 1), { type: 'sine', vol: vol / (k + 1), a: 0.002 }));
+  },
+  play(name) {
+    if (!this.set.sound || !this.init()) return;
+    const t = this.ctx.currentTime + 0.02, N = SCALE;
+    switch (name) {
+      case 'tap': this.tone(660, t, 0.06, { type: 'sine', vol: 0.04 }); break;
+      case 'build': this.drum(t, 0.25, 180); this.drum(t + 0.12, 0.2, 150); this.noise(t, 0.12, { vol: 0.08, freq: 500 }); break;
+      case 'settle': [0, 2, 4].forEach((k, n) => this.pluck(N[k], t + n * 0.1)); break;
+      case 'chime': this.bell(880, t); this.bell(1320, t + 0.15, 0.08); break;
+      case 'coin': this.tone(2400, t, 0.12, { type: 'square', vol: 0.025 }); this.tone(3200, t + 0.06, 0.18, { type: 'square', vol: 0.02 }); break;
+      case 'forge': [0, 0.18, 0.36].forEach(d => { this.tone(1800, t + d, 0.25, { type: 'square', vol: 0.025 }); this.noise(t + d, 0.06, { vol: 0.1, freq: 3000 }); }); break;
+      case 'war': [0, 0.22, 0.44, 0.58].forEach((d, k) => this.drum(t + d, 0.45, k === 3 ? 70 : 90)); break;
+      case 'victory': [0, 2, 4, 7].forEach((k, n) => this.pluck(N[k], t + n * 0.12, 0.18)); break;
+      case 'defeat': [4, 3, 1, 0].forEach((k, n) => this.pluck(N[k] / 2, t + n * 0.18, 0.16)); break;
+      case 'event': this.pluck(N[0], t, 0.12); this.pluck(N[4], t + 0.08, 0.1); break;
+      case 'gong':
+        this.tone(98, t, 3.5, { type: 'sine', vol: 0.25, a: 0.01 });
+        this.tone(98 * 2.4, t, 2.2, { type: 'sine', vol: 0.08 });
+        this.tone(98 * 3.9, t, 1.4, { type: 'sine', vol: 0.05 });
+        this.noise(t, 0.4, { vol: 0.05, freq: 300 });
+        break;
+      case 'turn': this.noise(t, 0.5, { vol: 0.05, freq: 400, f2: 1600 }); this.drum(t + 0.05, 0.16, 120); break;
+      case 'goal': [4, 7, 9].forEach((k, n) => this.bell(N[k], t + n * 0.09, 0.07)); break;
+      case 'wonder':
+        [0, 4, 7, 9, 11].forEach((k, n) => this.pluck(N[k], t + n * 0.1, 0.17));
+        this.tone(N[0] / 2, t, 2.5, { type: 'sine', vol: 0.12, a: 0.05 });
+        break;
+      case 'festival':
+        [0, 4, 2, 5, 4, 7].forEach((k, n) => this.pluck(N[k], t + n * 0.11, 0.14));
+        this.drum(t, 0.25, 140);
+        this.drum(t + 0.33, 0.25, 140);
+        break;
+      default: break;
+    }
+  },
+  // Music: a low drone and lyre notes wandering a pentatonic scale
+  music(on) {
+    if (!on || !this.set.sound) {
+      if (this.ctx) this.musicBus.gain.setTargetAtTime(0, this.ctx.currentTime, 0.4);
+      clearInterval(this.timer);
+      this.timer = 0;
+      if (this.drone) {
+        const t = this.ctx.currentTime;
+        this.drone.forEach(o => o.stop(t + 1.5));
+        this.drone = null;
+      }
+      return;
+    }
+    if (this.timer || !this.init()) return;
+    const ctx = this.ctx, lp = ctx.createBiquadFilter(), g = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
+    lp.type = 'lowpass';
+    lp.frequency.value = 420;
+    g.gain.value = 0.035;
+    lfo.frequency.value = 0.07;
+    lg.gain.value = 160;
+    lfo.connect(lg);
+    lg.connect(lp.frequency);
+    const oscs = [73.42, 110, 73.6].map(f => { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.connect(lp); return o; });
+    lp.connect(g);
+    g.connect(this.musicBus);
+    this.drone = [...oscs, lfo];
+    this.drone.forEach(o => o.start());
+    this.musicBus.gain.setTargetAtTime(0.9, ctx.currentTime, 0.8);
+    this.nextNote = ctx.currentTime + 0.6;
+    this.timer = setInterval(() => this.schedule(), 200);
+  },
+  schedule() {
+    if (!this.ctx || document.hidden) return;
+    const now = this.ctx.currentTime;
+    if (this.nextNote < now) this.nextNote = now + 0.1;
+    while (this.nextNote < now + 0.6) {
+      this.step = clamp(this.step + Math.floor(Math.random() * 5) - 2, 0, PENTA.length - 1);
+      this.pluck(PENTA[this.step], this.nextNote, 0.07, this.musicBus);
+      if (Math.random() < 0.25) this.pluck(PENTA[Math.max(0, this.step - 2)], this.nextNote + 0.02, 0.05, this.musicBus);
+      this.nextNote += [0.45, 0.6, 0.9, 1.2, 1.8][Math.floor(Math.random() * 5)];
+    }
+  },
+};
+function toggleSound() {
+  Sound.set.sound = !Sound.set.sound;
+  saveSettings();
+  Sound.music(Sound.set.music);
+  Sound.play('tap');
+  renderSoundBtn();
+  if (modalOpen && currentModal.menu) drawModal(currentModal);
+}
+function toggleMusic() {
+  Sound.set.music = !Sound.set.music;
+  if (Sound.set.music && !Sound.set.sound) Sound.set.sound = true;
+  saveSettings();
+  Sound.music(Sound.set.music);
+  renderSoundBtn();
+  if (modalOpen && currentModal.menu) drawModal(currentModal);
+}
+
+
+/* ---------- 13. Boot ---------- */
+const ACTIONS = {
+  tab: id => {
+    if (ui.tab === id && ui.drawer && !window.matchMedia('(max-width: 860px)').matches) ui.drawer = false;
+    else { ui.tab = id; ui.drawer = true; }
+    Sound.play('tap');
+  },
+  council: () => { ui.tab = 'council'; ui.drawer = true; },
+  fold: () => { ui.drawer = false; },
+  step: n => { ui.step = +n; },
+  job: arg => { const [k, d] = arg.split(':'); changeJob(k, d); },
+  autofarm: autoFarm,
+  expedition, build, project, festival, gift, trade,
+  research: setResearch,
+  peace: askPeace,
+  raid: raidNeighbor,
+  end: endTurn,
+  choose: k => choose(+k),
+  help: showHelp,
+  menu: () => pushModal(menuModal()),
+  sound: toggleSound,
+  music: toggleMusic,
+  diff: id => { if (!DIFFS[id]) return; ui.diff = id; document.querySelectorAll('[data-act="diff"]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.arg === id))); Sound.play('tap'); },
+  copysave: copySave,
+  loadsave: () => importSave(($('#loadCode') || {}).value || ''),
+};
+const SELF_RENDER = new Set(['end', 'choose', 'help', 'menu', 'sound', 'music', 'diff', 'copysave', 'loadsave']);
+const MODAL_OK = new Set(['choose', 'sound', 'music', 'diff', 'copysave', 'loadsave']);
+function nearestHist(svg, clientX) {
+  const box = svg.getBoundingClientRect(), t = ((clientX - box.left) / box.width * CW - CL) / (CW - CL - CR) * LAST_TURN;
+  let best = 0;
+  S.hist.forEach((d, k) => { if (Math.abs(d.t - t) < Math.abs(S.hist[best].t - t)) best = k; });
+  return best;
+}
+function bindEvents() {
+  document.addEventListener('click', e => {
+    const chipEl = e.target.closest('.chip');
+    if (chipEl && !modalOpen) { toast(chipEl.title); return; }
+    const el = e.target.closest('[data-act]');
+    if (!el || el.disabled || !S) return;
+    const act = el.dataset.act;
+    if (modalOpen && !MODAL_OK.has(act)) return;
+    if (!ACTIONS[act]) return;
+    ACTIONS[act](el.dataset.arg);
+    if (!SELF_RENDER.has(act)) { if (!S.over) checkGoals(); save(); renderAll(); }
+  });
+  document.addEventListener('keydown', e => {
+    if (!S) return;
+    if (e.target.id === 'peopleName' && e.key === 'Enter') { e.preventDefault(); choose(0); return; }
+    if (e.key === 'Escape' && modalOpen) { const k = currentModal.choices.findIndex(ch => ch.cancel); if (k >= 0) { e.preventDefault(); choose(k); } return; }
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.ctrlKey || e.metaKey || e.altKey) return;
+    const chipEl = e.target.closest && e.target.closest('.chip');
+    if (chipEl && !modalOpen && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toast(chipEl.title); return; }
+    const chart = e.target.closest && e.target.closest('svg[data-chart]');
+    if (chart && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); chartPoint(chart, (chart.dataset.idx == null ? S.hist.length - 1 : +chart.dataset.idx) + (e.key === 'ArrowLeft' ? -1 : 1)); return; }
+    if (modalOpen) return;
+    if (e.key === 'e' || e.key === 'E') endTurn();
+    else if (/^[1-7]$/.test(e.key)) { ui.tab = TABS[+e.key - 1][0]; ui.drawer = true; renderAll(); }
+    else if (e.key === '?') showHelp();
+    else if (e.key === 'm' || e.key === 'M') toggleSound();
+  });
+  document.addEventListener('pointermove', e => { const svg = e.target.closest && e.target.closest('svg[data-chart]'); if (svg && S.hist.length) chartPoint(svg, nearestHist(svg, e.clientX)); });
+  document.addEventListener('pointerout', e => { const svg = e.target.closest && e.target.closest('svg[data-chart]'); if (svg && !svg.contains(e.relatedTarget)) chartHide(svg); });
+  document.addEventListener('focusin', e => { if (e.target.matches && e.target.matches('svg[data-chart]') && S.hist.length) chartPoint(e.target, S.hist.length - 1); });
+  document.addEventListener('focusout', e => { if (e.target.matches && e.target.matches('svg[data-chart]')) chartHide(e.target); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) kickScene(); });
+}
+function start(data) {
+  Sound.set = loadSettings();
+  document.documentElement.style.setProperty('--grain', `url(${grain().toDataURL()})`);
+  bindEvents();
+  if (window.ResizeObserver) new ResizeObserver(() => kickScene()).observe($('#board'));
+  else window.addEventListener('resize', kickScene);
+  const saved = (data && data.save && sanitize(data.save)) || loadSave();
+  if (saved && !saved.over) {
+    S = saved;
+    if (!S.hist.length) recordHistory();
+    renderAll();
+    restorePending();
+  } else {
+    newGame('Uruma');
+    renderAll();
+    showIntro();
+  }
+  if (Sound.set.music) document.addEventListener('pointerdown', () => Sound.music(true), { once: true });
+}
+window.claude?.hot?.snapshot?.(() => ({ save: S }));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
+</body>
+</html>

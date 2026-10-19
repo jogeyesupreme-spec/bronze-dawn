@@ -3635,6 +3635,8 @@ const HOWTO = `<ul>
   <li>In 1200 BC the Bronze Age Collapse tests your walls, your granaries and your people's unity.</li>
 </ul>`;
 const KEYS = '<p class="small muted"><kbd>E</kbd> end turn · <kbd>1</kbd>–<kbd>7</kbd> drawer tabs · arrow keys move around the map · <kbd>M</kbd> sound · <kbd>?</kbd> help · <kbd>Esc</kbd> close</p>';
+// The settlement version of the game sits next to this file
+const VALLEY_URL = 'valley.html';
 const cleanName = v => String(v || '').replace(/[<>&"'`]/g, '').trim().slice(0, 24);
 
 function showIntro() {
@@ -3645,7 +3647,8 @@ function showIntro() {
     body: 'It is 3000 BC. Your small tribe farms the silt beside a great river. Grow it into a city, live through the age of Sargon and Hammurabi, and keep it standing through the Bronze Age Collapse of 1200 BC.',
     html: `${HOWTO}<label for="peopleName">Name your people</label><input id="peopleName" maxlength="24" autocomplete="off" value="${escapeHTML(S.name)}">
       <p class="h">Difficulty</p><div class="seg" role="group" aria-label="Difficulty">${Object.entries(DIFFS).map(([id, d]) => `<button class="btn ghost" data-act="diff" data-arg="${id}" aria-pressed="${ui.diff === id}"><span>${d.name}</span><small>${d.sub}</small></button>`).join('')}</div>
-      ${best ? `<p class="small muted">Best so far: the ${escapeHTML(best.name)}, ${Number(best.score) || 0} points (${escapeHTML(best.rank)}). ${Object.keys(m.ach).length} of ${ACHIEVEMENTS.length} achievements.</p>` : ''}`,
+      ${best ? `<p class="small muted">Best so far: the ${escapeHTML(best.name)}, ${Number(best.score) || 0} points (${escapeHTML(best.rank)}). ${Object.keys(m.ach).length} of ${ACHIEVEMENTS.length} achievements.</p>` : ''}
+      <p class="small muted">Prefer it closer to Pre-Civilization: Bronze Age? <a href="${VALLEY_URL}" style="color:var(--gold)">Play Bronze Dawn Valley</a>: no map, four core resources, one growing settlement from 6000 BC.</p>`,
     choices: [{
       label: 'Begin',
       run: () => {
@@ -3717,6 +3720,7 @@ function menuModal() {
       <h3>Load a game</h3><textarea id="loadCode" rows="2" placeholder="Paste a save code here" aria-label="Save code to load"></textarea>
       <div class="row"><button class="btn ghost" data-act="loadsave">Load this code</button><label class="btn ghost" style="font-weight:700">Open a save file<input type="file" id="loadFile" accept=".json,application/json" hidden></label></div>
       <h3>Hall of records</h3>${bestHTML()}
+      <h3>The other version</h3><p class="small">Bronze Dawn Valley follows Pre-Civilization: Bronze Age more closely: no map, four core resources, lands won by expedition, and one settlement that grows on screen from 6000 BC. <a href="${VALLEY_URL}" style="color:var(--gold)">Play Bronze Dawn Valley</a>.</p>
       <h3>Keyboard</h3>${KEYS}`,
     choices: [{ label: 'Back to the game', cancel: true }, { label: 'Start a new game', ghost: true, run: confirmNew }],
   };
